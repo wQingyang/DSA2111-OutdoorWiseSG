@@ -1,4 +1,4 @@
-# Module boundaries
+# Module Boundaries
 
 ```mermaid
 flowchart TD
@@ -11,16 +11,24 @@ flowchart TD
     A --> F
 ```
 
-bootstrap.py 是唯一实现组装入口。contracts 定义数据/Protocol；collector 只负责 HTTP 与标准化，不读写 CSV；repository 只管持久化、锁、去重、修订；service 独立处理每个 metric 的来源和时效；pipeline 顺序采集、隔离失败、刷新汇总、验证预测/推荐输出。前端/agent 只通过 HTTP 或统一 reader 获取结构化数据。
+bootstrap.py is the only composition root. contracts defines schemas and protocols. Collectors handle HTTP requests and normalization without CSV access. The repository owns persistence, locks, deduplication, and revisions. The service independently matches each metric to sources and evaluates freshness. The pipeline collects sources sequentially, isolates source failures, refreshes summaries, and validates prediction, risk, and recommendation outputs. The frontend and agent consume structured data through HTTP or the shared reader.
 
-pipeline.refresh 不因单个来源失败整体中断，但 repository 的磁盘写入失败仍向上报错，不假装成功。route_environment_latest 是缓存视图；get_route_environment 在指定时间重算状态。pipeline.run 把 rainfall 投影回原 Conditions 合约以保留已跑通的推荐/预测接口，同时提供完整 environment 与 risks。
+pipeline.refresh continues after individual source failures. Repository disk-write failures still propagate rather than being reported as successful ingestion. route_environment_latest is a cached materialized view; get_route_environment recalculates state at the requested time. pipeline.run projects rainfall into the existing Conditions contract to preserve the original prediction and recommendation interfaces while exposing complete environment and risks outputs.
 
-## Matching extension
+## Matching Extension
 
-StartPointStrategy 使用原 GeoJSON 第一坐标作为代表点。各气象指标独立从该指标实际有可用观测的站点选最近来源，优先 fresh，超出 15km 为 missing；若无 fresh 则选最近 stale 并明确标记。WBGT/heat stress 不假定与温度站共用。regional 按 TOML 的人工区域映射。站点距离为球面直线距离，不是到达距离。未来沿线采样可注入 geometry_strategy，并扩展逐段匹配/汇总策略；当前没有虚构沿线精度。
+StartPointStrategy uses the first original GeoJSON coordinate as the route representative point. Each station metric independently selects the nearest station with usable observations for that metric, preferring fresh stations. A source beyond 15 km produces missing. If no fresh source is available, the nearest stale source is selected and labelled stale.
 
-## PostgreSQL migration
+WBGT and heat stress do not assume that temperature stations supply those metrics. Regional sources follow the curated TOML assignments. Station distance is a straight-line spherical distance, not a travel distance.
 
-用 PostgreSQLRepository 实现 EnvironmentRepository，bootstrap 替换构造，保留同样的 key、revision/as_of、source_kind 隔离、锁和 typed 返回契约。collector、service、frontend、agent 无需改 CSV 路径。预测快照的存储策略仍属于 repository。静态 catalog 可以继续保留 CSV/GeoJSON或迁移到表。没有生产数据库驱动、没有付费依赖。
+Future along-route sampling can be introduced through geometry_strategy and an extended segment-level matching and aggregation strategy. The current implementation does not claim along-route precision.
 
-原 modules/collector.py 与 modules/spatial.py 保留为 v1 参考，不再由 bootstrap 调用；活动实现是 collectors/ 和 services/。不要在这两个旧文件继续加新指标。
+## PostgreSQL Migration
+
+Implement EnvironmentRepository with a PostgreSQLRepository and replace its construction in bootstrap. Preserve observation keys, revision history, as_of availability rules, source_kind isolation, concurrency guarantees, and typed return contracts.
+
+Collectors, the service, the frontend, and agent consumers should not need CSV-path changes. Prediction snapshot storage remains a repository responsibility. The static route catalog can remain CSV/GeoJSON or move into database tables. This version has no production database driver or paid database dependency.
+
+## Legacy Modules
+
+modules/collector.py and modules/spatial.py are retained as v1 reference implementations and are no longer composed by bootstrap. Active implementations live in collectors/ and services/. Do not add new metrics to the legacy files.

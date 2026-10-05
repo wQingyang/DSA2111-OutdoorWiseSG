@@ -1,41 +1,44 @@
-# Actual verification — 2026-10-05
+# Actual Verification — 2026-10-05
 
-在原项目运行一次默认 live `python -m outdoorwise.cli collect`，2026-10-05 03:38:16–03:39:52 UTC（新加坡 11:38–11:39）。8 来源全部成功、各 1 次请求，实际新增 **234 条 live 观测**，没有 mock 回退。原始计数和时间见 verification.json / data/runtime/ingestion_runs.csv。
+A single default-live `python -m outdoorwise.cli collect` ran in the existing project from 2026-10-05 03:38:16 to 03:39:52 UTC (11:38 to 11:39 in Singapore). All eight sources succeeded on their first request and inserted **234 live observations**. No source fell back to mock data. Counts and timestamps are recorded in verification.json and data/runtime/ingestion_runs.csv.
 
-| 来源 | 收到 / 新增 |
+| Source | Received / inserted |
 |---|---:|
-| rainfall | 89 |
-| wind speed | 17 |
-| wind direction | 17 |
-| temperature | 18 |
-| humidity | 18 |
+| Rainfall | 89 |
+| Wind speed | 17 |
+| Wind direction | 17 |
+| Temperature | 18 |
+| Humidity | 18 |
 | PM2.5 | 5 |
 | PSI + PM10 | 10 |
 | WBGT + heat stress | 60 |
 
-两路线共 20 条最新指标汇总、20 条来源映射，10 指标均有真实观测。完整 HTTP run 见 example_run.json。本次来源如下：
+The two routes produced 20 latest metric summaries and 20 source mappings. All ten metrics had real observations. The complete pipeline response is recorded in example_run.json. The matched sources were:
 
-| 指标 | Marina Bay | Woodlands Waterfront |
+| Metric | Marina Bay | Woodlands Waterfront |
 |---|---|---|
-| 降雨 | S119 | S104 |
-| 风速 / 风向 | S108 | S104 |
-| 温度 / 湿度 | S111 | S104 |
+| Rainfall | S119 | S104 |
+| Wind speed / direction | S108 | S104 |
+| Temperature / humidity | S111 | S104 |
 | PM2.5 / PSI / PM10 | south | north |
 | WBGT / heat stress | S144 (Hong Lim Park) | S125 |
 
-## Tests and frontend
+## Tests and Frontend
 
-`python -m pytest -q`：12 passed。覆盖真实录制响应 parser、单位变化拒收、去重、旧值修订、带时区同瞬间去重、历史 as_of、missing/stale、失败继续采集与 live 缓存、retry、单 writer/日志恢复、原降雨迁移、模块边界、API、agent 工具链。LLM 工具循环用测试响应验证，并非真实供应商请求。
+`python -m pytest -q` passed 12 tests. Coverage includes recorded official response parsing, changed-unit rejection, deduplication, revisions, equivalent timezone instants, historical as_of queries, missing and stale observations, failure isolation, live cache delivery, retries, single-writer locking, journal recovery, legacy rainfall migration, module boundaries, API endpoints, and agent tools. The LLM tool loop uses test responses; this does not verify a real provider call.
 
-原 frontend/app.js 在 jsdom DOM 中实际请求本地 FastAPI HTTP 服务，验证 2 卡片、20 真实指标行、0 missing、2 原路线备用 SVG。运行入口：
+The existing frontend/app.js ran in a jsdom DOM against the actual local FastAPI HTTP service, displaying two cards, twenty real metric rows, zero missing rows, and two preserved route SVG fallbacks. To repeat this check:
 
 ```bash
 python -m uvicorn outdoorwise.api.app:app --port 8765
-# 另一个终端，在项目根目录；Node 20+，仅验证需要 jsdom
+# In another terminal, from the project root; Node 20+ is required.
+# jsdom is needed only for this frontend verification.
 npm install --prefix /tmp/outdoorwise-ui-check jsdom
 NODE_PATH=/tmp/outdoorwise-ui-check/node_modules BASE_URL=http://127.0.0.1:8765 node tests/frontend_smoke.cjs
 ```
 
-未完成完整浏览器截图/Leaflet 在线地图视觉验证：浏览器下载返回损坏压缩包，无法安装。DOM 与 HTTP 检查成功，不能把它描述成完整浏览器端到端视觉测试。Docker 构建未实际运行；Dockerfile 已补上新增 config 目录。外部 LLM 未提供 key，本次未验证真实 agent provider。
+## Verification Limits
 
-数据时间会过期，这是正常状态。服务使用查询时刻重新计算 fresh/stale/cache，不沿用快照的旧 fresh 标签。没有把现在的观测当成未来 30/60 分钟预测；live forecast 与综合 risk 均 unavailable。
+Full browser screenshots and online Leaflet map rendering were not visually verified because the browser download returned a damaged archive. Successful DOM and HTTP checks should not be described as a complete visual browser test. The Docker build was not run; Dockerfile includes the newly required config directory. No external LLM credentials were supplied, so a real agent provider was not verified.
+
+Observation timestamps naturally age. The service recalculates fresh, stale, and cache labels at query time rather than reusing old snapshot labels. Current observations are not future 30- or 60-minute predictions. Live forecasts and comprehensive risk outputs remain unavailable.
