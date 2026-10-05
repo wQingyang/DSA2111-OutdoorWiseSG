@@ -1,11 +1,18 @@
-<<<<<<< HEAD
-# OutdoorWise — existing demo upgraded to v2
+# OutdoorWise — Environmental Data Pipeline Demo
 
-原前端、Marina Bay / Woodlands Waterfront、GeoJSON 与降雨流程均保留。本次在同一个项目内增加 8 个官方 API collector、10 个环境指标、CSV 数据层与共享读取服务。默认数据模式为 **live**，agent 默认仍为规则演示。既有推荐只根据距离/降雨基线排序，尚未加入综合环境风险模型。
+OutdoorWise combines two curated Singapore running routes with environmental observations, route recommendations, and an assistant interface. This version extends the existing demo in place, preserving its frontend, Marina Bay and Woodlands Waterfront routes, GeoJSON files, and rainfall workflow.
 
-## Run
+The pipeline integrates eight official API endpoints covering ten environmental metrics, stores observations in CSV files, and exposes a shared route environment service. The default data mode is **live**. The default assistant mode is a fixed rule-based demonstration. The existing recommendation baseline uses route distance and rainfall; a comprehensive environmental risk model is not connected yet.
 
-Python 3.11+，推荐 Linux / macOS；Windows 请用 WSL 或 Docker（CSV 跨进程锁使用 fcntl）。
+## Requirements
+
+- Python 3.11 or later.
+- Linux or macOS. On Windows, use WSL or Docker because the CSV repository uses `fcntl` for cross-process locking.
+- Internet access to collect live observations. Previously collected data can be read without fetching again.
+
+## Quick Start
+
+Run these commands from the extracted project directory:
 
 ```bash
 cd outdoorwise-demo
@@ -18,55 +25,116 @@ python -m outdoorwise.cli run --horizon 30
 python -m uvicorn outdoorwise.api.app:app --host 127.0.0.1 --port 8000
 ```
 
-打开 http://127.0.0.1:8000 ，原路线卡片会展示每个指标的值、来源、距离、观测/抓取时间，以及 fresh/stale/missing 和 live/cache/demo/unavailable。鼠标悬停显示匹配方法、修订时间和原因。`/docs` 为接口文档。前端刷新按钮重新采集全部来源，单来源失败返回 partial，并继续其他来源。
+Open [the application](http://127.0.0.1:8000). Each route card displays metric values, sources, station distances, observation and fetch times, freshness states, and delivery labels. Hover over a metric row to inspect its matching method, source update time, and status explanation. API documentation is available at [the backend documentation page](http://127.0.0.1:8000/docs).
 
-包内附本次真实采集的 CSV。时间会自然变旧；重新 collect 可刷新。live 启动不偷偷联网或切换 mock，直接读取已存真实数据。
+The **Refresh observations** button collects all configured sources. A failed source produces a `partial` result while collection continues for the other sources. Existing observations remain available with explicit status labels.
+
+The package includes CSV files from a verified live collection. Their timestamps naturally become stale. Run `collect` again to refresh them. Starting the server in live mode reads stored live observations; it does not automatically fetch data or substitute demo values.
+
+## Collection and Demo Commands
 
 ```bash
-python -m outdoorwise.cli collect --due   # 只采集达到配置间隔的来源
+# Collect only sources whose configured polling interval has elapsed.
+python -m outdoorwise.cli collect --due
+
+# Run the test suite.
 python -m pytest -q
+
+# Collect explicitly synthetic observations.
 OUTDOORWISE_DATA_MODE=demo python -m outdoorwise.cli collect
+
+# Start the application with demo observations and simulated forecasts.
 OUTDOORWISE_DATA_MODE=demo python -m uvicorn outdoorwise.api.app:app
 ```
 
-`--due` 是可重复调用的任务入口，本版不启动后台调度器；由团队自己的 scheduler 调用。强制 collect 忽略间隔。demo 和 live 观测按 source_kind 隔离；最新路线视图代表最近运行的模式，服务读取时始终按所选模式重算。
+`collect --due` is an entry point for the team's scheduler. This version does not start a background scheduler. Running `collect` without `--due` collects all sources regardless of their polling intervals.
 
-## Where everything lives
+Live and demo observations are isolated using `source_kind`. The latest route CSV views represent the mode used by the most recent refresh. The shared service recalculates results for the selected mode and query time.
 
-| 内容 | 文件 |
+## Project Structure
+
+| Responsibility | File or directory |
 |---|---|
-| API 地址、间隔、超时、重试、stale 阈值 | config/environment.toml |
-| 每个来源的独立 collector | outdoorwise/collectors/ |
-| 字段、单位、统计窗口与类型校验 | outdoorwise/contracts/environment.py |
-| 模块 Protocol | outdoorwise/contracts/ports.py |
-| 单 writer、去重、修订、原子写入 | outdoorwise/storage/repository.py |
-| 各指标独立匹配与共享读取接口 | outdoorwise/services/route_environment.py |
-| 采集与模块编排 | outdoorwise/pipeline/runner.py |
-| 唯一模块组装入口 | outdoorwise/bootstrap.py |
-| 原前端（已增加环境表） | frontend/ |
-| 原路线 catalog / geometry | data/catalog/ |
-| 真实观测、映射、汇总、采集日志 | data/runtime/*.csv |
-| 组员填充模板 | templates/module_template.py |
+| API URLs, polling intervals, timeouts, retries, and freshness thresholds | `config/environment.toml` |
+| Independent collectors for each API endpoint | `outdoorwise/collectors/` |
+| Field, unit, aggregation window, and type validation | `outdoorwise/contracts/environment.py` |
+| Module protocols | `outdoorwise/contracts/ports.py` |
+| Single writer, deduplication, revisions, and atomic persistence | `outdoorwise/storage/repository.py` |
+| Independent metric matching and shared environment access | `outdoorwise/services/route_environment.py` |
+| Collection and module orchestration | `outdoorwise/pipeline/runner.py` |
+| Module composition and implementation selection | `outdoorwise/bootstrap.py` |
+| Existing frontend with route environment tables | `frontend/` |
+| Route catalog and GeoJSON geometry | `data/catalog/` |
+| Observations, source mappings, route summaries, and ingestion logs | `data/runtime/*.csv` |
+| Integration templates for team members | `templates/module_template.py` |
 
-详细说明：[API_CONFIG](docs/API_CONFIG.md)、[CSV_SCHEMA](docs/CSV_SCHEMA.md)、[ARCHITECTURE](docs/ARCHITECTURE.md)、[TEAM_HANDOFF](docs/TEAM_HANDOFF.md)、[VERIFICATION](docs/VERIFICATION.md)。
+## Environmental Metrics
 
-## Shared interface
+| Metric | Canonical unit | Aggregation window |
+|---|---|---|
+| Rainfall | `mm` | 5-minute accumulation |
+| Wind speed | `m/s` | 10-minute mean |
+| Wind direction | `degree` | 10-minute mean |
+| Air temperature | `degC` | 1 minute |
+| Relative humidity | `%` | 1 minute |
+| PM2.5 | `ug/m3` | 1 hour |
+| PSI | `index` | 24 hours |
+| PM10 | `ug/m3` | 24 hours |
+| Official WBGT | `degC` | 15-minute mean |
+| Official heat stress level | `category` | Corresponding 15-minute WBGT observation |
+
+PM10 is extracted from the PSI API's concentration field, not its PM10 sub-index. WBGT and heat stress come directly from the official endpoint. Polling intervals and publication cadence are separate from aggregation windows.
+
+Each metric selects its own available source. Station-based metrics use the route's first GeoJSON coordinate as a representative point. Regional air quality metrics use the configured source region: `south` for Marina Bay and `north` for Woodlands Waterfront. This version does not implement along-route sampling or regional polygon containment.
+
+## CSV Storage and Data Status
+
+The existing `routes.csv` and GeoJSON files remain in `data/catalog/`. Runtime storage includes:
+
+- `locations.csv`: source station and region metadata.
+- `environment_observations.csv`: one metric observation per row, with current revisions.
+- `environment_observation_versions.csv`: observation revision history for historical queries.
+- `route_source_mapping.csv`: route-to-source mappings for each metric.
+- `route_environment_latest.csv`: the latest route environment summary.
+- `ingestion_runs.csv`: collection outcomes and received, inserted, revised, and unchanged record counts.
+
+Observation records distinguish `observed_at`, `source_updated_at`, and `fetched_at`. Timestamps include timezones. If a source does not supply an update timestamp, `source_updated_at` remains empty.
+
+Repeated collection does not append duplicate observations. Source corrections update the current observation and retain earlier revisions. CSV writes are serialized through the repository and use temporary files with atomic replacement. A pending transaction journal supports recovery of interrupted multi-file updates.
+
+Freshness is represented by `fresh`, `stale`, or `missing`. Delivery is represented by `live`, `cache`, `demo`, or `unavailable`. Missing measurements remain `None` or `null`; they are never replaced with zero.
+
+## Shared Module Interface
+
+Team modules read structured data through a common interface:
 
 ```python
 from datetime import datetime, timezone
 from outdoorwise.bootstrap import build_pipeline
 from outdoorwise.config import Settings
+
 pipeline = build_pipeline(Settings.from_env())
-environment = pipeline.get_route_environment('marina_bay', datetime.now(timezone.utc))
+environment = pipeline.get_route_environment(
+    'marina_bay',
+    datetime.now(timezone.utc),
+)
 ```
 
-HTTP：`GET /api/routes/marina_bay/environment?as_of=2026-10-05T03:40:00Z`。时间必须带时区。返回 typed RouteEnvironment，指标缺失值为 None/null。队友禁止直接读写 CSV 或各自请求环境 API。
+The equivalent HTTP endpoint is:
 
-## Prediction / AI
+```text
+GET /api/routes/marina_bay/environment?as_of=2026-10-05T03:40:00Z
+```
 
-当前观测不是未来 30/60 分钟预测。live 的预测与风险模块返回 unavailable；demo 预测有 is_mock=true。预测输出在 predictions_latest.json，绝不进入环境观测长表。
+`as_of` must include a timezone. Omit it to query the current environment. The result is a typed `RouteEnvironment` containing metric values, provenance, timestamps, matching details, and status labels.
 
-真实 agent 配置仍沿用原 demo 的 chat-completions 工具循环：
+Consumer modules must not read or write CSV files directly or independently call environmental APIs. Implementations are selected in `bootstrap.py`. A future PostgreSQL adapter should preserve the repository protocol and observation revision semantics.
+
+## Predictions, Risk Assessment, and Agentic AI
+
+Current observations are separate from future 30- or 60-minute forecasts. The live prediction and comprehensive risk modules currently return `unavailable`. Demo forecasts use `is_mock=true`. Prediction outputs are stored separately in `data/runtime/predictions_latest.json`, never in the environmental observation table.
+
+The existing assistant supports a chat-completions tool loop. Configure a real provider with:
 
 ```bash
 export OUTDOORWISE_AGENT_MODE=llm
@@ -75,7 +143,18 @@ export LLM_MODEL=your-provider-model
 export LLM_API_KEY=your-key
 ```
 
-没有供应商 key，因此真实 LLM 调用本次未验证。默认 agent=demo 的固定工具链已验证，结构化环境与风险输出进入解释工具。`get_route_environment` 工具接受 route_id 与可选 as_of。不要把规则演示当成真实 LLM 接入。
-=======
-# DSA2111-OutdoorWiseSG
->>>>>>> 6bffe0e121fc91ff2e7c914b3754611cdb475381
+No provider credentials were supplied during verification, so real LLM calls have not been verified. The default demo assistant follows a fixed tool sequence. Its tools consume structured environmental data and module outputs. The `get_route_environment` tool accepts `route_id` and an optional `as_of` timestamp.
+
+## Verification
+
+The verified live collection successfully fetched all eight API endpoints and inserted **234 real observations**. Both routes generated ten environmental metric summaries each. The test suite passed **12 tests**, covering parsing, deduplication, revisions, historical queries, failure isolation, caching, retries, migration, and module interfaces.
+
+The existing frontend passed a DOM integration check against the actual HTTP backend, displaying two route cards and twenty environmental metric rows. Full browser screenshots and the online Leaflet map were not visually verified because the browser download failed. Real LLM provider calls and Docker builds were not verified.
+
+## Documentation
+
+- [API configuration and source semantics](docs/API_CONFIG.md)
+- [CSV schema and persistence rules](docs/CSV_SCHEMA.md)
+- [Architecture and migration boundaries](docs/ARCHITECTURE.md)
+- [Six-person ownership and module handoff](docs/TEAM_HANDOFF.md)
+- [Verification results and limitations](docs/VERIFICATION.md)
