@@ -1,0 +1,734 @@
+{
+  "locations.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "minLength": 1,
+        "title": "Location Id",
+        "type": "string"
+      },
+      "name": {
+        "title": "Name",
+        "type": "string"
+      },
+      "location_type": {
+        "enum": [
+          "station",
+          "region"
+        ],
+        "title": "Location Type",
+        "type": "string"
+      },
+      "lon": {
+        "maximum": 180,
+        "minimum": -180,
+        "title": "Lon",
+        "type": "number"
+      },
+      "lat": {
+        "maximum": 90,
+        "minimum": -90,
+        "title": "Lat",
+        "type": "number"
+      },
+      "source_kind": {
+        "default": "live",
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "metadata_updated_at": {
+        "format": "date-time",
+        "title": "Metadata Updated At",
+        "type": "string"
+      }
+    },
+    "required": [
+      "source",
+      "location_id",
+      "name",
+      "location_type",
+      "lon",
+      "lat",
+      "metadata_updated_at"
+    ],
+    "title": "Location",
+    "type": "object"
+  },
+  "environment_observations.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "minLength": 1,
+        "title": "Location Id",
+        "type": "string"
+      },
+      "observed_at": {
+        "format": "date-time",
+        "title": "Observed At",
+        "type": "string"
+      },
+      "source_updated_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Updated At"
+      },
+      "fetched_at": {
+        "format": "date-time",
+        "title": "Fetched At",
+        "type": "string"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      },
+      "category_value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Category Value"
+      },
+      "unit": {
+        "title": "Unit",
+        "type": "string"
+      },
+      "aggregation_window": {
+        "title": "Aggregation Window",
+        "type": "string"
+      },
+      "source_kind": {
+        "default": "live",
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "raw_value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Value"
+      },
+      "raw_unit": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Unit"
+      },
+      "revision": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "first_fetched_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "First Fetched At"
+      }
+    },
+    "required": [
+      "source",
+      "location_id",
+      "observed_at",
+      "fetched_at",
+      "metric",
+      "unit",
+      "aggregation_window"
+    ],
+    "title": "EnvironmentObservation",
+    "type": "object"
+  },
+  "environment_observation_versions.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "minLength": 1,
+        "title": "Location Id",
+        "type": "string"
+      },
+      "observed_at": {
+        "format": "date-time",
+        "title": "Observed At",
+        "type": "string"
+      },
+      "source_updated_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Updated At"
+      },
+      "fetched_at": {
+        "format": "date-time",
+        "title": "Fetched At",
+        "type": "string"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      },
+      "category_value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Category Value"
+      },
+      "unit": {
+        "title": "Unit",
+        "type": "string"
+      },
+      "aggregation_window": {
+        "title": "Aggregation Window",
+        "type": "string"
+      },
+      "source_kind": {
+        "default": "live",
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "raw_value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Value"
+      },
+      "raw_unit": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Unit"
+      },
+      "revision": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "first_fetched_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "First Fetched At"
+      }
+    },
+    "required": [
+      "source",
+      "location_id",
+      "observed_at",
+      "fetched_at",
+      "metric",
+      "unit",
+      "aggregation_window"
+    ],
+    "title": "EnvironmentObservation",
+    "type": "object"
+  },
+  "route_source_mapping.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "route_id": {
+        "title": "Route Id",
+        "type": "string"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Location Id"
+      },
+      "source_kind": {
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "match_method": {
+        "title": "Match Method",
+        "type": "string"
+      },
+      "station_distance_km": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "title": "Station Distance Km"
+      },
+      "representative_lon": {
+        "title": "Representative Lon",
+        "type": "number"
+      },
+      "representative_lat": {
+        "title": "Representative Lat",
+        "type": "number"
+      },
+      "mapped_at": {
+        "format": "date-time",
+        "title": "Mapped At",
+        "type": "string"
+      }
+    },
+    "required": [
+      "route_id",
+      "metric",
+      "source",
+      "location_id",
+      "source_kind",
+      "match_method",
+      "station_distance_km",
+      "representative_lon",
+      "representative_lat",
+      "mapped_at"
+    ],
+    "title": "RouteSourceMapping",
+    "type": "object"
+  },
+  "route_environment_latest.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "route_id": {
+        "title": "Route Id",
+        "type": "string"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      },
+      "category_value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Category Value"
+      },
+      "unit": {
+        "title": "Unit",
+        "type": "string"
+      },
+      "aggregation_window": {
+        "title": "Aggregation Window",
+        "type": "string"
+      },
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Location Id"
+      },
+      "location_name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Location Name"
+      },
+      "source_kind": {
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "delivery": {
+        "enum": [
+          "live",
+          "cache",
+          "demo",
+          "unavailable"
+        ],
+        "title": "Delivery",
+        "type": "string"
+      },
+      "state": {
+        "enum": [
+          "fresh",
+          "stale",
+          "missing"
+        ],
+        "title": "State",
+        "type": "string"
+      },
+      "match_method": {
+        "title": "Match Method",
+        "type": "string"
+      },
+      "station_distance_km": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Station Distance Km"
+      },
+      "observed_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Observed At"
+      },
+      "source_updated_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Updated At"
+      },
+      "fetched_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Fetched At"
+      },
+      "as_of": {
+        "format": "date-time",
+        "title": "As Of",
+        "type": "string"
+      },
+      "revision": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Revision"
+      },
+      "reason": {
+        "default": "",
+        "title": "Reason",
+        "type": "string"
+      }
+    },
+    "required": [
+      "route_id",
+      "metric",
+      "unit",
+      "aggregation_window",
+      "source",
+      "source_kind",
+      "delivery",
+      "state",
+      "match_method",
+      "as_of"
+    ],
+    "title": "RouteMetric",
+    "type": "object"
+  },
+  "ingestion_runs.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "source_kind": {
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "started_at": {
+        "format": "date-time",
+        "title": "Started At",
+        "type": "string"
+      },
+      "finished_at": {
+        "format": "date-time",
+        "title": "Finished At",
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "success",
+          "failed",
+          "skipped"
+        ],
+        "title": "Status",
+        "type": "string"
+      },
+      "attempts": {
+        "default": 0,
+        "title": "Attempts",
+        "type": "integer"
+      },
+      "received_records": {
+        "default": 0,
+        "title": "Received Records",
+        "type": "integer"
+      },
+      "inserted_records": {
+        "default": 0,
+        "title": "Inserted Records",
+        "type": "integer"
+      },
+      "revised_records": {
+        "default": 0,
+        "title": "Revised Records",
+        "type": "integer"
+      },
+      "unchanged_records": {
+        "default": 0,
+        "title": "Unchanged Records",
+        "type": "integer"
+      },
+      "error": {
+        "default": "",
+        "title": "Error",
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_id",
+      "source",
+      "source_kind",
+      "started_at",
+      "finished_at",
+      "status"
+    ],
+    "title": "IngestionRun",
+    "type": "object"
+  }
+}

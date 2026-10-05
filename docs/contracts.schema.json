@@ -1,0 +1,1827 @@
+{
+  "Observation": {
+    "$defs": {
+      "Coordinate": {
+        "additionalProperties": false,
+        "properties": {
+          "lon": {
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Lon",
+            "type": "number"
+          },
+          "lat": {
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Lat",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lon",
+          "lat"
+        ],
+        "title": "Coordinate",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "station_id": {
+        "title": "Station Id",
+        "type": "string"
+      },
+      "location": {
+        "$ref": "#/$defs/Coordinate"
+      },
+      "metric": {
+        "const": "rainfall",
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "minimum": 0,
+        "title": "Value",
+        "type": "number"
+      },
+      "unit": {
+        "const": "mm",
+        "default": "mm",
+        "title": "Unit",
+        "type": "string"
+      },
+      "observed_at": {
+        "format": "date-time",
+        "title": "Observed At",
+        "type": "string"
+      },
+      "collected_at": {
+        "format": "date-time",
+        "title": "Collected At",
+        "type": "string"
+      },
+      "source": {
+        "enum": [
+          "demo_fixture",
+          "data_gov_sg"
+        ],
+        "title": "Source",
+        "type": "string"
+      }
+    },
+    "required": [
+      "station_id",
+      "location",
+      "metric",
+      "value",
+      "observed_at",
+      "collected_at",
+      "source"
+    ],
+    "title": "Observation",
+    "type": "object"
+  },
+  "Conditions": {
+    "additionalProperties": false,
+    "properties": {
+      "route_id": {
+        "title": "Route Id",
+        "type": "string"
+      },
+      "rainfall_mm": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Rainfall Mm"
+      },
+      "station_ids": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Station Ids",
+        "type": "array"
+      },
+      "max_station_distance_km": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Max Station Distance Km"
+      },
+      "observed_at": {
+        "anyOf": [
+          {
+            "format": "date-time",
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Observed At"
+      },
+      "source": {
+        "enum": [
+          "demo_fixture",
+          "data_gov_sg",
+          "unavailable"
+        ],
+        "title": "Source",
+        "type": "string"
+      },
+      "quality": {
+        "enum": [
+          "demo",
+          "fresh",
+          "stale",
+          "missing"
+        ],
+        "title": "Quality",
+        "type": "string"
+      }
+    },
+    "required": [
+      "route_id",
+      "station_ids",
+      "source",
+      "quality"
+    ],
+    "title": "Conditions",
+    "type": "object"
+  },
+  "Prediction": {
+    "additionalProperties": false,
+    "properties": {
+      "route_id": {
+        "title": "Route Id",
+        "type": "string"
+      },
+      "horizon_min": {
+        "enum": [
+          30,
+          60
+        ],
+        "title": "Horizon Min",
+        "type": "integer"
+      },
+      "rain_probability": {
+        "anyOf": [
+          {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Rain Probability"
+      },
+      "generated_at": {
+        "format": "date-time",
+        "title": "Generated At",
+        "type": "string"
+      },
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "is_mock": {
+        "title": "Is Mock",
+        "type": "boolean"
+      },
+      "status": {
+        "enum": [
+          "demo",
+          "available",
+          "unavailable"
+        ],
+        "title": "Status",
+        "type": "string"
+      }
+    },
+    "required": [
+      "route_id",
+      "horizon_min",
+      "generated_at",
+      "source",
+      "is_mock",
+      "status"
+    ],
+    "title": "Prediction",
+    "type": "object"
+  },
+  "Preferences": {
+    "$defs": {
+      "Coordinate": {
+        "additionalProperties": false,
+        "properties": {
+          "lon": {
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Lon",
+            "type": "number"
+          },
+          "lat": {
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Lat",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lon",
+          "lat"
+        ],
+        "title": "Coordinate",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "target_distance_km": {
+        "default": 4,
+        "exclusiveMinimum": 0,
+        "maximum": 100,
+        "title": "Target Distance Km",
+        "type": "number"
+      },
+      "duration_min": {
+        "default": 30,
+        "maximum": 60,
+        "minimum": 1,
+        "title": "Duration Min",
+        "type": "integer"
+      },
+      "horizon_min": {
+        "default": 30,
+        "enum": [
+          30,
+          60
+        ],
+        "title": "Horizon Min",
+        "type": "integer"
+      },
+      "location": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Coordinate"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "max_access_distance_km": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Max Access Distance Km"
+      }
+    },
+    "title": "Preferences",
+    "type": "object"
+  },
+  "Run": {
+    "$defs": {
+      "Conditions": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "rainfall_mm": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Rainfall Mm"
+          },
+          "station_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Station Ids",
+            "type": "array"
+          },
+          "max_station_distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Station Distance Km"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Observed At"
+          },
+          "source": {
+            "enum": [
+              "demo_fixture",
+              "data_gov_sg",
+              "unavailable"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "demo",
+              "fresh",
+              "stale",
+              "missing"
+            ],
+            "title": "Quality",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "station_ids",
+          "source",
+          "quality"
+        ],
+        "title": "Conditions",
+        "type": "object"
+      },
+      "Coordinate": {
+        "additionalProperties": false,
+        "properties": {
+          "lon": {
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Lon",
+            "type": "number"
+          },
+          "lat": {
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Lat",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lon",
+          "lat"
+        ],
+        "title": "Coordinate",
+        "type": "object"
+      },
+      "EnvironmentRisk": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "assessed_at": {
+            "format": "date-time",
+            "title": "Assessed At",
+            "type": "string"
+          },
+          "status": {
+            "default": "unavailable",
+            "enum": [
+              "unavailable",
+              "available",
+              "demo"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "source": {
+            "default": "risk_module_not_connected",
+            "title": "Source",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "route_id",
+          "assessed_at"
+        ],
+        "title": "EnvironmentRisk",
+        "type": "object"
+      },
+      "LineString": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "LineString",
+            "default": "LineString",
+            "title": "Type",
+            "type": "string"
+          },
+          "coordinates": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "minItems": 2,
+            "title": "Coordinates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "coordinates"
+        ],
+        "title": "LineString",
+        "type": "object"
+      },
+      "Prediction": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "horizon_min": {
+            "enum": [
+              30,
+              60
+            ],
+            "title": "Horizon Min",
+            "type": "integer"
+          },
+          "rain_probability": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Rain Probability"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "is_mock": {
+            "title": "Is Mock",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "demo",
+              "available",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "horizon_min",
+          "generated_at",
+          "source",
+          "is_mock",
+          "status"
+        ],
+        "title": "Prediction",
+        "type": "object"
+      },
+      "Preferences": {
+        "additionalProperties": false,
+        "properties": {
+          "target_distance_km": {
+            "default": 4,
+            "exclusiveMinimum": 0,
+            "maximum": 100,
+            "title": "Target Distance Km",
+            "type": "number"
+          },
+          "duration_min": {
+            "default": 30,
+            "maximum": 60,
+            "minimum": 1,
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "horizon_min": {
+            "default": 30,
+            "enum": [
+              30,
+              60
+            ],
+            "title": "Horizon Min",
+            "type": "integer"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Coordinate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "max_access_distance_km": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Access Distance Km"
+          }
+        },
+        "title": "Preferences",
+        "type": "object"
+      },
+      "Recommendation": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "access_distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Access Distance Km"
+          },
+          "distance_difference_km": {
+            "title": "Distance Difference Km",
+            "type": "number"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "route_id",
+          "score",
+          "distance_difference_km",
+          "reasons"
+        ],
+        "title": "Recommendation",
+        "type": "object"
+      },
+      "Route": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "loop",
+              "out_and_back",
+              "point_to_point"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "distance_km": {
+            "exclusiveMinimum": 0,
+            "title": "Distance Km",
+            "type": "number"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/$defs/LineString"
+          },
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "name",
+          "kind",
+          "distance_km",
+          "status",
+          "geometry",
+          "attribution"
+        ],
+        "title": "Route",
+        "type": "object"
+      },
+      "RouteEnvironment": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "const": "2.0",
+            "default": "2.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/$defs/RouteMetric"
+            },
+            "title": "Metrics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "route_id",
+          "as_of",
+          "metrics"
+        ],
+        "title": "RouteEnvironment",
+        "type": "object"
+      },
+      "RouteMetric": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "metric": {
+            "enum": [
+              "rainfall",
+              "wind_speed",
+              "wind_direction",
+              "air_temperature",
+              "relative_humidity",
+              "pm25",
+              "psi",
+              "pm10",
+              "wbgt",
+              "heat_stress_level"
+            ],
+            "title": "Metric",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          },
+          "category_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Category Value"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "aggregation_window": {
+            "title": "Aggregation Window",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "location_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location Id"
+          },
+          "location_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location Name"
+          },
+          "source_kind": {
+            "enum": [
+              "live",
+              "demo"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "delivery": {
+            "enum": [
+              "live",
+              "cache",
+              "demo",
+              "unavailable"
+            ],
+            "title": "Delivery",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "fresh",
+              "stale",
+              "missing"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "match_method": {
+            "title": "Match Method",
+            "type": "string"
+          },
+          "station_distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Station Distance Km"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Observed At"
+          },
+          "source_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Updated At"
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fetched At"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revision"
+          },
+          "reason": {
+            "default": "",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "metric",
+          "unit",
+          "aggregation_window",
+          "source",
+          "source_kind",
+          "delivery",
+          "state",
+          "match_method",
+          "as_of"
+        ],
+        "title": "RouteMetric",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "schema_version": {
+        "const": "2.0",
+        "default": "2.0",
+        "title": "Schema Version",
+        "type": "string"
+      },
+      "run_id": {
+        "title": "Run Id",
+        "type": "string"
+      },
+      "generated_at": {
+        "format": "date-time",
+        "title": "Generated At",
+        "type": "string"
+      },
+      "data_mode": {
+        "enum": [
+          "demo",
+          "live"
+        ],
+        "title": "Data Mode",
+        "type": "string"
+      },
+      "preferences": {
+        "$ref": "#/$defs/Preferences"
+      },
+      "routes": {
+        "items": {
+          "$ref": "#/$defs/Route"
+        },
+        "title": "Routes",
+        "type": "array"
+      },
+      "conditions": {
+        "items": {
+          "$ref": "#/$defs/Conditions"
+        },
+        "title": "Conditions",
+        "type": "array"
+      },
+      "predictions": {
+        "items": {
+          "$ref": "#/$defs/Prediction"
+        },
+        "title": "Predictions",
+        "type": "array"
+      },
+      "recommendations": {
+        "items": {
+          "$ref": "#/$defs/Recommendation"
+        },
+        "title": "Recommendations",
+        "type": "array"
+      },
+      "warnings": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Warnings",
+        "type": "array"
+      },
+      "environment": {
+        "items": {
+          "$ref": "#/$defs/RouteEnvironment"
+        },
+        "title": "Environment",
+        "type": "array"
+      },
+      "risks": {
+        "items": {
+          "$ref": "#/$defs/EnvironmentRisk"
+        },
+        "title": "Risks",
+        "type": "array"
+      }
+    },
+    "required": [
+      "run_id",
+      "generated_at",
+      "data_mode",
+      "preferences",
+      "routes",
+      "conditions",
+      "predictions",
+      "recommendations",
+      "warnings"
+    ],
+    "title": "Run",
+    "type": "object"
+  },
+  "ChatResponse": {
+    "$defs": {
+      "Conditions": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "rainfall_mm": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Rainfall Mm"
+          },
+          "station_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Station Ids",
+            "type": "array"
+          },
+          "max_station_distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Station Distance Km"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Observed At"
+          },
+          "source": {
+            "enum": [
+              "demo_fixture",
+              "data_gov_sg",
+              "unavailable"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "quality": {
+            "enum": [
+              "demo",
+              "fresh",
+              "stale",
+              "missing"
+            ],
+            "title": "Quality",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "station_ids",
+          "source",
+          "quality"
+        ],
+        "title": "Conditions",
+        "type": "object"
+      },
+      "Coordinate": {
+        "additionalProperties": false,
+        "properties": {
+          "lon": {
+            "maximum": 180,
+            "minimum": -180,
+            "title": "Lon",
+            "type": "number"
+          },
+          "lat": {
+            "maximum": 90,
+            "minimum": -90,
+            "title": "Lat",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lon",
+          "lat"
+        ],
+        "title": "Coordinate",
+        "type": "object"
+      },
+      "EnvironmentRisk": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "assessed_at": {
+            "format": "date-time",
+            "title": "Assessed At",
+            "type": "string"
+          },
+          "status": {
+            "default": "unavailable",
+            "enum": [
+              "unavailable",
+              "available",
+              "demo"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "source": {
+            "default": "risk_module_not_connected",
+            "title": "Source",
+            "type": "string"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "route_id",
+          "assessed_at"
+        ],
+        "title": "EnvironmentRisk",
+        "type": "object"
+      },
+      "LineString": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "const": "LineString",
+            "default": "LineString",
+            "title": "Type",
+            "type": "string"
+          },
+          "coordinates": {
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "minItems": 2,
+            "title": "Coordinates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "coordinates"
+        ],
+        "title": "LineString",
+        "type": "object"
+      },
+      "Prediction": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "horizon_min": {
+            "enum": [
+              30,
+              60
+            ],
+            "title": "Horizon Min",
+            "type": "integer"
+          },
+          "rain_probability": {
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Rain Probability"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "is_mock": {
+            "title": "Is Mock",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "demo",
+              "available",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "horizon_min",
+          "generated_at",
+          "source",
+          "is_mock",
+          "status"
+        ],
+        "title": "Prediction",
+        "type": "object"
+      },
+      "Preferences": {
+        "additionalProperties": false,
+        "properties": {
+          "target_distance_km": {
+            "default": 4,
+            "exclusiveMinimum": 0,
+            "maximum": 100,
+            "title": "Target Distance Km",
+            "type": "number"
+          },
+          "duration_min": {
+            "default": 30,
+            "maximum": 60,
+            "minimum": 1,
+            "title": "Duration Min",
+            "type": "integer"
+          },
+          "horizon_min": {
+            "default": 30,
+            "enum": [
+              30,
+              60
+            ],
+            "title": "Horizon Min",
+            "type": "integer"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Coordinate"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "max_access_distance_km": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Max Access Distance Km"
+          }
+        },
+        "title": "Preferences",
+        "type": "object"
+      },
+      "Recommendation": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "access_distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Access Distance Km"
+          },
+          "distance_difference_km": {
+            "title": "Distance Difference Km",
+            "type": "number"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "route_id",
+          "score",
+          "distance_difference_km",
+          "reasons"
+        ],
+        "title": "Recommendation",
+        "type": "object"
+      },
+      "Route": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "loop",
+              "out_and_back",
+              "point_to_point"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "distance_km": {
+            "exclusiveMinimum": 0,
+            "title": "Distance Km",
+            "type": "number"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "geometry": {
+            "$ref": "#/$defs/LineString"
+          },
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "name",
+          "kind",
+          "distance_km",
+          "status",
+          "geometry",
+          "attribution"
+        ],
+        "title": "Route",
+        "type": "object"
+      },
+      "RouteEnvironment": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "const": "2.0",
+            "default": "2.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/$defs/RouteMetric"
+            },
+            "title": "Metrics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "route_id",
+          "as_of",
+          "metrics"
+        ],
+        "title": "RouteEnvironment",
+        "type": "object"
+      },
+      "RouteMetric": {
+        "additionalProperties": false,
+        "properties": {
+          "route_id": {
+            "title": "Route Id",
+            "type": "string"
+          },
+          "metric": {
+            "enum": [
+              "rainfall",
+              "wind_speed",
+              "wind_direction",
+              "air_temperature",
+              "relative_humidity",
+              "pm25",
+              "psi",
+              "pm10",
+              "wbgt",
+              "heat_stress_level"
+            ],
+            "title": "Metric",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          },
+          "category_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Category Value"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "aggregation_window": {
+            "title": "Aggregation Window",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "location_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location Id"
+          },
+          "location_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location Name"
+          },
+          "source_kind": {
+            "enum": [
+              "live",
+              "demo"
+            ],
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "delivery": {
+            "enum": [
+              "live",
+              "cache",
+              "demo",
+              "unavailable"
+            ],
+            "title": "Delivery",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "fresh",
+              "stale",
+              "missing"
+            ],
+            "title": "State",
+            "type": "string"
+          },
+          "match_method": {
+            "title": "Match Method",
+            "type": "string"
+          },
+          "station_distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Station Distance Km"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Observed At"
+          },
+          "source_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Updated At"
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fetched At"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Revision"
+          },
+          "reason": {
+            "default": "",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "route_id",
+          "metric",
+          "unit",
+          "aggregation_window",
+          "source",
+          "source_kind",
+          "delivery",
+          "state",
+          "match_method",
+          "as_of"
+        ],
+        "title": "RouteMetric",
+        "type": "object"
+      },
+      "Run": {
+        "additionalProperties": false,
+        "properties": {
+          "schema_version": {
+            "const": "2.0",
+            "default": "2.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "data_mode": {
+            "enum": [
+              "demo",
+              "live"
+            ],
+            "title": "Data Mode",
+            "type": "string"
+          },
+          "preferences": {
+            "$ref": "#/$defs/Preferences"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/$defs/Route"
+            },
+            "title": "Routes",
+            "type": "array"
+          },
+          "conditions": {
+            "items": {
+              "$ref": "#/$defs/Conditions"
+            },
+            "title": "Conditions",
+            "type": "array"
+          },
+          "predictions": {
+            "items": {
+              "$ref": "#/$defs/Prediction"
+            },
+            "title": "Predictions",
+            "type": "array"
+          },
+          "recommendations": {
+            "items": {
+              "$ref": "#/$defs/Recommendation"
+            },
+            "title": "Recommendations",
+            "type": "array"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          },
+          "environment": {
+            "items": {
+              "$ref": "#/$defs/RouteEnvironment"
+            },
+            "title": "Environment",
+            "type": "array"
+          },
+          "risks": {
+            "items": {
+              "$ref": "#/$defs/EnvironmentRisk"
+            },
+            "title": "Risks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run_id",
+          "generated_at",
+          "data_mode",
+          "preferences",
+          "routes",
+          "conditions",
+          "predictions",
+          "recommendations",
+          "warnings"
+        ],
+        "title": "Run",
+        "type": "object"
+      },
+      "Trace": {
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "title": "Tool",
+            "type": "string"
+          },
+          "arguments": {
+            "additionalProperties": true,
+            "title": "Arguments",
+            "type": "object"
+          },
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "tool",
+          "arguments",
+          "result"
+        ],
+        "title": "Trace",
+        "type": "object"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "message": {
+        "title": "Message",
+        "type": "string"
+      },
+      "agent_mode": {
+        "enum": [
+          "demo",
+          "llm"
+        ],
+        "title": "Agent Mode",
+        "type": "string"
+      },
+      "trace": {
+        "items": {
+          "$ref": "#/$defs/Trace"
+        },
+        "title": "Trace",
+        "type": "array"
+      },
+      "recommended_route_ids": {
+        "items": {
+          "type": "string"
+        },
+        "title": "Recommended Route Ids",
+        "type": "array"
+      },
+      "run": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Run"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    },
+    "required": [
+      "message",
+      "agent_mode",
+      "trace",
+      "recommended_route_ids",
+      "run"
+    ],
+    "title": "ChatResponse",
+    "type": "object"
+  }
+}

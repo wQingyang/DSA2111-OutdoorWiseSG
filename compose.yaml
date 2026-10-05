@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      OUTDOORWISE_DATA_MODE: ${OUTDOORWISE_DATA_MODE:-live}
+      OUTDOORWISE_AGENT_MODE: ${OUTDOORWISE_AGENT_MODE:-demo}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
+    volumes:
+      - ./data/runtime:/app/data/runtime
