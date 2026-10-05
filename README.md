@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OutdoorWise — existing demo upgraded to v2
 
 原前端、Marina Bay / Woodlands Waterfront、GeoJSON 与降雨流程均保留。本次在同一个项目内增加 8 个官方 API collector、10 个环境指标、CSV 数据层与共享读取服务。默认数据模式为 **live**，agent 默认仍为规则演示。既有推荐只根据距离/降雨基线排序，尚未加入综合环境风险模型。
@@ -75,3 +76,6 @@ export LLM_API_KEY=your-key
 ```
 
 没有供应商 key，因此真实 LLM 调用本次未验证。默认 agent=demo 的固定工具链已验证，结构化环境与风险输出进入解释工具。`get_route_environment` 工具接受 route_id 与可选 as_of。不要把规则演示当成真实 LLM 接入。
+=======
+# DSA2111-OutdoorWiseSG
+>>>>>>> 6bffe0e121fc91ff2e7c914b3754611cdb475381
