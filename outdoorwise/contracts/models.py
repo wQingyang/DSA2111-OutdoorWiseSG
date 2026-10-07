@@ -14,15 +14,6 @@ class Route(Contract):
     status: str
     geometry: LineString
     attribution: str
-class Observation(Contract):
-    station_id: str
-    location: Coordinate
-    metric: Literal["rainfall"]
-    value: float = Field(ge=0)
-    unit: Literal["mm"] = "mm"
-    observed_at: AwareDatetime
-    collected_at: AwareDatetime
-    source: Literal["demo_fixture", "data_gov_sg"]
 class Conditions(Contract):
     route_id: str
     rainfall_mm: float | None = Field(default=None, ge=0)

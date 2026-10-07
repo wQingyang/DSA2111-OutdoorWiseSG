@@ -11,3 +11,15 @@ services:
       DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
     volumes:
       - ./data/runtime:/app/data/runtime
+
+  collector:
+    build: .
+    command: ["python", "-m", "outdoorwise.cli", "watch", "--tick-seconds", "30"]
+    restart: unless-stopped
+    stop_grace_period: 3m
+    environment:
+      OUTDOORWISE_DATA_MODE: live
+      OUTDOORWISE_AGENT_MODE: demo
+      DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
+    volumes:
+      - ./data/runtime:/app/data/runtime

@@ -24,9 +24,9 @@ class AgentService:
             ranked=run.recommendations
             if ranked:
                 best=ranked[0]
-                message=f'Demo mode: according to the current constraints, the best route is {names[best.route_id]}。'+ ' '.join(best.reasons)
-            else: message='Demo mode: this is demo mode. No candidate routes available under the current constraints. Please adjust the distance limit.'
-            message+=' This is demo mode; please use the form to modify your preferences.'
+                message=f'Rule-based demo: based on the form preferences, the first candidate is {names[best.route_id]}. '+ ' '.join(best.reasons)
+            else: message='Rule-based demo: no candidate routes satisfy the current limits. Please adjust the distance limit.'
+            message+=' This demo follows a fixed tool sequence. Use the form to update your preferences.'
         else:
             messages=[{'role':'system','content':SYSTEM}, {'role':'user','content':json.dumps({
                 'message':request.message,'preferences':request.preferences.model_dump(mode='json')},ensure_ascii=False)}]

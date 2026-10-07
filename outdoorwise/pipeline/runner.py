@@ -10,9 +10,10 @@ class Pipeline:
         self.predictor=predictor;self.recommender=recommender;self.risk=risk;self.mode=mode;self.config=config
     def get_route_environment(self,route_id,as_of=None):
         return self.environment_service.get_route_environment(route_id,as_of)
-    def refresh(self,due_only=False):
+    def refresh(self,due_only=False,should_stop=None):
         logs=[]
         for index,collector in enumerate(self.collectors):
+            if should_stop and should_stop():break
             source=collector.source;start=utc_now()
             if due_only and not self.repository.source_due(source,self.mode,self.config.sources[source].interval_seconds,start):
                 continue

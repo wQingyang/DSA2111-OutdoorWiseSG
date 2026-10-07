@@ -47,7 +47,17 @@ OUTDOORWISE_DATA_MODE=demo python -m outdoorwise.cli collect
 OUTDOORWISE_DATA_MODE=demo python -m uvicorn outdoorwise.api.app:app
 ```
 
-`collect --due` is an entry point for the team's scheduler. This version does not start a background scheduler. Running `collect` without `--due` collects all sources regardless of their polling intervals.
+Start continuous collection in a separate terminal:
+
+```bash
+OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli watch
+# Inspect record counts and the last worker report.
+OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli status
+```
+
+`watch` checks configured source intervals every 30 seconds, persists live history, and resumes scheduling from ingestion logs after restart. Stop it with Ctrl+C. Only one continuous worker can own a data directory. `collect --due` remains a one-shot entry point; `collect` without `--due` forces all sources.
+
+The collector process and host must remain running. The frontend runs independently. See [continuous collection](docs/LIVE_COLLECTION.md) for shutdown, Docker Compose, recovery, and monitoring instructions.
 
 Live and demo observations are isolated using `source_kind`. The latest route CSV views represent the mode used by the most recent refresh. The shared service recalculates results for the selected mode and query time.
 
@@ -61,6 +71,7 @@ Live and demo observations are isolated using `source_kind`. The latest route CS
 | Module protocols | `outdoorwise/contracts/ports.py` |
 | Single writer, deduplication, revisions, and atomic persistence | `outdoorwise/storage/repository.py` |
 | Independent metric matching and shared environment access | `outdoorwise/services/route_environment.py` |
+| Continuous collector and scheduler | `outdoorwise/pipeline/worker.py` |
 | Collection and module orchestration | `outdoorwise/pipeline/runner.py` |
 | Module composition and implementation selection | `outdoorwise/bootstrap.py` |
 | Existing frontend with route environment tables | `frontend/` |
@@ -92,13 +103,14 @@ Each metric selects its own available source. Station-based metrics use the rout
 The existing `routes.csv` and GeoJSON files remain in `data/catalog/`. Runtime storage includes:
 
 - `locations.csv`: source station and region metadata.
-- `environment_observations.csv`: one metric observation per row, with current revisions.
-- `environment_observation_versions.csv`: observation revision history for historical queries.
+- `weather_observations.csv` and `weather_observation_versions.csv`: rainfall, wind speed/direction, temperature, and humidity.
+- `air_quality_observations.csv` and `air_quality_observation_versions.csv`: PM2.5, PSI, and PM10.
+- `heat_stress_observations.csv` and `heat_stress_observation_versions.csv`: official WBGT and heat stress.
 - `route_source_mapping.csv`: route-to-source mappings for each metric.
 - `route_environment_latest.csv`: the latest route environment summary.
 - `ingestion_runs.csv`: collection outcomes and received, inserted, revised, and unchanged record counts.
 
-Observation records distinguish `observed_at`, `source_updated_at`, and `fetched_at`. Timestamps include timezones. If a source does not supply an update timestamp, `source_updated_at` remains empty.
+Observation records distinguish `observed_at`, `source_updated_at`, and `fetched_at`. Every CSV timestamp uses Singapore local time in `YYYY-MM-DDTHH:MM:SS` format, without fractional seconds or a timezone suffix. The repository restores `Asia/Singapore` on read; internal models and HTTP timestamps remain timezone-aware. If a source does not supply an update timestamp, `source_updated_at` remains empty.
 
 Repeated collection does not append duplicate observations. Source corrections update the current observation and retain earlier revisions. CSV writes are serialized through the repository and use temporary files with atomic replacement. A pending transaction journal supports recovery of interrupted multi-file updates.
 
@@ -147,14 +159,21 @@ No provider credentials were supplied during verification, so real LLM calls hav
 
 ## Verification
 
-The verified live collection successfully fetched all eight API endpoints and inserted **234 real observations**. Both routes generated ten environmental metric summaries each. The test suite passed **12 tests**, covering parsing, deduplication, revisions, historical queries, failure isolation, caching, retries, migration, and module interfaces.
+The verified live collection successfully fetched all eight API endpoints and inserted **234 real observations**. Both routes generated ten environmental metric summaries each. The test suite passed **20 tests**, covering parsing, deduplication, revisions, historical queries, failure isolation, caching, retries, current-table initialization, and module interfaces.
 
 The existing frontend passed a DOM integration check against the actual HTTP backend, displaying two route cards and twenty environmental metric rows. Full browser screenshots and the online Leaflet map were not visually verified because the browser download failed. Real LLM provider calls and Docker builds were not verified.
 
 ## Documentation
 
+- [Continuous live collection](docs/LIVE_COLLECTION.md)
 - [API configuration and source semantics](docs/API_CONFIG.md)
 - [CSV schema and persistence rules](docs/CSV_SCHEMA.md)
-- [Architecture and migration boundaries](docs/ARCHITECTURE.md)
+- [Architecture and module boundaries](docs/ARCHITECTURE.md)
 - [Six-person ownership and module handoff](docs/TEAM_HANDOFF.md)
 - [Verification results and limitations](docs/VERIFICATION.md)
+
+## Updating an Existing Installation
+
+Stop the collection worker and web server before replacing code. Preserve the data/runtime directory when replacing an existing installation using the current category tables. Install the updated code and run `python -m outdoorwise.cli status` to inspect the database, then restart the collection worker and frontend.
+
+Repository initialization creates missing current tables and replays interrupted writes. All CSV time fields use local Singapore time at second precision. See docs/CSV_SCHEMA.md for the storage contract.

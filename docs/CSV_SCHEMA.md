@@ -1,12 +1,30 @@
-# CSV schema
+# CSV Schema — Storage Version 3
 
-CSV files use UTF-8 with fixed headers. Empty nullable fields represent None, not zero. Timestamps use timezone-aware ISO8601; collectors normalize source times to UTC. Numeric values and categories occupy separate columns.
+All CSV files use UTF-8 with fixed headers. Empty nullable fields represent None, not zero. Numeric measurements and categories occupy separate columns.
+
+## Timestamp Contract
+
+Every CSV time column uses `YYYY-MM-DDTHH:MM:SS` in **Asia/Singapore**. For example, `2026-10-05T03:38:28.869141Z` is stored as `2026-10-05T11:38:28`. No fractional seconds, Z, or offset suffix is stored. The timezone is defined by this schema and data/runtime/csv_storage_metadata.json, not by the machine timezone.
+
+The repository restores timezone information on read and converts aware timestamps on write. Source parsers and HTTP interfaces continue to require timezone-aware times. An offset-free CSV time must never be interpreted as UTC. The same rule applies to observations, revisions, station metadata, mapping and summary times, and ingestion logs. Nullable missing times remain empty.
+
+Persistence uses second precision, discarding subsecond fractions. Observation keys also use second precision. History queries have second-level availability resolution.
+
+## Observation Categories
+
+| Category | Current observations | Revision history | Metrics |
+|---|---|---|---|
+| Weather | weather_observations.csv | weather_observation_versions.csv | rainfall, wind_speed, wind_direction, air_temperature, relative_humidity |
+| Air quality | air_quality_observations.csv | air_quality_observation_versions.csv | pm25, psi, pm10 |
+| Heat stress | heat_stress_observations.csv | heat_stress_observation_versions.csv | wbgt, heat_stress_level |
+
+Each table uses a long format: one metric per row. Aggregation windows remain independent of polling intervals. Station IDs remain source-specific; air-quality regions are not weather stations. locations.csv is a unified source directory.
 
 ## locations.csv
 
-Location: `data/runtime/locations.csv`. Column order follows the `Location` contract.
+Location: `data/runtime/locations.csv`. Column order follows the internal `Location` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
 
-| Field | Python type |
+| Field | Internal Python type |
 |---|---|
 | source | `<class 'str'>` |
 | location_id | `<class 'str'>` |
@@ -17,11 +35,11 @@ Location: `data/runtime/locations.csv`. Column order follows the `Location` cont
 | source_kind | `Literal['live', 'demo']` |
 | metadata_updated_at | `<class 'pydantic.types.AwareDatetime'>` |
 
-## environment_observations.csv
+## weather_observations.csv
 
-Location: `data/runtime/environment_observations.csv`. Column order follows the `EnvironmentObservation` contract.
+Location: `data/runtime/weather_observations.csv`. Column order follows the internal `EnvironmentObservation` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
 
-| Field | Python type |
+| Field | Internal Python type |
 |---|---|
 | source | `<class 'str'>` |
 | location_id | `<class 'str'>` |
@@ -39,11 +57,99 @@ Location: `data/runtime/environment_observations.csv`. Column order follows the 
 | revision | `<class 'int'>` |
 | first_fetched_at | `pydantic.types.AwareDatetime | None` |
 
-## environment_observation_versions.csv
+## air_quality_observations.csv
 
-Location: `data/runtime/environment_observation_versions.csv`. Column order follows the `EnvironmentObservation` contract.
+Location: `data/runtime/air_quality_observations.csv`. Column order follows the internal `EnvironmentObservation` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
 
-| Field | Python type |
+| Field | Internal Python type |
+|---|---|
+| source | `<class 'str'>` |
+| location_id | `<class 'str'>` |
+| observed_at | `<class 'pydantic.types.AwareDatetime'>` |
+| source_updated_at | `pydantic.types.AwareDatetime | None` |
+| fetched_at | `<class 'pydantic.types.AwareDatetime'>` |
+| metric | `Literal['rainfall', 'wind_speed', 'wind_direction', 'air_temperature', 'relative_humidity', 'pm25', 'psi', 'pm10', 'wbgt', 'heat_stress_level']` |
+| value | `float | None` |
+| category_value | `str | None` |
+| unit | `<class 'str'>` |
+| aggregation_window | `<class 'str'>` |
+| source_kind | `Literal['live', 'demo']` |
+| raw_value | `float | None` |
+| raw_unit | `str | None` |
+| revision | `<class 'int'>` |
+| first_fetched_at | `pydantic.types.AwareDatetime | None` |
+
+## heat_stress_observations.csv
+
+Location: `data/runtime/heat_stress_observations.csv`. Column order follows the internal `EnvironmentObservation` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
+
+| Field | Internal Python type |
+|---|---|
+| source | `<class 'str'>` |
+| location_id | `<class 'str'>` |
+| observed_at | `<class 'pydantic.types.AwareDatetime'>` |
+| source_updated_at | `pydantic.types.AwareDatetime | None` |
+| fetched_at | `<class 'pydantic.types.AwareDatetime'>` |
+| metric | `Literal['rainfall', 'wind_speed', 'wind_direction', 'air_temperature', 'relative_humidity', 'pm25', 'psi', 'pm10', 'wbgt', 'heat_stress_level']` |
+| value | `float | None` |
+| category_value | `str | None` |
+| unit | `<class 'str'>` |
+| aggregation_window | `<class 'str'>` |
+| source_kind | `Literal['live', 'demo']` |
+| raw_value | `float | None` |
+| raw_unit | `str | None` |
+| revision | `<class 'int'>` |
+| first_fetched_at | `pydantic.types.AwareDatetime | None` |
+
+## weather_observation_versions.csv
+
+Location: `data/runtime/weather_observation_versions.csv`. Column order follows the internal `EnvironmentObservation` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
+
+| Field | Internal Python type |
+|---|---|
+| source | `<class 'str'>` |
+| location_id | `<class 'str'>` |
+| observed_at | `<class 'pydantic.types.AwareDatetime'>` |
+| source_updated_at | `pydantic.types.AwareDatetime | None` |
+| fetched_at | `<class 'pydantic.types.AwareDatetime'>` |
+| metric | `Literal['rainfall', 'wind_speed', 'wind_direction', 'air_temperature', 'relative_humidity', 'pm25', 'psi', 'pm10', 'wbgt', 'heat_stress_level']` |
+| value | `float | None` |
+| category_value | `str | None` |
+| unit | `<class 'str'>` |
+| aggregation_window | `<class 'str'>` |
+| source_kind | `Literal['live', 'demo']` |
+| raw_value | `float | None` |
+| raw_unit | `str | None` |
+| revision | `<class 'int'>` |
+| first_fetched_at | `pydantic.types.AwareDatetime | None` |
+
+## air_quality_observation_versions.csv
+
+Location: `data/runtime/air_quality_observation_versions.csv`. Column order follows the internal `EnvironmentObservation` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
+
+| Field | Internal Python type |
+|---|---|
+| source | `<class 'str'>` |
+| location_id | `<class 'str'>` |
+| observed_at | `<class 'pydantic.types.AwareDatetime'>` |
+| source_updated_at | `pydantic.types.AwareDatetime | None` |
+| fetched_at | `<class 'pydantic.types.AwareDatetime'>` |
+| metric | `Literal['rainfall', 'wind_speed', 'wind_direction', 'air_temperature', 'relative_humidity', 'pm25', 'psi', 'pm10', 'wbgt', 'heat_stress_level']` |
+| value | `float | None` |
+| category_value | `str | None` |
+| unit | `<class 'str'>` |
+| aggregation_window | `<class 'str'>` |
+| source_kind | `Literal['live', 'demo']` |
+| raw_value | `float | None` |
+| raw_unit | `str | None` |
+| revision | `<class 'int'>` |
+| first_fetched_at | `pydantic.types.AwareDatetime | None` |
+
+## heat_stress_observation_versions.csv
+
+Location: `data/runtime/heat_stress_observation_versions.csv`. Column order follows the internal `EnvironmentObservation` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
+
+| Field | Internal Python type |
 |---|---|
 | source | `<class 'str'>` |
 | location_id | `<class 'str'>` |
@@ -63,9 +169,9 @@ Location: `data/runtime/environment_observation_versions.csv`. Column order foll
 
 ## route_source_mapping.csv
 
-Location: `data/runtime/route_source_mapping.csv`. Column order follows the `RouteSourceMapping` contract.
+Location: `data/runtime/route_source_mapping.csv`. Column order follows the internal `RouteSourceMapping` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
 
-| Field | Python type |
+| Field | Internal Python type |
 |---|---|
 | route_id | `<class 'str'>` |
 | metric | `Literal['rainfall', 'wind_speed', 'wind_direction', 'air_temperature', 'relative_humidity', 'pm25', 'psi', 'pm10', 'wbgt', 'heat_stress_level']` |
@@ -80,9 +186,9 @@ Location: `data/runtime/route_source_mapping.csv`. Column order follows the `Rou
 
 ## route_environment_latest.csv
 
-Location: `data/runtime/route_environment_latest.csv`. Column order follows the `RouteMetric` contract.
+Location: `data/runtime/route_environment_latest.csv`. Column order follows the internal `RouteMetric` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
 
-| Field | Python type |
+| Field | Internal Python type |
 |---|---|
 | route_id | `<class 'str'>` |
 | metric | `Literal['rainfall', 'wind_speed', 'wind_direction', 'air_temperature', 'relative_humidity', 'pm25', 'psi', 'pm10', 'wbgt', 'heat_stress_level']` |
@@ -107,9 +213,9 @@ Location: `data/runtime/route_environment_latest.csv`. Column order follows the 
 
 ## ingestion_runs.csv
 
-Location: `data/runtime/ingestion_runs.csv`. Column order follows the `IngestionRun` contract.
+Location: `data/runtime/ingestion_runs.csv`. Column order follows the internal `IngestionRun` contract. The datetime fields below use the CSV timestamp encoding defined above, rather than the internal aware datetime representation.
 
-| Field | Python type |
+| Field | Internal Python type |
 |---|---|
 | run_id | `<class 'str'>` |
 | source | `<class 'str'>` |
@@ -126,23 +232,24 @@ Location: `data/runtime/ingestion_runs.csv`. Column order follows the `Ingestion
 
 ## Keys and History
 
-- `locations`: source + location_id + source_kind. Stations with identical IDs from different APIs must remain separate.
-- `environment_observations`: source + location_id + observed_at (the same instant, regardless of timezone representation) + metric + aggregation_window + source_kind. Repeated collection refreshes fetched_at without appending duplicate observations. Upstream value or updatedTimestamp corrections update the existing row and increment revision.
-- `environment_observation_versions`: observation key + revision. Retains previous and current revisions, including first_fetched_at for each version, to support as_of queries. Do not delete this history.
-- `route_source_mapping` and `route_environment_latest`: current materialized views keyed by route and metric, including source_kind. Each refresh replaces these views. Historical queries reconstruct results from observation versions rather than reading the latest view.
-- `ingestion_runs`: one run_id log entry per source collection attempt, including received, inserted, revised, and unchanged record counts and failure details. Sources skipped by --due do not generate log entries.
-- `routes.csv` and GeoJSON files remain in data/catalog with their original formats.
+locations uses source + location_id + source_kind. Stations with identical IDs from different sources remain distinct.
 
-## Historical Query Semantics
+Each category observation table uses source + location_id + observed_at (same instant at second precision) + metric + aggregation_window + source_kind. Repeated collection refreshes fetched_at without adding a duplicate. Source corrections increment revision and update the current record. The matching category version table uses the observation key + revision and retains each revision's first_fetched_at.
 
-An as_of query selects the latest observation with observed_at <= as_of whose revision was first fetched by that time. When the source supplies updatedTimestamp, it must also be <= as_of. Later corrections are not exposed to earlier queries.
+Current observation tables contain all collected observation timestamps, not just the latest timestamp. Revision tables track changes to those observations; they are not separate forecast tables.
 
-The locations table is a current catalog, not a complete historical geography catalog. Exact historical matching after station moves or renaming is not implemented. Individual fetch-time refreshes for unchanged observations are not retained as separate versions, so historical delivery labels may conservatively report cache. Observation values and revisions do not look ahead.
+route_source_mapping and route_environment_latest are current views keyed by route and metric, including source_kind. Historical queries reconstruct observations from all three revision tables. ingestion_runs records actual source attempts; --due skips do not create log rows.
 
-## Writer and Recovery
+## Historical Queries
 
-All CSV I/O belongs to the repository. A thread RLock and cross-process flock serialize writers for the same storage path. Writes use temporary files in the destination directory, fsync, and os.replace.
+A revision must have observed_at and first_fetched_at at or before as_of. Where supplied, source_updated_at must also be at or before as_of. Later revisions do not appear in earlier queries. The locations directory remains current metadata rather than a complete historical geography catalog. Unchanged fetch refreshes are not stored as separate revisions, so historical delivery labels may conservatively report cache.
 
-Multi-file updates first persist a pending transaction journal and then replace each file atomically. Repository initialization replays an interrupted journal. This is not a single operating-system atomic commit across multiple files. Service readers use the same lock; external applications reading CSV directly do not have that guarantee. Use local storage. This adapter does not claim full database transaction guarantees on network filesystems or sudden power loss.
+## Initialization and Recovery
 
-Predictions are stored separately in data/runtime/predictions_latest.json. latest_run.json holds a combined pipeline snapshot. The environmental observation table does not accept future predictions. If the legacy observations.csv exists, its rainfall records are migrated once and the original file is retained for audit.
+Repository initialization creates any missing current tables with their canonical headers and replays pending writes using only the current table registry.
+
+All CSV I/O remains in the repository. Thread RLock and cross-process flock serialize writers; each file uses a same-directory temporary file, fsync, and atomic replacement. A pending journal supports interrupted multi-file replay. This is not a single operating-system atomic transaction across files. Direct external CSV readers do not share the repository lock. Local storage is recommended.
+
+## Operational Files
+
+collection_worker.json stores the last worker report, not observations. csv_storage_metadata.json declares the timestamp convention and table mapping. predictions_latest.json remains separate from observations. Internal JSON snapshots and HTTP responses retain timezone-aware timestamps. The worker lease is separate from the short CSV writer lock; source cooldowns are recovered from ingestion logs.

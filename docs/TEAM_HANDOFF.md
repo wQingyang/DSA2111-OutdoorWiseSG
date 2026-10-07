@@ -1,6 +1,15 @@
 # Six-Person Ownership and Integration
 
-The following ownership boundaries are a suggested allocation. 
+The following ownership boundaries are a suggested allocation. Replace owner numbers with team members' names. Owner 1 is responsible for database and pipeline integration. Shared interface changes require team review.
+
+| Owner | Primary files and directories | Interface and deliverables |
+|---|---|---|
+| 1: Database and pipeline integration | storage, pipeline, bootstrap, contracts | Repository adapter, observation keys and revisions, get_route_environment, module composition, continuous collection worker, integration verification |
+| 2: Environmental ingestion | collectors, source configuration in config/environment.toml | collect() -> (CollectionBatch, attempts), source/unit/window contracts, recorded API fixtures |
+| 3: Routes and spatial data | data/catalog, geometry strategy in services | Stable route_id values, reviewed regional mappings, future GeoJSON sampling |
+| 4: Rainfall prediction | modules/predictor.py | predict(conditions, horizon_min) -> one Prediction per route; inject the shared reader for full environment features |
+| 5: Environmental risk, recommendations, and agent | modules/risk.py, modules/recommender.py, agent | assess(environments) -> EnvironmentRisk; rank(...) -> Recommendation; explanations grounded in structured tool outputs |
+| 6: Frontend and API presentation | frontend, api | Consume the current HTTP contracts; display nulls, state, delivery, provenance, and timestamps; preserve the map and forms |
 
 ## Fixed Contracts
 

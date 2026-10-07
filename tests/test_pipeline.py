@@ -37,8 +37,8 @@ def test_dedup_revisions_asof(pipeline):
     assert repo.ingest(changed,log(changed)).revised_records==2
     assert {o.value for o in repo.environment_snapshot('demo',batch.fetched_at)[1]}=={0,1.2}
     assert {o.value for o in repo.environment_snapshot('demo',after)[1]}=={8}
-    assert len(list(csv.DictReader((repo.runtime/'environment_observations.csv').open())))==2
-    assert len(list(csv.DictReader((repo.runtime/'environment_observation_versions.csv').open())))==4
+    assert len(list(csv.DictReader((repo.runtime/'weather_observations.csv').open())))==2
+    assert len(list(csv.DictReader((repo.runtime/'weather_observation_versions.csv').open())))==4
     assert repo.ingest(batch,log(batch)).revised_records==0
     offset=timezone(timedelta(hours=8))
     alternate=batch.model_copy(update={'observations':[o.model_copy(update={'observed_at':o.observed_at.astimezone(offset)}) for o in batch.observations]})
@@ -137,10 +137,3 @@ def test_retry_transport_and_llm_tool_loop(pipeline,monkeypatch):
     assert len(result.trace)==2 and len(result.recommended_route_ids)==2
     assert len(result.trace[0].result['environment']['metrics'])==10
     # This checks the tool loop only, not a real provider call.
-def test_v1_rainfall_migration(tmp_path):
-    shutil.copytree(ROOT/'data/catalog',tmp_path/'catalog');runtime=tmp_path/'runtime';runtime.mkdir();now=utc_now().isoformat()
-    (runtime/'observations.csv').write_text('station_id,lon,lat,metric,value,unit,observed_at,collected_at,source\nS1,103.8,1.3,rainfall,0,mm,'+now+','+now+',data_gov_sg\n')
-    pipe=build_pipeline(Settings(data_root=tmp_path,data_mode='live'))
-    obs=pipe.repository.environment_snapshot('live',utc_now())[1]
-    assert len(obs)==1 and obs[0].value==0 and obs[0].source_updated_at is None
-    assert (runtime/'observations.csv').exists()

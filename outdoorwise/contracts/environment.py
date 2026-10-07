@@ -46,7 +46,7 @@ class EnvironmentObservation(Contract):
     def validate_measurement(self):
         unit,window,source=METRIC_SPECS[self.metric]
         if (self.unit,self.aggregation_window,self.source)!=(unit,window,source):
-            raise ValueError("Metric source/unit/window disagree with v2 contract")
+            raise ValueError("Metric source/unit/window disagree with the environment contract")
         if self.metric=="heat_stress_level":
             if self.value is not None or self.category_value not in {None,"Low","Moderate","High"}:
                 raise ValueError("Official heat stress is Low/Moderate/High or missing, never a numeric estimate")

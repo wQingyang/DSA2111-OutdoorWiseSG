@@ -38,7 +38,7 @@ The station endpoints currently do not supply a reliable source_updated_at. This
 
 The TOML configuration sets timeout_seconds=20, max_retries=2 (up to three requests), exponential backoff with Retry-After handling, a maximum retry delay of 30 seconds, and 1.5-second spacing between sources. HTTP 429, server errors, and network errors can be retried. Parsing failures and unexpected units are logged as failures without retries. Each source failure is isolated so other collectors can continue.
 
-stale_after_seconds is an application policy, not an official health standard: 900 seconds for station metrics, 7200 seconds for regional metrics, and 2700 seconds for WBGT. Freshness uses observed_at; cache delivery uses fetch age and the latest failed collection. Missing observations remain missing. Actual zero values remain zero. Future observations do not enter a current query. Configured intervals do not start a scheduler automatically.
+stale_after_seconds is an application policy, not an official health standard: 900 seconds for station metrics, 7200 seconds for regional metrics, and 2700 seconds for WBGT. Freshness uses observed_at; cache delivery uses fetch age and the latest failed collection. Missing observations remain missing. Actual zero values remain zero. Future observations do not enter a current query. Configured intervals are enforced by the explicitly started `watch` worker; the web server does not start collection automatically.
 
 ## Regional Matching
 

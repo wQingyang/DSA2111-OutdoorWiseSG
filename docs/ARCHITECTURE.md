@@ -29,6 +29,10 @@ Implement EnvironmentRepository with a PostgreSQLRepository and replace its cons
 
 Collectors, the service, the frontend, and agent consumers should not need CSV-path changes. Prediction snapshot storage remains a repository responsibility. The static route catalog can remain CSV/GeoJSON or move into database tables. This version has no production database driver or paid database dependency.
 
-## Legacy Modules
+## Continuous Worker
 
-modules/collector.py and modules/spatial.py are retained as v1 reference implementations and are no longer composed by bootstrap. Active implementations live in collectors/ and services/. Do not add new metrics to the legacy files.
+pipeline/worker.py calls the same pipeline.refresh(due_only=True) path. The repository port owns the lifetime worker lease, persisted worker state, and database status report. Only live data mode is accepted. Source cooldowns survive restarts through ingestion_runs.csv. The web server does not automatically start a worker. Docker Compose defines a separate collector service sharing the existing runtime volume. See LIVE_COLLECTION.md for operation and limitations.
+
+## Category Storage
+
+The repository routes metrics into weather, air_quality, and heat_stress observation and revision tables while keeping the existing environment_snapshot and get_route_environment interfaces. locations remains shared and source-specific. Category tables are long-format observations, not synchronized wide rows. CSV encoding converts time columns to Asia/Singapore local seconds without suffixes and restores aware datetimes on read. No collector or prediction module needs to interpret CSV timestamps directly.

@@ -45,9 +45,10 @@
         "type": "string"
       },
       "metadata_updated_at": {
-        "format": "date-time",
         "title": "Metadata Updated At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       }
     },
     "required": [
@@ -60,9 +61,11 @@
       "metadata_updated_at"
     ],
     "title": "Location",
-    "type": "object"
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
   },
-  "environment_observations.csv": {
+  "weather_observations.csv": {
     "additionalProperties": false,
     "properties": {
       "source": {
@@ -75,15 +78,17 @@
         "type": "string"
       },
       "observed_at": {
-        "format": "date-time",
         "title": "Observed At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       },
       "source_updated_at": {
         "anyOf": [
           {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
           },
           {
             "type": "null"
@@ -93,9 +98,10 @@
         "title": "Source Updated At"
       },
       "fetched_at": {
-        "format": "date-time",
         "title": "Fetched At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       },
       "metric": {
         "enum": [
@@ -187,8 +193,9 @@
       "first_fetched_at": {
         "anyOf": [
           {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
           },
           {
             "type": "null"
@@ -208,9 +215,11 @@
       "aggregation_window"
     ],
     "title": "EnvironmentObservation",
-    "type": "object"
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
   },
-  "environment_observation_versions.csv": {
+  "air_quality_observations.csv": {
     "additionalProperties": false,
     "properties": {
       "source": {
@@ -223,15 +232,17 @@
         "type": "string"
       },
       "observed_at": {
-        "format": "date-time",
         "title": "Observed At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       },
       "source_updated_at": {
         "anyOf": [
           {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
           },
           {
             "type": "null"
@@ -241,9 +252,10 @@
         "title": "Source Updated At"
       },
       "fetched_at": {
-        "format": "date-time",
         "title": "Fetched At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       },
       "metric": {
         "enum": [
@@ -335,8 +347,9 @@
       "first_fetched_at": {
         "anyOf": [
           {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
           },
           {
             "type": "null"
@@ -356,7 +369,625 @@
       "aggregation_window"
     ],
     "title": "EnvironmentObservation",
-    "type": "object"
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
+  },
+  "heat_stress_observations.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "minLength": 1,
+        "title": "Location Id",
+        "type": "string"
+      },
+      "observed_at": {
+        "title": "Observed At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "source_updated_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Updated At"
+      },
+      "fetched_at": {
+        "title": "Fetched At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      },
+      "category_value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Category Value"
+      },
+      "unit": {
+        "title": "Unit",
+        "type": "string"
+      },
+      "aggregation_window": {
+        "title": "Aggregation Window",
+        "type": "string"
+      },
+      "source_kind": {
+        "default": "live",
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "raw_value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Value"
+      },
+      "raw_unit": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Unit"
+      },
+      "revision": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "first_fetched_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "First Fetched At"
+      }
+    },
+    "required": [
+      "source",
+      "location_id",
+      "observed_at",
+      "fetched_at",
+      "metric",
+      "unit",
+      "aggregation_window"
+    ],
+    "title": "EnvironmentObservation",
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
+  },
+  "weather_observation_versions.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "minLength": 1,
+        "title": "Location Id",
+        "type": "string"
+      },
+      "observed_at": {
+        "title": "Observed At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "source_updated_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Updated At"
+      },
+      "fetched_at": {
+        "title": "Fetched At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      },
+      "category_value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Category Value"
+      },
+      "unit": {
+        "title": "Unit",
+        "type": "string"
+      },
+      "aggregation_window": {
+        "title": "Aggregation Window",
+        "type": "string"
+      },
+      "source_kind": {
+        "default": "live",
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "raw_value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Value"
+      },
+      "raw_unit": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Unit"
+      },
+      "revision": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "first_fetched_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "First Fetched At"
+      }
+    },
+    "required": [
+      "source",
+      "location_id",
+      "observed_at",
+      "fetched_at",
+      "metric",
+      "unit",
+      "aggregation_window"
+    ],
+    "title": "EnvironmentObservation",
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
+  },
+  "air_quality_observation_versions.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "minLength": 1,
+        "title": "Location Id",
+        "type": "string"
+      },
+      "observed_at": {
+        "title": "Observed At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "source_updated_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Updated At"
+      },
+      "fetched_at": {
+        "title": "Fetched At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      },
+      "category_value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Category Value"
+      },
+      "unit": {
+        "title": "Unit",
+        "type": "string"
+      },
+      "aggregation_window": {
+        "title": "Aggregation Window",
+        "type": "string"
+      },
+      "source_kind": {
+        "default": "live",
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "raw_value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Value"
+      },
+      "raw_unit": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Unit"
+      },
+      "revision": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "first_fetched_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "First Fetched At"
+      }
+    },
+    "required": [
+      "source",
+      "location_id",
+      "observed_at",
+      "fetched_at",
+      "metric",
+      "unit",
+      "aggregation_window"
+    ],
+    "title": "EnvironmentObservation",
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
+  },
+  "heat_stress_observation_versions.csv": {
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "title": "Source",
+        "type": "string"
+      },
+      "location_id": {
+        "minLength": 1,
+        "title": "Location Id",
+        "type": "string"
+      },
+      "observed_at": {
+        "title": "Observed At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "source_updated_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Source Updated At"
+      },
+      "fetched_at": {
+        "title": "Fetched At",
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
+      },
+      "metric": {
+        "enum": [
+          "rainfall",
+          "wind_speed",
+          "wind_direction",
+          "air_temperature",
+          "relative_humidity",
+          "pm25",
+          "psi",
+          "pm10",
+          "wbgt",
+          "heat_stress_level"
+        ],
+        "title": "Metric",
+        "type": "string"
+      },
+      "value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Value"
+      },
+      "category_value": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Category Value"
+      },
+      "unit": {
+        "title": "Unit",
+        "type": "string"
+      },
+      "aggregation_window": {
+        "title": "Aggregation Window",
+        "type": "string"
+      },
+      "source_kind": {
+        "default": "live",
+        "enum": [
+          "live",
+          "demo"
+        ],
+        "title": "Source Kind",
+        "type": "string"
+      },
+      "raw_value": {
+        "anyOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Value"
+      },
+      "raw_unit": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "Raw Unit"
+      },
+      "revision": {
+        "default": 1,
+        "minimum": 1,
+        "title": "Revision",
+        "type": "integer"
+      },
+      "first_fetched_at": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "title": "First Fetched At"
+      }
+    },
+    "required": [
+      "source",
+      "location_id",
+      "observed_at",
+      "fetched_at",
+      "metric",
+      "unit",
+      "aggregation_window"
+    ],
+    "title": "EnvironmentObservation",
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
   },
   "route_source_mapping.csv": {
     "additionalProperties": false,
@@ -428,9 +1059,10 @@
         "type": "number"
       },
       "mapped_at": {
-        "format": "date-time",
         "title": "Mapped At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       }
     },
     "required": [
@@ -446,7 +1078,9 @@
       "mapped_at"
     ],
     "title": "RouteSourceMapping",
-    "type": "object"
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
   },
   "route_environment_latest.csv": {
     "additionalProperties": false,
@@ -577,8 +1211,9 @@
       "observed_at": {
         "anyOf": [
           {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
           },
           {
             "type": "null"
@@ -590,8 +1225,9 @@
       "source_updated_at": {
         "anyOf": [
           {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
           },
           {
             "type": "null"
@@ -603,8 +1239,9 @@
       "fetched_at": {
         "anyOf": [
           {
-            "format": "date-time",
-            "type": "string"
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+            "description": "Asia/Singapore local time without offset or fraction"
           },
           {
             "type": "null"
@@ -614,9 +1251,10 @@
         "title": "Fetched At"
       },
       "as_of": {
-        "format": "date-time",
         "title": "As Of",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       },
       "revision": {
         "anyOf": [
@@ -649,7 +1287,9 @@
       "as_of"
     ],
     "title": "RouteMetric",
-    "type": "object"
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
   },
   "ingestion_runs.csv": {
     "additionalProperties": false,
@@ -671,14 +1311,16 @@
         "type": "string"
       },
       "started_at": {
-        "format": "date-time",
         "title": "Started At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       },
       "finished_at": {
-        "format": "date-time",
         "title": "Finished At",
-        "type": "string"
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}$",
+        "description": "Asia/Singapore local time without offset or fraction"
       },
       "status": {
         "enum": [
@@ -729,6 +1371,8 @@
       "status"
     ],
     "title": "IngestionRun",
-    "type": "object"
+    "type": "object",
+    "x-csv-timezone": "Asia/Singapore",
+    "x-csv-time-precision": "seconds"
   }
 }
