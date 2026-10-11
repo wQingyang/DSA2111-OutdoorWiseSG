@@ -8,6 +8,9 @@ from outdoorwise.config import Settings,ROOT
 from outdoorwise.bootstrap import build_pipeline
 from outdoorwise.contracts.models import Preferences,Run,ChatRequest,ChatResponse,Route
 from outdoorwise.agent.service import AgentService
+from outdoorwise.personalization.router import get_service, router as personalization_router
+from outdoorwise.personalization.repository import PersonalizationRepository
+from outdoorwise.personalization.service import PersonalizationService
 def create_app(settings: Settings | None=None):
     settings=settings or Settings.from_env(); pipeline=build_pipeline(settings)
     @asynccontextmanager
@@ -16,6 +19,9 @@ def create_app(settings: Settings | None=None):
         yield
     app=FastAPI(title='OutdoorWise',version='0.2.0',lifespan=lifespan)
     app.state.pipeline=pipeline
+    app.dependency_overrides[get_service] = lambda: PersonalizationService(
+        PersonalizationRepository(settings.data_root))
+    app.include_router(personalization_router)
     @app.get('/api/health')
     def health(): return {'ok':True,'schema_version':'2.0','data_mode':settings.data_mode,'agent_mode':settings.agent_mode}
     @app.get('/api/routes',response_model=list[Route])
