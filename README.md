@@ -74,6 +74,11 @@ Live and demo observations are isolated using `source_kind`. The latest route CS
 | Continuous collector and scheduler | `outdoorwise/pipeline/worker.py` |
 | Collection and module orchestration | `outdoorwise/pipeline/runner.py` |
 | Module composition and implementation selection | `outdoorwise/bootstrap.py` |
+| Account registration, login, sessions | `outdoorwise/accounts/` |
+| Runs, favourites, feedback, profile, difficulty, ranking | `outdoorwise/personalization/` |
+| Generic difficulty estimator and API | `outdoorwise/difficulty/` |
+| GPX-only route export | `outdoorwise/export/` |
+| Chronological evaluation, synthetic data, and plots | `outdoorwise/evaluation/` |
 | Existing frontend with route environment tables | `frontend/` |
 | Route catalog and GeoJSON geometry | `data/catalog/` |
 | Observations, source mappings, route summaries, and ingestion logs | `data/runtime/*.csv` |
@@ -159,9 +164,15 @@ No provider credentials were supplied during verification, so real LLM calls hav
 
 ## Verification
 
-The verified live collection successfully fetched all eight API endpoints and inserted **234 real observations**. Both routes generated ten environmental metric summaries each. The test suite passed **20 tests**, covering parsing, deduplication, revisions, historical queries, failure isolation, caching, retries, current-table initialization, and module interfaces.
+### Original environmental-pipeline verification
+
+The verified live collection successfully fetched all eight API endpoints and inserted **234 real observations**. Both routes generated ten environmental metric summaries each. The original test suite passed **20 tests**, covering parsing, deduplication, revisions, historical queries, failure isolation, caching, retries, current-table initialization, and module interfaces.
 
 The existing frontend passed a DOM integration check against the actual HTTP backend, displaying two route cards and twenty environmental metric rows. Full browser screenshots and the online Leaflet map were not visually verified because the browser download failed. Real LLM provider calls and Docker builds were not verified.
+
+### Current full test suite
+
+The current full suite passes **46 tests**. This includes the original pipeline checks plus account, personalization, profile, generic/personalized difficulty, reranking, evaluation, and GPX export coverage.
 
 ## Documentation
 
@@ -171,9 +182,55 @@ The existing frontend passed a DOM integration check against the actual HTTP bac
 - [Architecture and module boundaries](docs/ARCHITECTURE.md)
 - [Six-person ownership and module handoff](docs/TEAM_HANDOFF.md)
 - [Verification results and limitations](docs/VERIFICATION.md)
+- [Personalization and runner adaptation](docs/PERSONALIZATION.md)
 
 ## Updating an Existing Installation
 
 Stop the collection worker and web server before replacing code. Preserve the data/runtime directory when replacing an existing installation using the current category tables. Install the updated code and run `python -m outdoorwise.cli status` to inspect the database, then restart the collection worker and frontend.
 
 Repository initialization creates missing current tables and replays interrupted writes. All CSV time fields use local Singapore time at second precision. See docs/CSV_SCHEMA.md for the storage contract.
+
+## User Accounts and Authentication
+
+The frontend supports registration, login, username availability checks, logout, and a profile page. Usernames are unique case-insensitively; each account receives an immutable UUID user ID. Passwords are hashed with scrypt, and sessions are stored server-side in the SQLite accounts database and exposed through HttpOnly cookies.
+
+## Personal Running History and Feedback
+
+Authenticated runners can record completed runs, favourite routes, and post-run perceived difficulty feedback. Runs retain actual distance, duration, and derived pace. Feedback records a 1–5 difficulty rating plus optional tags and comments. All history is isolated by authenticated user. It feeds a derived running profile rather than a permanently stored profile document.
+
+## Derived Running Profile
+
+The profile reports distance statistics, pace statistics, comfortable distance from suitable feedback, perceived-difficulty summaries, recent difficulty trend, usable history, and profile confidence.
+
+## Generic Route Difficulty
+
+Generic difficulty is an application-level effort estimate from 1–5, not a clinical or medical risk score. It uses route distance and rainfall plus a non-double-counting heat hierarchy: WBGT first, official heat-stress category when WBGT is unavailable, then temperature and humidity when both are unavailable.
+
+## Personalised Difficulty
+
+Personalised difficulty starts from the generic prediction and applies historical residual calibration from previous completed runs and feedback, cold-start shrinkage, and a comfortable-distance adjustment. The UI labels this result **Predicted difficulty for you**. Current-run feedback is not used to predict that same run. Detailed equations are documented in [PERSONALIZATION.md](docs/PERSONALIZATION.md).
+
+## Difficulty-Match Route Ranking
+
+The existing team recommender remains authoritative for the candidate set and environmental/feasibility filtering. A request-specific target difficulty reranks only those candidates:
+
+```text
+difficulty_mismatch = abs(personalized_difficulty - target_difficulty)
+sort by (difficulty_mismatch ASC, original_rank ASC)
+```
+
+**Overall recommendation rank** is the existing team recommender order. **Your difficulty-match rank** is the order after matching the requested intensity. The candidate set is unchanged; filtered routes are never reintroduced. Favourites do not currently affect difficulty-match ranking.
+
+## GPX Route Export
+
+Routes can be downloaded as GPX through `GET /api/routes/{route_id}/export.gpx`. The existing GeoJSON geometry is converted directly to an ordered GPX track with correct longitude/latitude handling. GPX is the only route export format.
+
+## Evaluation and Synthetic Data
+
+The evaluation framework performs chronological replay without future-feedback leakage and reports generic versus personalised MAE, RMSE, exact rounded accuracy, within-one accuracy, signed error, learning-over-time buckets, and per-user metrics. Synthetic evaluation is explicitly isolated under `data/runtime/evaluation/synthetic/` and must be labelled synthetic rather than treated as real evidence.
+
+```bash
+python -m pytest -q
+python -m outdoorwise.evaluation.personalization
+python -m outdoorwise.evaluation.personalization --synthetic
+```
