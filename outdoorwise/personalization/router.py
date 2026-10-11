@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from outdoorwise.config import Settings
+from outdoorwise.accounts.models import UserPublic
+from outdoorwise.accounts.router import get_current_user
 
 from .models import (CompletedRun, CompletedRunCreate, DifficultyFeedback,
                      DifficultyFeedbackCreate, FavouriteRoute)
@@ -10,22 +12,28 @@ from .service import PersonalizationService
 router = APIRouter(prefix="/api/users/{user_id}", tags=["personalization"])
 
 
+def owner(user_id: str, current: UserPublic = Depends(get_current_user)):
+    if user_id != current.user_id:
+        raise HTTPException(403, "Cannot access another user's personalization data")
+    return current
+
+
 def get_service() -> PersonalizationService:
     return PersonalizationService(PersonalizationRepository(Settings.from_env().data_root))
 
 
 @router.post("/runs", response_model=CompletedRun, status_code=201)
-def create_run(user_id: str, data: CompletedRunCreate, service: PersonalizationService = Depends(get_service)):
+def create_run(user_id: str, data: CompletedRunCreate, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     return service.create_completed_run(user_id, data)
 
 
 @router.get("/runs", response_model=list[CompletedRun])
-def list_runs(user_id: str, service: PersonalizationService = Depends(get_service)):
+def list_runs(user_id: str, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     return service.list_completed_runs(user_id)
 
 
 @router.get("/runs/{completed_run_id}", response_model=CompletedRun)
-def get_run(user_id: str, completed_run_id: str, service: PersonalizationService = Depends(get_service)):
+def get_run(user_id: str, completed_run_id: str, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     result = service.get_completed_run(user_id, completed_run_id)
     if result is None:
         raise HTTPException(404, "Completed run not found")
@@ -33,24 +41,24 @@ def get_run(user_id: str, completed_run_id: str, service: PersonalizationService
 
 
 @router.put("/favourites/{route_id}", response_model=FavouriteRoute)
-def add_favourite(user_id: str, route_id: str, service: PersonalizationService = Depends(get_service)):
+def add_favourite(user_id: str, route_id: str, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     return service.add_favourite(user_id, route_id)
 
 
 @router.delete("/favourites/{route_id}", status_code=204)
-def delete_favourite(user_id: str, route_id: str, service: PersonalizationService = Depends(get_service)):
+def delete_favourite(user_id: str, route_id: str, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     if not service.remove_favourite(user_id, route_id):
         raise HTTPException(404, "Favourite route not found")
 
 
 @router.get("/favourites", response_model=list[FavouriteRoute])
-def list_favourites(user_id: str, service: PersonalizationService = Depends(get_service)):
+def list_favourites(user_id: str, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     return service.list_favourites(user_id)
 
 
 @router.post("/runs/{completed_run_id}/feedback", response_model=DifficultyFeedback, status_code=201)
 def add_feedback(user_id: str, completed_run_id: str, data: DifficultyFeedbackCreate,
-                 service: PersonalizationService = Depends(get_service)):
+                 service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     run = service.get_completed_run(user_id, completed_run_id)
     if run is None:
         raise HTTPException(404, "Completed run not found")
@@ -61,5 +69,5 @@ def add_feedback(user_id: str, completed_run_id: str, data: DifficultyFeedbackCr
 
 
 @router.get("/feedback", response_model=list[DifficultyFeedback])
-def list_feedback(user_id: str, service: PersonalizationService = Depends(get_service)):
+def list_feedback(user_id: str, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     return service.list_feedback(user_id)

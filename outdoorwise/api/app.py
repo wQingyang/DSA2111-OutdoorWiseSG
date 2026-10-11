@@ -11,6 +11,8 @@ from outdoorwise.agent.service import AgentService
 from outdoorwise.personalization.router import get_service, router as personalization_router
 from outdoorwise.personalization.repository import PersonalizationRepository
 from outdoorwise.personalization.service import PersonalizationService
+from outdoorwise.accounts.router import get_current_user, get_repository as get_account_repository, router as accounts_router
+from outdoorwise.accounts.repository import AccountRepository
 def create_app(settings: Settings | None=None):
     settings=settings or Settings.from_env(); pipeline=build_pipeline(settings)
     @asynccontextmanager
@@ -21,7 +23,9 @@ def create_app(settings: Settings | None=None):
     app.state.pipeline=pipeline
     app.dependency_overrides[get_service] = lambda: PersonalizationService(
         PersonalizationRepository(settings.data_root))
+    app.dependency_overrides[get_account_repository] = lambda: AccountRepository(settings.data_root)
     app.include_router(personalization_router)
+    app.include_router(accounts_router)
     @app.get('/api/health')
     def health(): return {'ok':True,'schema_version':'2.0','data_mode':settings.data_mode,'agent_mode':settings.agent_mode}
     @app.get('/api/routes',response_model=list[Route])
@@ -47,6 +51,12 @@ def create_app(settings: Settings | None=None):
             raise HTTPException(502,'Agent provider failed; verify server configuration and provider availability.') from e
     @app.get('/')
     def index(): return FileResponse(ROOT/'frontend/index.html')
+    @app.get('/login.html')
+    def login_page(): return FileResponse(ROOT/'frontend/login.html')
+    @app.get('/register.html')
+    def register_page(): return FileResponse(ROOT/'frontend/register.html')
+    @app.get('/profile.html')
+    def profile_page(): return FileResponse(ROOT/'frontend/profile.html')
     app.mount('/assets',StaticFiles(directory=ROOT/'frontend'),name='assets')
     return app
 app=create_app()
