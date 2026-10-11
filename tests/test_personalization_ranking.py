@@ -9,13 +9,25 @@ def pred(route, difficulty): return {"route_id":route,"generic_predicted_difficu
 
 def test_target_changes_order_and_candidate_set_is_preserved():
     candidates=[rec("easy",90),rec("hard",90)]
-    assert [x["route_id"] for x in rank_candidates(candidates,[pred("easy",2),pred("hard",5)],2)] == ["easy","hard"]
-    assert {x["route_id"] for x in rank_candidates(candidates,[pred("easy",2),pred("hard",5)],5)} == {"easy","hard"}
+    easy_target=rank_candidates(candidates,[pred("easy",2),pred("hard",5)],2)
+    assert [x["route_id"] for x in easy_target] == ["easy","hard"]
+    result=rank_candidates(candidates,[pred("easy",2),pred("hard",5)],5)
+    assert [x["route_id"] for x in result] == ["hard","easy"]
+    assert {x["route_id"] for x in result} == {"easy","hard"}
+    assert {x["route_id"]:x["original_base_rank"] for x in easy_target} == {x["route_id"]:x["original_base_rank"] for x in result}
+    assert {x["route_id"]:x["generic_difficulty"] for x in easy_target} == {x["route_id"]:x["generic_difficulty"] for x in result}
+    assert {x["route_id"]:x["personalized_difficulty"] for x in easy_target} == {x["route_id"]:x["personalized_difficulty"] for x in result}
 
 def test_base_score_and_deterministic_ties_are_preserved():
     result=rank_candidates([rec("b",50),rec("a",50)],[pred("b",3),pred("a",3)],3)
     assert [x["route_id"] for x in result] == ["b","a"]
     assert all(x["original_base_rank"] in {1,2} and x["personalized_rank"] in {1,2} for x in result)
+
+def test_original_rank_resolves_equal_mismatch_and_score_is_exposed():
+    result=rank_candidates([rec("first",80),rec("second",100)],[pred("first",2),pred("second",4)],3)
+    assert [x["route_id"] for x in result] == ["first","second"]
+    assert result[0]["base_recommendation_score"] == 80
+    assert result[0]["personalized_score"] == -1
 
 def test_authenticated_endpoint_and_anonymous_flow(tmp_path):
     import shutil

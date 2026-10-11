@@ -14,6 +14,7 @@ from outdoorwise.personalization.service import PersonalizationService
 from outdoorwise.accounts.router import get_current_user, get_repository as get_account_repository, router as accounts_router
 from outdoorwise.accounts.repository import AccountRepository
 from outdoorwise.difficulty.router import router as difficulty_router
+from outdoorwise.export.router import router as export_router
 def create_app(settings: Settings | None=None):
     settings=settings or Settings.from_env(); pipeline=build_pipeline(settings)
     @asynccontextmanager
@@ -29,6 +30,7 @@ def create_app(settings: Settings | None=None):
     app.include_router(personalization_me_router)
     app.include_router(accounts_router)
     app.include_router(difficulty_router)
+    app.include_router(export_router)
     @app.get('/api/health')
     def health(): return {'ok':True,'schema_version':'2.0','data_mode':settings.data_mode,'agent_mode':settings.agent_mode}
     @app.get('/api/routes',response_model=list[Route])
