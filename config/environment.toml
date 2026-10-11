@@ -1,0 +1,56 @@
+# API publication cadence, polling policy, and freshness are separate concepts.
+[collection]
+timeout_seconds = 20
+max_retries = 2
+retry_backoff_seconds = 2
+max_retry_delay_seconds = 30
+request_spacing_seconds = 1.5
+
+[matching]
+station_max_distance_km = 15.0
+representative_method = "start_point_v1"
+# Explicit coarse regional assignment; not administrative polygons or GPS stations.
+[matching.route_regions]
+marina_bay = "south"
+woodlands_waterfront = "north"
+
+[sources.nea_rainfall]
+url = "https://api-open.data.gov.sg/v2/real-time/api/rainfall"
+interval_seconds = 300
+stale_after_seconds = 900
+metrics = ["rainfall"]
+[sources.nea_wind_speed]
+url = "https://api-open.data.gov.sg/v2/real-time/api/wind-speed"
+interval_seconds = 300
+stale_after_seconds = 900
+metrics = ["wind_speed"]
+[sources.nea_wind_direction]
+url = "https://api-open.data.gov.sg/v2/real-time/api/wind-direction"
+interval_seconds = 300
+stale_after_seconds = 900
+metrics = ["wind_direction"]
+[sources.nea_air_temperature]
+url = "https://api-open.data.gov.sg/v2/real-time/api/air-temperature"
+interval_seconds = 300
+stale_after_seconds = 900
+metrics = ["air_temperature"]
+[sources.nea_relative_humidity]
+url = "https://api-open.data.gov.sg/v2/real-time/api/relative-humidity"
+interval_seconds = 300
+stale_after_seconds = 900
+metrics = ["relative_humidity"]
+[sources.nea_pm25]
+url = "https://api-open.data.gov.sg/v2/real-time/api/pm25"
+interval_seconds = 900
+stale_after_seconds = 7200
+metrics = ["pm25"]
+[sources.nea_psi]
+url = "https://api-open.data.gov.sg/v2/real-time/api/psi"
+interval_seconds = 900
+stale_after_seconds = 7200
+metrics = ["psi", "pm10"]
+[sources.nea_wbgt]
+url = "https://api-open.data.gov.sg/v2/real-time/api/weather?api=wbgt"
+interval_seconds = 900
+stale_after_seconds = 2700
+metrics = ["wbgt", "heat_stress_level"]

@@ -1,0 +1,148 @@
+{
+  "verified_at": "2026-10-07T09:56:39.103904+00:00",
+  "command": "OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli watch --tick-seconds 1 --max-cycles 2",
+  "new_live_observations": 234,
+  "total_live_observations": 468,
+  "first_cycle": {
+    "status": "success",
+    "sources": [
+      {
+        "run_id": "a942773c479840d6862e510faf7b9406",
+        "source": "nea_rainfall",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:55:02.238523Z",
+        "finished_at": "2026-10-07T09:55:13.253457Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 89,
+        "inserted_records": 89,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      },
+      {
+        "run_id": "c2db50623c9e476d8efd5471811f7721",
+        "source": "nea_wind_speed",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:55:13.275308Z",
+        "finished_at": "2026-10-07T09:55:29.588506Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 17,
+        "inserted_records": 17,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      },
+      {
+        "run_id": "ce99020b59ec49e9a921dd44b77ae382",
+        "source": "nea_wind_direction",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:55:29.609003Z",
+        "finished_at": "2026-10-07T09:55:41.392627Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 17,
+        "inserted_records": 17,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      },
+      {
+        "run_id": "2be7b7d20edb4126a48e44d2cde5ba19",
+        "source": "nea_air_temperature",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:55:41.414834Z",
+        "finished_at": "2026-10-07T09:55:52.575747Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 18,
+        "inserted_records": 18,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      },
+      {
+        "run_id": "648c21329e77478997760093010cd610",
+        "source": "nea_relative_humidity",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:55:52.594986Z",
+        "finished_at": "2026-10-07T09:56:03.196073Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 18,
+        "inserted_records": 18,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      },
+      {
+        "run_id": "9e788472efaf48f9823b407109666d6a",
+        "source": "nea_pm25",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:56:03.218226Z",
+        "finished_at": "2026-10-07T09:56:14.339812Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 5,
+        "inserted_records": 5,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      },
+      {
+        "run_id": "6e690d9238994de696b1f3238faf25df",
+        "source": "nea_psi",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:56:14.370089Z",
+        "finished_at": "2026-10-07T09:56:26.772777Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 10,
+        "inserted_records": 10,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      },
+      {
+        "run_id": "52702c41508146c685c335d2bcb135db",
+        "source": "nea_wbgt",
+        "source_kind": "live",
+        "started_at": "2026-10-07T09:56:26.797367Z",
+        "finished_at": "2026-10-07T09:56:38.046287Z",
+        "status": "success",
+        "attempts": 1,
+        "received_records": 60,
+        "inserted_records": 60,
+        "revised_records": 0,
+        "unchanged_records": 0,
+        "error": ""
+      }
+    ],
+    "routes": 2,
+    "metrics": 20
+  },
+  "second_cycle": {
+    "status": "success",
+    "sources": [],
+    "routes": 2,
+    "metrics": 20
+  },
+  "final_worker_state": {
+    "state": "stopped",
+    "pid": 12,
+    "source_kind": "live",
+    "started_at": "2026-10-07T09:55:02.238175+00:00",
+    "updated_at": "2026-10-07T09:56:39.103576+00:00",
+    "completed_cycles": 2,
+    "last_report": {
+      "status": "success",
+      "sources": [],
+      "routes": 2,
+      "metrics": 20
+    },
+    "message": ""
+  },
+  "tests_passed": 18,
+  "docker_deployment_verified": false
+}
