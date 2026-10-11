@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from outdoorwise.config import Settings
 from outdoorwise.accounts.models import UserPublic
 from outdoorwise.accounts.router import get_current_user
+from outdoorwise.contracts.models import Preferences
 
 from .models import (CompletedRun, CompletedRunCreate, DifficultyFeedback,
-                     DifficultyFeedbackCreate, FavouriteRoute)
+                     DifficultyFeedbackCreate, FavouriteRoute, UserRunningProfile, PersonalizedRecommendationRequest)
+from .ranking import rank_candidates
 from .repository import PersonalizationRepository
 from .service import PersonalizationService
 
 router = APIRouter(prefix="/api/users/{user_id}", tags=["personalization"])
+me_router = APIRouter(prefix="/api/me", tags=["personalization"])
 
 
 def owner(user_id: str, current: UserPublic = Depends(get_current_user)):
@@ -71,3 +74,25 @@ def add_feedback(user_id: str, completed_run_id: str, data: DifficultyFeedbackCr
 @router.get("/feedback", response_model=list[DifficultyFeedback])
 def list_feedback(user_id: str, service: PersonalizationService = Depends(get_service), _=Depends(owner)):
     return service.list_feedback(user_id)
+
+
+@me_router.get("/running-profile", response_model=UserRunningProfile)
+def running_profile(current: UserPublic = Depends(get_current_user), service: PersonalizationService = Depends(get_service)):
+    return service.get_running_profile(current.user_id)
+
+@me_router.get("/routes/{route_id}/personalized-difficulty")
+def personalized_difficulty(route_id: str, request: Request, current: UserPublic = Depends(get_current_user), service: PersonalizationService = Depends(get_service)):
+    pipeline = request.app.state.pipeline
+    route = next((r for r in pipeline.repository.load_routes() if r.route_id == route_id), None)
+    if route is None: raise HTTPException(404, "Unknown route")
+    return service.get_personalized_difficulty(current.user_id, route, pipeline.get_route_environment(route_id))
+
+@me_router.post("/recommendations")
+def personalized_recommendations(data: PersonalizedRecommendationRequest, request: Request, current: UserPublic = Depends(get_current_user), service: PersonalizationService = Depends(get_service)):
+    pipeline=request.app.state.pipeline; run=pipeline.run(Preferences.model_validate(data.model_dump(exclude={"target_difficulty"})))
+    predictions=[]
+    for route in run.routes:
+        if any(rec.route_id==route.route_id for rec in run.recommendations):
+            predictions.append(service.get_personalized_difficulty(current.user_id, route, pipeline.get_route_environment(route.route_id)))
+    ranked=rank_candidates(run.recommendations,predictions,data.target_difficulty)
+    return {"run":run,"target_difficulty":data.target_difficulty,"recommendations":ranked}

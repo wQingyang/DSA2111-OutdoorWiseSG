@@ -8,11 +8,12 @@ from outdoorwise.config import Settings,ROOT
 from outdoorwise.bootstrap import build_pipeline
 from outdoorwise.contracts.models import Preferences,Run,ChatRequest,ChatResponse,Route
 from outdoorwise.agent.service import AgentService
-from outdoorwise.personalization.router import get_service, router as personalization_router
+from outdoorwise.personalization.router import get_service, me_router as personalization_me_router, router as personalization_router
 from outdoorwise.personalization.repository import PersonalizationRepository
 from outdoorwise.personalization.service import PersonalizationService
 from outdoorwise.accounts.router import get_current_user, get_repository as get_account_repository, router as accounts_router
 from outdoorwise.accounts.repository import AccountRepository
+from outdoorwise.difficulty.router import router as difficulty_router
 def create_app(settings: Settings | None=None):
     settings=settings or Settings.from_env(); pipeline=build_pipeline(settings)
     @asynccontextmanager
@@ -25,7 +26,9 @@ def create_app(settings: Settings | None=None):
         PersonalizationRepository(settings.data_root))
     app.dependency_overrides[get_account_repository] = lambda: AccountRepository(settings.data_root)
     app.include_router(personalization_router)
+    app.include_router(personalization_me_router)
     app.include_router(accounts_router)
+    app.include_router(difficulty_router)
     @app.get('/api/health')
     def health(): return {'ok':True,'schema_version':'2.0','data_mode':settings.data_mode,'agent_mode':settings.agent_mode}
     @app.get('/api/routes',response_model=list[Route])

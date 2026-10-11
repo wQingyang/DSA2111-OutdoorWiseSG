@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
+from outdoorwise.contracts.models import Preferences
 
 
 class CompletedRunCreate(BaseModel):
@@ -11,6 +12,10 @@ class CompletedRunCreate(BaseModel):
     actual_distance_km: float = Field(gt=0)
     actual_duration_min: float = Field(gt=0)
     predicted_difficulty: float | None = Field(default=None, ge=1, le=5)
+    personalized_predicted_difficulty: float | None = Field(default=None, ge=1, le=5)
+
+class PersonalizedRecommendationRequest(Preferences):
+    target_difficulty: int = Field(ge=1, le=5)
 
 
 class CompletedRun(CompletedRunCreate):
@@ -62,3 +67,24 @@ class DifficultyFeedback(DifficultyFeedbackCreate):
     route_id: str
     completed_run_id: str
     created_at: AwareDatetime
+
+
+class UserRunningProfile(BaseModel):
+    user_id: str
+    completed_run_count: int
+    feedback_count: int
+    favourite_count: int
+    total_distance_km: float | None = None
+    mean_distance_km: float | None = None
+    median_distance_km: float | None = None
+    recent_mean_distance_km: float | None = None
+    typical_distance_min_km: float | None = None
+    typical_distance_max_km: float | None = None
+    comfortable_distance_km: float | None = None
+    mean_pace_min_per_km: float | None = None
+    median_pace_min_per_km: float | None = None
+    mean_perceived_difficulty: float | None = None
+    median_perceived_difficulty: float | None = None
+    recent_difficulty_trend: str | None = None
+    usable_run_count: int
+    profile_confidence: str

@@ -3,6 +3,9 @@ from uuid import uuid4
 
 from .models import (CompletedRun, CompletedRunCreate, DifficultyFeedback,
                      DifficultyFeedbackCreate, FavouriteRoute)
+from .profile import derive_running_profile
+from outdoorwise.difficulty.service import GenericDifficultyEstimator
+from outdoorwise.personalization.difficulty import PersonalizedDifficultyPredictor
 from .repository import PersonalizationRepository
 
 
@@ -46,3 +49,13 @@ class PersonalizationService:
 
     def list_feedback(self, user_id):
         return self.repository.list_feedback(user_id)
+
+    def get_running_profile(self, user_id):
+        return derive_running_profile(user_id, self.list_completed_runs(user_id),
+                                      self.list_feedback(user_id), self.list_favourites(user_id))
+
+    def get_personalized_difficulty(self, user_id, route, environment):
+        generic = GenericDifficultyEstimator().predict(route, environment)
+        runs, feedback = self.list_completed_runs(user_id), self.list_feedback(user_id)
+        profile = derive_running_profile(user_id, runs, feedback, [])
+        return PersonalizedDifficultyPredictor().predict(route.route_id, route.distance_km, generic.predicted_difficulty, runs, feedback, profile)

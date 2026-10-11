@@ -76,6 +76,7 @@
   async function saveRun(event) {
     event.preventDefault(); const form = event.target; const routeId = $('run-route-id').value;
     const body = { route_id: routeId, completed_at: new Date().toISOString(), actual_distance_km: Number($('run-distance').value), actual_duration_min: Number($('run-duration').value) };
+    const generic = window.outdoorwiseDifficulty?.[routeId]; if (generic) { body.predicted_difficulty = generic.predicted_difficulty; if (generic.personalized_predicted_difficulty != null) body.personalized_predicted_difficulty = generic.personalized_predicted_difficulty; }
     const difficulty = $('run-difficulty').value; const tags = $('run-tags').value.split(',').map(x => x.trim()).filter(Boolean); const comment = $('run-comment').value.trim();
     try {
       const run = await request(`${base()}/runs`, { method: 'POST', body: JSON.stringify(body) });
