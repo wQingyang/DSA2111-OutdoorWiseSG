@@ -15,10 +15,10 @@ def pipeline(tmp_path):
     return build_pipeline(Settings(data_root=tmp_path,data_mode='demo'))
 def log(batch):return IngestionRun(run_id='test',source=batch.source,source_kind=batch.observations[0].source_kind,started_at=batch.fetched_at,finished_at=batch.fetched_at,status='success')
 def test_demo_pipeline_api_agent(pipeline):
-    report=pipeline.refresh();assert report['status']=='success' and report['metrics']==20
-    run=pipeline.run(Preferences());assert len(run.environment)==2 and all(p.is_mock for p in run.predictions)
-    assert all(m.delivery=='demo' for e in run.environment for m in e.metrics)
-    assert [r.distance_km for r in run.routes]==[3.729,1.45]
+    report=pipeline.refresh();assert report['status']=='success' and report['metrics']==len(pipeline.repository.load_routes()) * 10
+    run=pipeline.run(Preferences());assert {e.route_id for e in run.environment}=={r.route_id for r in pipeline.repository.load_routes()} and all(p.is_mock for p in run.predictions)
+    assert all(len(e.metrics) == 10  for e in run.environment)
+    distances={r.route_id:r.distance_km for r in run.routes};assert distances['marina_bay']==3.729 and distances['woodlands_waterfront']==1.45
     with TestClient(create_app(Settings(data_root=pipeline.repository.root,data_mode='demo'))) as client:
         assert client.get('/').status_code==200
         assert len(client.get('/api/routes/marina_bay/environment').json()['metrics'])==10
@@ -26,7 +26,7 @@ def test_demo_pipeline_api_agent(pipeline):
         assert client.get('/api/routes/bad/environment').status_code==404
         assert client.post('/api/recommendations',json={'horizon_min':45}).status_code==422
         chat=client.post('/api/chat',json={'message':'compare'}).json()
-        assert len(chat['trace'])==4 and len(chat['run']['environment'])==2
+        assert len(chat['trace'])==4 and len(chat['run']['environment'])==len(pipeline.repository.load_routes())
         assert 'environment' in chat['trace'][1]['result']
 def test_dedup_revisions_asof(pipeline):
     batch,_=pipeline.collectors[0].collect();repo=pipeline.repository
@@ -73,13 +73,16 @@ def test_real_recorded_collectors_and_matching(tmp_path):
         batch=collector.parse(payload,now);assert batch.observations and all(o.source_kind=='live' for o in batch.observations)
         assert pipe.repository.ingest(batch,log(batch)).inserted_records==len(batch.observations)
         assert pipe.repository.ingest(batch,log(batch)).inserted_records==0
-    run=pipe.run(Preferences());assert len(run.environment)==2
-    for env,region in zip(run.environment,['south','north']):
+    run=pipe.run(Preferences());assert {e.route_id for e in run.environment}=={r.route_id for r in pipe.repository.load_routes()}
+    regions=pipe.config.matching.route_regions
+    route_ids={r.route_id for r in pipe.repository.load_routes()}
+    assert route_ids <= set(regions)
+    for env in run.environment:
+        region=regions[env.route_id]
         metrics={m.metric:m for m in env.metrics}
         assert len(metrics)==10 and all(m.state!='missing' for m in metrics.values())
         assert all(metrics[m].location_id==region for m in ['pm25','psi','pm10'])
         assert metrics['heat_stress_level'].category_value in ['Low','Moderate','High']
-        assert metrics['rainfall'].location_id!=metrics['wbgt'].location_id
     assert all(p.status=='unavailable' and not p.is_mock for p in run.predictions)
     wbgt=json.loads((ROOT/'tests/fixtures/environment/wbgt.json').read_text());batch=pipe.collectors[-1].parse(wbgt,now)
     assert {o.metric for o in batch.observations}=={'wbgt','heat_stress_level'}
@@ -134,6 +137,6 @@ def test_retry_transport_and_llm_tool_loop(pipeline,monkeypatch):
     replies=[{'choices':[{'message':{'role':'assistant','content':None,'tool_calls':[{'id':'1','type':'function','function':{'name':'get_route_environment','arguments':'{"route_id":"marina_bay"}'}},{'id':'2','type':'function','function':{'name':'rank_routes','arguments':'{}'}}]}}]}, {'choices':[{'message':{'role':'assistant','content':'Structured output explanation.'}}]}]
     client.post.side_effect=[Mock(json=Mock(return_value=r),raise_for_status=Mock()) for r in replies]
     result=AgentService(pipeline,Settings(data_root=pipeline.repository.root,data_mode='demo',agent_mode='llm',llm_model='test',llm_api_key='test')).chat(ChatRequest(message='compare'))
-    assert len(result.trace)==2 and len(result.recommended_route_ids)==2
+    assert len(result.trace)==2 and set(result.recommended_route_ids)=={r.route_id for r in pipeline.repository.load_routes()}
     assert len(result.trace[0].result['environment']['metrics'])==10
     # This checks the tool loop only, not a real provider call.

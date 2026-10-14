@@ -13,6 +13,16 @@ representative_method = "start_point_v1"
 [matching.route_regions]
 marina_bay = "south"
 woodlands_waterfront = "north"
+west_coast = "west"
+east_coast = "east"
+bishan_ang_mo_kio = "central"
+singapore_botanic_gardens = "central"
+macritchie_reservoir = "central"
+pasir_ris_park = "east"
+bedok_reservoir = "east"
+jurong_lake_gardens = "west"
+rail_corridor_bukit_timah = "central"
+punggol_waterway = "north"
 
 [sources.nea_rainfall]
 url = "https://api-open.data.gov.sg/v2/real-time/api/rainfall"
