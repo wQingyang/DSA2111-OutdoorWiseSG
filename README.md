@@ -1,6 +1,6 @@
 # OutdoorWise — Environmental Data Pipeline Demo
 
-OutdoorWise combines two curated Singapore running routes with environmental observations, route recommendations, and an assistant interface. This version extends the existing demo in place, preserving its frontend, Marina Bay and Woodlands Waterfront routes, GeoJSON files, and rainfall workflow.
+OutdoorWise combines a catalog of 12 Singapore running routes with environmental observations, route recommendations, and an assistant interface. The catalog preserves the original Marina Bay and Woodlands Waterfront routes and adds ten routes. The ten new routes are candidates marked candidate_requires_visual_review; verify their geometry before treating them as approved routes.
 
 The pipeline integrates eight official API endpoints covering ten environmental metrics, stores observations in CSV files, and exposes a shared route environment service. The default data mode is **live**. The default assistant mode is a fixed rule-based demonstration. The existing recommendation baseline uses route distance and rainfall; a comprehensive environmental risk model is not connected yet.
 
@@ -101,7 +101,7 @@ Live and demo observations are isolated using `source_kind`. The latest route CS
 
 PM10 is extracted from the PSI API's concentration field, not its PM10 sub-index. WBGT and heat stress come directly from the official endpoint. Polling intervals and publication cadence are separate from aggregation windows.
 
-Each metric selects its own available source. Station-based metrics use the route's first GeoJSON coordinate as a representative point. Regional air quality metrics use the configured source region: `south` for Marina Bay and `north` for Woodlands Waterfront. This version does not implement along-route sampling or regional polygon containment.
+Each metric selects its own available source. Station-based metrics use the route's first GeoJSON coordinate as a representative point.Regional air-quality metrics use the source region configured for each route in config/environment.toml. This version does not implement along-route sampling or regional polygon containment.
 
 ## CSV Storage and Data Status
 
