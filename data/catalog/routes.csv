@@ -1,3 +1,13 @@
 route_id,name,kind,distance_km,geometry_file,status
 marina_bay,Marina Bay waterfront loop,loop,3.729,marina_bay.geojson,candidate_requires_visual_review
 woodlands_waterfront,Woodlands Waterfront out-and-back,out_and_back,1.45,woodlands_waterfront.geojson,candidate_requires_visual_review
+west_coast,West Coast Park out-and-back,out_and_back,4.041,west_coast.geojson,candidate_requires_visual_review
+east_coast,East Coast Park out-and-back,out_and_back,7.033,east_coast.geojson,candidate_requires_visual_review
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,loop,4.608,bishan_ang_mo_kio.geojson,candidate_requires_visual_review
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,loop,5.79,singapore_botanic_gardens.geojson,candidate_requires_visual_review
+macritchie_reservoir,MacRitchie Reservoir forest loop,loop,8.297,macritchie_reservoir.geojson,candidate_requires_visual_review
+pasir_ris_park,Pasir Ris Park coastal loop,loop,5.12,pasir_ris_park.geojson,candidate_requires_visual_review
+bedok_reservoir,Bedok Reservoir Park loop,loop,9.041,bedok_reservoir.geojson,candidate_requires_visual_review
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,loop,6.209,jurong_lake_gardens.geojson,candidate_requires_visual_review
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,out_and_back,7.631,rail_corridor_bukit_timah.geojson,candidate_requires_visual_review
+punggol_waterway,Punggol Waterway out-and-back,out_and_back,6.885,punggol_waterway.geojson,candidate_requires_visual_review
