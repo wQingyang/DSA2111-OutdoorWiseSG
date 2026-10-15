@@ -1,5 +1,7 @@
 # Module Boundaries
 
+Sprint 1 update: `modules/risk.py` now implements observation-based component scoring; `modules/risk_policy.py` applies eligibility, with no default blocks; and `modules/risk_ranking.py` scores existing candidates after the baseline. `bootstrap.py` injects these and the existing difficulty estimator. Authenticated requests supply personalized difficulty from the same environment snapshot. Blocked routes remain in catalog/risk results but are excluded from recommendations. Unknown risk has a null weighted score and explicit fallback. Environmental CSV schema v3 is unchanged. See [the current formulas and API semantics](ENVIRONMENTAL_RISK.md).
+
 ```mermaid
 flowchart TD
     C["8 independent collectors"] --> S["Typed batch validation"]

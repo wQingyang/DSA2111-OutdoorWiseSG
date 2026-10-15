@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Literal
 from pydantic import Field, AwareDatetime, model_validator
 from .core import Contract, Coordinate
+from .risk import RiskComponent, RiskDataQuality
 # Source update cadence is different from averaging window and observation resolution.
 METRIC_SPECS = {
     "rainfall": ("mm", "PT5M", "nea_rainfall"),
@@ -127,6 +128,14 @@ class EnvironmentRisk(Contract):
     status: Literal["unavailable","available","demo"] = "unavailable"
     source: str = "risk_module_not_connected"
     reasons: list[str] = Field(default_factory=list)
+    risk_score: float | None = Field(default=None, ge=0, le=100)
+    risk_level: Literal['low', 'elevated', 'high', 'unknown'] = 'unknown'
+    risk_components: dict[str, RiskComponent] = Field(default_factory=dict)
+    risk_status: Literal['complete', 'incomplete', 'unavailable'] = 'unavailable'
+    risk_assessment_mode: Literal['current_observation'] = 'current_observation'
+    eligibility: Literal['eligible', 'caution', 'blocked', 'unknown'] = 'unknown'
+    risk_data_quality: RiskDataQuality = Field(default_factory=RiskDataQuality)
+    risk_warnings: list[str] = Field(default_factory=list)
 def utc_now(): return datetime.now(timezone.utc)
 def timestamp(value):
     result=datetime.fromisoformat(value.replace("Z","+00:00"))

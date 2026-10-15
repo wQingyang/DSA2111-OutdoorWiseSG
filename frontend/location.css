@@ -1,0 +1,11 @@
+.location-controls { margin: 0 0 15px; padding: 0; border: 0; min-width: 0; }
+.location-controls legend { margin-bottom: 8px; font-size: 13px; font-weight: 650; }
+.location-controls label { margin-bottom: 10px; }
+.location-controls button { font-size: 12px; min-height: 38px; }
+.location-controls .location-clear { background: #e9efe7; color: #17382f; margin-top: 8px; }
+.location-help, #location-status, #selected-coordinates, #access-location-note { display: block; font-size: 11px; line-height: 1.5; color: #52675e; overflow-wrap: anywhere; }
+#location-status { margin: 9px 0 5px; }
+#selected-coordinates { font-weight: 600; }
+#map.selecting-start, #map.selecting-start .leaflet-grab { cursor: crosshair; }
+.starting-location-marker { background: #184bb5; color: white; border: 2px solid white; border-radius: 8px 8px 8px 0; box-shadow: 0 2px 7px #17382f66; text-align: center; line-height: 28px; font-size: 11px; font-weight: 750; }
+#access:disabled { background: #edf0eb; color: #52675e; }

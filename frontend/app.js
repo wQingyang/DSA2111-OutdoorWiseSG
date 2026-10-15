@@ -1,13 +1,135 @@
-const $=id=>document.getElementById(id); let map,layer,routes=[];
-const positions={nus:{lon:103.776,lat:1.296},north:{lon:103.786,lat:1.438},bay:{lon:103.855,lat:1.287}};
-function preferences(){return {target_distance_km:Number($('distance').value),duration_min:Number($('duration').value),horizon_min:Number($('horizon').value),location:positions[$('location').value]||null,max_access_distance_km:$('access').value?Number($('access').value):null};}
-async function api(path,body){const res=await fetch(path,body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await res.json();if(!res.ok)throw Error(typeof data.detail==='string'?data.detail:JSON.stringify(data.detail));return data;}
-function draw(selected){if(!window.L){$('map').hidden=true;$('fallback').hidden=false;$('fallback').replaceChildren();const p=document.createElement('p');p.textContent='Map library unavailable. Route shapes shown below (separate local coordinate panels).';$('fallback').append(p);for(const r of selected){const pts=r.geometry.coordinates,xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);const minx=Math.min(...xs),miny=Math.min(...ys),dx=Math.max(...xs)-minx||1,dy=Math.max(...ys)-miny||1;const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 600 280');const line=document.createElementNS(svg.namespaceURI,'polyline');line.setAttribute('points',pts.map(p=>`${20+560*(p[0]-minx)/dx},${260-220*(p[1]-miny)/dy}`).join(' '));line.setAttribute('fill','none');line.setAttribute('stroke','#24684c');line.setAttribute('stroke-width','3');const title=document.createElement('p');title.textContent=r.name;$('fallback').append(title,svg);svg.append(line);}return;}
-if(!map){map=L.map('map').setView([1.36,103.82],11);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(map);}if(layer)map.removeLayer(layer);layer=L.featureGroup(selected.map((r,i)=>L.polyline(r.geometry.coordinates.map(p=>[p[1],p[0]]),{color:i?'#bb792c':'#24684c',weight:5}))).addTo(map);if(selected.length)map.fitBounds(layer.getBounds(),{padding:[25,25]});}
-function render(run){routes=run.routes;draw(routes);$('warnings').textContent=run.warnings.join(' ');$('cards').replaceChildren();const rows=run.recommendations.length?run.recommendations:[];if(!rows.length){$('cards').textContent='No routes satisfy your access limit.';document.dispatchEvent(new CustomEvent('outdoorwise:routes-rendered',{detail:{routes}}));return;}for(const [i,rec] of rows.entries()){const r=routes.find(r=>r.route_id===rec.route_id),c=run.conditions.find(c=>c.route_id===r.route_id),p=run.predictions.find(p=>p.route_id===r.route_id);const card=document.createElement('article');card.className='card';card.dataset.personalizationRoute=r.route_id;const title=document.createElement('h3');title.textContent=`${i+1}. ${r.name}`;card.append(title);const ranked=window.personalizedRanking?.[r.route_id];if(ranked){const rank=document.createElement('p');rank.textContent=`Overall recommendation rank: #${ranked.original_base_rank}`;rank.title='Based on the existing route recommendation system before personal difficulty matching.';card.append(rank);const match=document.createElement('p');match.textContent=`Your difficulty-match rank: #${ranked.personalized_rank}`;match.title='Ranks suitable routes by how closely their predicted difficulty matches your selected target.';card.append(match);const target=document.createElement('p');target.textContent=`Your target: ${['','Very easy','Easy','Comfortable','Challenging','Very challenging'][ranked.target_difficulty]} (${ranked.target_difficulty} / 5) · Difficulty difference: ${ranked.difficulty_mismatch.toFixed(1)}`;card.append(target);const why=document.createElement('p');why.textContent=ranked.explanation;card.append(why);}for(const text of [`${r.distance_km.toFixed(3)} km · ${r.kind}`,`Rain observation: ${c.rainfall_mm===null?'Unavailable':c.rainfall_mm+' mm'} · ${c.quality}`,`Observed: ${c.observed_at||'N/A'} · ${c.source}`,`Forecast (${p.horizon_min} min): ${p.rain_probability===null?'Unknown':(100*p.rain_probability).toFixed(0)+'%'} · ${p.is_mock?'SIMULATED':p.source}`,`Score ${rec.score} · ${r.status}`,...rec.reasons]){const el=document.createElement('p');el.textContent=text;card.append(el);}const env=(run.environment||[]).find(e=>e.route_id===r.route_id);if(env){const wrap=document.createElement('div');wrap.className='environment-scroll';const table=document.createElement('table');table.className='environment';const head=document.createElement('tr');for(const label of ['Metric / window','Value','State / delivery','Source / distance','Observation / fetched']){const th=document.createElement('th');th.textContent=label;head.append(th);}table.append(head);for(const m of env.metrics){const tr=document.createElement('tr');tr.dataset.metric=m.metric;tr.dataset.state=m.state;for(const value of [m.metric+' / '+m.aggregation_window,m.category_value??(m.value===null?'Unavailable':Number(m.value.toFixed(2))+' '+m.unit),m.state+' / '+m.delivery,m.source+' / '+(m.location_name||'N/A')+(m.station_distance_km===null?'':' / '+m.station_distance_km+' km'),(m.observed_at||'N/A')+' / '+(m.fetched_at||'N/A')]){const td=document.createElement('td');td.textContent=value;tr.append(td);}tr.title=m.reason+' · '+m.match_method+' · source updated '+(m.source_updated_at||'not supplied');table.append(tr);}wrap.append(table);card.append(wrap);}const actions=document.createElement('div');actions.className='card-actions';const favourite=document.createElement('button');favourite.className='favourite-button';const completed=document.createElement('button');completed.className='completed-run-button';completed.textContent='I completed this run';actions.append(favourite,completed);card.append(actions);const button=document.createElement('button');button.textContent='Show route';button.onclick=()=>draw([r]);card.append(button);$('cards').append(card);}document.dispatchEvent(new CustomEvent('outdoorwise:routes-rendered',{detail:{routes}}));}
-async function personalizedOrGeneric(){const base=preferences();try{const me=await fetch('/api/auth/me');if(!me.ok)throw Error();const res=await api('/api/me/recommendations',{...base,target_difficulty:Number($('target-difficulty').value)});window.personalizedRanking=Object.fromEntries(res.recommendations.map(x=>[x.route_id,x]));const order=new Map(res.recommendations.map((x,i)=>[x.route_id,i]));res.run.recommendations.sort((a,b)=>order.get(a.route_id)-order.get(b.route_id));return res.run;}catch(_){window.personalizedRanking=null;return api('/api/recommendations',base);}}
-async function busy(fn){document.querySelectorAll('button').forEach(b=>b.disabled=true);$('status').textContent='Working…';try{await fn();$('status').textContent='Updated.';}catch(e){$('status').textContent=e.message;}finally{document.querySelectorAll('button').forEach(b=>b.disabled=false);}}
-$('preferences').onsubmit=e=>{e.preventDefault();busy(async()=>render(await personalizedOrGeneric()));};
-$('refresh').onclick=()=>busy(async()=>{const report=await api('/api/refresh',{});$('ingestion').textContent=report.status+' · '+report.sources.map(s=>s.source+': '+s.status+(s.error?' ('+s.error+')':'')).join(' | ');render(await api('/api/recommendations',preferences()));});
-$('chat').onsubmit=e=>{e.preventDefault();busy(async()=>{const r=await api('/api/chat',{message:$('message').value,preferences:preferences()});$('answer').textContent=r.message;$('trace').textContent=JSON.stringify(r.trace,null,2);if(r.run)render(r.run);});};
-busy(async()=>{const h=await api('/api/health');$('mode').textContent=`Data: ${h.data_mode} / Agent: ${h.agent_mode}`;render(await api('/api/recommendations',preferences()));});
+const $ = id => document.getElementById(id);
+let map, layer, routes = [];
+function preferences() {
+  const location = window.outdoorwiseLocation.locationForRequest();
+  if (location && !$('access').checkValidity()) throw Error('Enter a valid positive straight-line access limit, or clear the limit.');
+  return {target_distance_km: Number($('distance').value), duration_min: Number($('duration').value), horizon_min: Number($('horizon').value),
+    target_difficulty: Number($('target-difficulty').value), location,
+    max_access_distance_km: location && $('access').value ? Number($('access').value) : null};
+}
+async function api(path, body) {
+  const response = await fetch(path, body === undefined ? {} : {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  if (!response.ok) {
+    const error = Error(response.status === 401 ? 'Your session expired. Sign in again to use your personal recommendations.' : 'We could not update your routes. Please try again.');
+    error.status = response.status; throw error;
+  }
+  return response.json();
+}
+function ensureMap() {
+  if (!window.L) {window.outdoorwiseLocation.mapUnavailable(); return null;}
+  if (!map) {
+    map = L.map('map').setView([1.36, 103.82], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap contributors', maxZoom: 19}).addTo(map);
+    window.outdoorwiseLocation.attachMap(map);
+  }
+  return map;
+}
+function draw(selected){if(!window.L){window.outdoorwiseLocation.mapUnavailable();$('map').hidden=true;$('fallback').hidden=false;$('fallback').replaceChildren();const p=document.createElement('p');p.textContent='Map library unavailable. Route shapes shown below (separate local coordinate panels).';$('fallback').append(p);for(const r of selected){const pts=r.geometry.coordinates,xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);const minx=Math.min(...xs),miny=Math.min(...ys),dx=Math.max(...xs)-minx||1,dy=Math.max(...ys)-miny||1;const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 600 280');const line=document.createElementNS(svg.namespaceURI,'polyline');line.setAttribute('points',pts.map(p=>`${20+560*(p[0]-minx)/dx},${260-220*(p[1]-miny)/dy}`).join(' '));line.setAttribute('fill','none');line.setAttribute('stroke','#24684c');line.setAttribute('stroke-width','3');const title=document.createElement('p');title.textContent=r.name;$('fallback').append(title,svg);svg.append(line);}return;}
+ensureMap();
+if (layer) map.removeLayer(layer);
+layer = L.featureGroup(selected.map((route, index) => {
+  const line = L.polyline(route.geometry.coordinates.map(p => [p[1], p[0]]), {color: index ? '#bb792c' : '#24684c', weight: 5, bubblingMouseEvents: false});
+  const label = document.createElement('span'); label.textContent = route.name; line.bindTooltip(label);
+  line.on('click', event => {
+    if (event.originalEvent) L.DomEvent.stopPropagation(event.originalEvent);
+    draw([route]);
+  });
+  return line;
+})).addTo(map);
+if (selected.length) {
+  const bounds = layer.getBounds(); const startingPoint = window.outdoorwiseLocation.selectedPoint();
+  if (startingPoint) bounds.extend([startingPoint.lat, startingPoint.lon]);
+  map.fitBounds(bounds, {padding: [25, 25]});
+}
+}
+
+function render(run) {
+  routes = run.routes;
+  draw(routes);
+  $('cards').replaceChildren(); $('blocked-routes').replaceChildren();
+  const rows = run.recommendations || [];
+  const riskMap = new Map((run.risks || []).map(r => [r.route_id, r]));
+  const envMap = new Map((run.environment || []).map(e => [e.route_id, e]));
+  const predictionMap = new Map((run.predictions || []).map(p => [p.route_id, p]));
+  const routeMap = new Map(routes.map(r => [r.route_id, r]));
+  const blocked = (run.risks || []).filter(r => r.eligibility === 'blocked');
+  $('results-summary').textContent = `${rows.length} route${rows.length === 1 ? '' : 's'} · ${window.personalizedRanking ? 'Matched to your running profile' : 'Matched to your preferences'}`;
+  const messages = [];
+  if (rows.length && rows.every(r => r.recommendation_score === null)) messages.push('Environmental assessment unavailable. Routes are ordered using available distance, access and difficulty preferences.');
+  if (rows.length && rows.every(r => r.distance_match_warning)) messages.push('No available route closely matches your target distance. Route lengths have not been shortened.');
+  if (blocked.length) messages.push(`${blocked.length} route${blocked.length === 1 ? '' : 's'} excluded by environmental policy. Review them below.`);
+  if (run.data_mode === 'demo') messages.push('Demo observations are synthetic. They do not describe current weather.');
+  $('warnings').textContent = messages.join(' '); $('warnings').hidden = !messages.length;
+  const addCard = (route, rec, risk, index, parent) => {
+    if (!route) return;
+    parent.append(window.outdoorwiseResults.card(route, rec, risk, envMap.get(route.route_id), predictionMap.get(route.route_id), run.preferences,
+      window.personalizedRanking?.[route.route_id], index, selected => draw([selected])));
+  };
+  rows.forEach((rec, index) => addCard(routeMap.get(rec.route_id), rec, riskMap.get(rec.route_id), index, $('cards')));
+  if (!rows.length) {
+    const limit = run.preferences.max_access_distance_km;
+    const empty = run.preferences.location && typeof limit === 'number'
+      ? `No recommended routes meet your preferences and ${limit} km straight-line access limit. The limit has not been relaxed. Choose another starting point or change the limit.`
+      : blocked.length ? 'No routes can currently be recommended. Review policy exclusions below or adjust your preferences.' : 'No routes match these preferences. Try a different starting location or distance.';
+    $('cards').append(Object.assign(document.createElement('p'), {className: 'empty-results', textContent: empty}));
+  }
+  if (blocked.length) {
+    const details = document.createElement('details'); details.className = 'blocked-discovery';
+    const summary = document.createElement('summary'); summary.textContent = `Routes not recommended (${blocked.length})`;
+    const container = document.createElement('div'); container.className = 'blocked-cards'; details.append(summary, container);
+    blocked.forEach((risk, index) => addCard(routeMap.get(risk.route_id), null, risk, index, container));
+    $('blocked-routes').append(details);
+  }
+  document.dispatchEvent(new CustomEvent('outdoorwise:routes-rendered', {detail: {routes, recommendations: rows,
+    personalizedRanking: window.personalizedRanking, authenticated: Boolean(window.outdoorwiseSession)}}));
+}
+async function personalizedOrGeneric() {
+  const base = preferences();
+  const revision = window.outdoorwiseLocation.revision();
+  const confirmSelection = run => {
+    if (revision !== window.outdoorwiseLocation.revision()) throw Error('Starting point changed while routes were updating. Compare Routes again to use the new point.');
+    if (base.max_access_distance_km !== preferences().max_access_distance_km) throw Error('Access limit changed while routes were updating. Compare Routes again to use the new limit.');
+    return run;
+  };
+  const session = await fetch('/api/auth/me');
+  if (session.status === 401) {
+    window.outdoorwiseSession = null; window.personalizedRanking = null;
+    return confirmSelection(await api('/api/recommendations', base));
+  }
+  if (!session.ok) throw Error('We could not check your sign-in status. Please try again.');
+  window.outdoorwiseSession = await session.json();
+  const response = await api('/api/me/recommendations', base);
+  confirmSelection(response.run);
+  window.personalizedRanking = Object.fromEntries(response.recommendations.map(r => [r.route_id, r]));
+  const order = new Map(response.recommendations.map((r, index) => [r.route_id, index]));
+  // Preserve the final server ordering, including personalized unknown-risk fallback.
+  response.run.recommendations.sort((a, b) => order.get(a.route_id) - order.get(b.route_id));
+  return response.run;
+}
+async function busy(action) {
+  const buttons = [...document.querySelectorAll('#preferences > button, #refresh, #chat button')];
+  buttons.forEach(button => button.disabled = true); $('status').textContent = 'Updating routes…';
+  try { await action(); $('status').textContent = 'Routes updated.'; }
+  catch (error) { $('status').textContent = error.message; }
+  finally { buttons.forEach(button => button.disabled = false); }
+}
+$('preferences').onsubmit = event => {event.preventDefault(); busy(async () => render(await personalizedOrGeneric()));};
+$('refresh').onclick = () => busy(async () => {
+  preferences(); // Never drop a pending/unselected location or its access constraint.
+  const report = await api('/api/refresh', {});
+  $('ingestion').textContent = report.status === 'partial' ? 'Some observations could not be refreshed. Retained data may be outdated.' : 'Environmental observations refreshed.';
+  render(await personalizedOrGeneric());
+});
+$('chat').onsubmit = event => {event.preventDefault(); busy(async () => {
+  const response = await api('/api/chat', {message: $('message').value, preferences: preferences()});
+  $('answer').textContent = response.message; $('trace').textContent = JSON.stringify(response.trace, null, 2);
+  // Assistant prose does not replace the final user-specific recommendation list.
+  render(await personalizedOrGeneric());
+});};
+document.addEventListener('outdoorwise:location-changed', () => { $('status').textContent = 'Starting point changed. Compare Routes to update your results.'; });
+ensureMap();
+busy(async () => {
+  const health = await api('/api/health');
+  $('mode').textContent = health.data_mode === 'demo' ? 'Demo observations' : 'Environmental observations';
+  render(await personalizedOrGeneric());
+});

@@ -1,2 +1,29 @@
-const {JSDOM}=require('jsdom');const fs=require('fs');
-(async()=>{const base=process.env.BASE_URL||'http://127.0.0.1:8765';const html=await(await fetch(base)).text();const dom=new JSDOM(html,{runScripts:'outside-only',url:base});let requests=[];dom.window.fetch=(url,opt)=>{requests.push(url);return fetch(base+url,opt)};dom.window.eval(fs.readFileSync(require('path').resolve(__dirname,'../frontend/app.js'),'utf8'));for(let i=0;i<50 && dom.window.document.querySelectorAll('tr[data-metric]').length<20;i++)await new Promise(r=>setTimeout(r,100));const d=dom.window.document;if(d.querySelectorAll('tr[data-metric]').length!==20)throw Error(d.getElementById('status').textContent);if(d.querySelectorAll('.card').length!==2)throw Error('cards');if(d.querySelectorAll('tr[data-state="missing"]').length)throw Error('unexpected missing data');if(!d.getElementById('cards').textContent.includes('nea_wbgt'))throw Error('WBGT absent');if(d.querySelectorAll('#fallback svg').length!==2)throw Error('fallback geometry absent');console.log('Original frontend + real HTTP backend: 2 cards, 20 real metric rows, 2 preserved route SVGs, 0 missing.');})();
+/* DOM + actual local HTTP API; run only against an isolated test data root. */
+const {JSDOM} = require('jsdom');
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+(async () => {
+  const base = process.env.BASE_URL || 'http://127.0.0.1:8769';
+  const expected = await (await fetch(base + '/api/recommendations', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({})})).json();
+  const html = await (await fetch(base)).text();
+  const dom = new JSDOM(html, {runScripts: 'outside-only', url: base});
+  try {
+    dom.window.fetch = (url, options) => fetch(base + url, options);
+    for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'app']) dom.window.eval(fs.readFileSync(path.join(__dirname, `../frontend/${script}.js`), 'utf8'));
+    const d = dom.window.document;
+    for (let i = 0; i < 100 && !d.getElementById('results-summary').textContent; i++) await new Promise(resolve => setTimeout(resolve, 100));
+    assert.equal(d.querySelectorAll('#cards .card').length, expected.recommendations.length);
+    assert.equal(d.querySelectorAll('.environmental-details[open]').length, 0);
+    for (const rec of expected.recommendations) {
+      const card = d.querySelector(`[data-personalization-route="${rec.route_id}"]`);
+      assert(card); assert.equal(card.querySelector('.rank-label').textContent, `Final rank #${rec.final_rank}`);
+      assert.equal(card.querySelector('.export-route-button').getAttribute('href'), `/api/routes/${rec.route_id}/export.gpx`);
+      assert.equal(card.querySelectorAll('tr[data-metric]').length, expected.environment.find(e => e.route_id === rec.route_id).metrics.length);
+      if (rec.recommendation_score === null) assert.equal(card.querySelector('.recommendation-score strong').textContent, 'Unavailable');
+    }
+    assert.equal(d.querySelectorAll('#fallback svg').length, expected.routes.length);
+    assert.equal(dom.window.location.pathname, '/');
+    console.log(`Actual HTTP + all dashboard scripts: ${expected.routes.length} catalog routes, ${expected.recommendations.length} final cards, collapsed metric details, unavailable scores preserved, GPX and SVG fallback verified.`);
+  } finally {dom.window.close();}
+})().catch(error => {console.error(error); process.exitCode = 1;});

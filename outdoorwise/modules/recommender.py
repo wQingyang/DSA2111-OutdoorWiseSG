@@ -18,7 +18,7 @@ class BaselineRecommender:
             if p.rain_probability is not None:
                 score-=50*p.rain_probability
                 reasons.append(f'{"SIMULATED " if p.is_mock else ""}{p.horizon_min}-minute rain probability {p.rain_probability:.0%}.')
-            else: reasons.append('Rain forecast unavailable; ranking uses distance only.')
+            else: reasons.append('Rain forecast unavailable; baseline score uses distance and optional access distance.')
             reasons.append(f'Observation quality: {c.quality}. Route status: {route.status}.')
             out.append(Recommendation(route_id=route.route_id,score=round(score,2),access_distance_km=round(access,3) if access is not None else None,
                 distance_difference_km=round(diff,3),reasons=reasons))

@@ -1,5 +1,7 @@
 # Personalization and Runner Adaptation
 
+Sprint 1 update: for complete environmental assessments, the recommendation score includes a 15% personal difficulty-match component alongside environmental suitability (45%), distance (25%) and access (15%). Generic requests use generic difficulty. The authenticated wrapper preserves its existing fields and the original baseline rank/score; it sorts complete groups by the weighted score and retains the mismatch fallback described below for unknown groups. Eligibility precedes preference, blocked routes are excluded, and candidate sets are never expanded. History/calibration/storage are unchanged. See [Environmental Risk](ENVIRONMENTAL_RISK.md) for exact formulas. The earlier pure mismatch description below now applies to the unknown-risk fallback, not complete weighted assessments.
+
 ## Overview
 
 The personalization loop is:
