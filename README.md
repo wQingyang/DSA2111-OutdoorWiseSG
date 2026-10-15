@@ -4,6 +4,21 @@ OutdoorWise combines a catalog of 12 Singapore running routes with environmental
 
 The pipeline integrates eight official API endpoints covering ten environmental metrics, stores observations in CSV files, and exposes a shared route environment service. The default data mode is **live**. The default assistant mode is a fixed rule-based demonstration. The existing recommendation baseline uses route distance and rainfall; a comprehensive environmental risk model is not connected yet.
 
+An optional dynamic-routing MVP can generate validated running loops from an arbitrary map point using the openrouteservice pedestrian graph. Set `ORS_API_KEY` to enable it. Generated routes are checked for start proximity, loop closure, target-distance tolerance, and duplicate geometry, then retained in `data/runtime/generated_routes.json`. They remain automatically generated candidates and require on-site access confirmation.
+
+The default routing endpoint is the current HeiGIT endpoint, `https://api.heigit.org/openrouteservice`. Override it with `OUTDOORWISE_ROUTING_BASE_URL` only when using another compatible or self-hosted instance.
+
+Dynamic candidates are evaluated without making additional environmental API calls. Their geometry is sampled at approximately 500-metre intervals and matched against the observations already held by the environment repository. The route cards show conservative along-route rainfall, heat, and air-quality summaries. Generic difficulty is calculated for every candidate; authenticated users receive personalized difficulty based on their existing history. Candidates are ranked by target-distance error and target-difficulty mismatch. Regional air-quality matching uses the nearest available regional label for generated geometry and is not polygon containment.
+
+## Changes in `liaoyue/dynamic_route`
+
+- Added a dynamic route engine backed by openrouteservice. It generates walking/running loops from a selected start point, target distance, and route preferences.
+- Added route validation, adaptive distance correction, provider retries, duplicate filtering, generated-route persistence, and GPX export.
+- Added along-route environmental assessment by sampling the generated geometry and matching it against locally collected rainfall, heat, and air-quality observations.
+- Added generic and personalised difficulty estimates and ranking for generated route candidates.
+- Split the frontend into two tabs: **Existing route recommendations** for the local route catalog and **Generate a dynamic route** for newly generated routes. Each tab has an independent map and route state.
+- Kept public route browsing available without authentication; account-only actions still ask the user to sign in.
+
 ## Requirements
 
 - Python 3.11 or later.
@@ -15,17 +30,33 @@ The pipeline integrates eight official API endpoints covering ten environmental 
 Run these commands from the extracted project directory:
 
 ```bash
-cd outdoorwise-demo
+cd DSA2111-OutdoorWiseSG
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
 export OUTDOORWISE_DATA_MODE=live
+# Required only for the dynamic-route tab.
+export ORS_API_KEY=your-key
+# Refresh official environmental observations. This requires internet access.
 python -m outdoorwise.cli collect
+# Optional pipeline run for the 30-minute prediction/demo output.
 python -m outdoorwise.cli run --horizon 30
 python -m uvicorn outdoorwise.api.app:app --host 127.0.0.1 --port 8000
 ```
 
 Open [the application](http://127.0.0.1:8000). Each route card displays metric values, sources, station distances, observation and fetch times, freshness states, and delivery labels. Hover over a metric row to inspect its matching method, source update time, and status explanation. API documentation is available at [the backend documentation page](http://127.0.0.1:8000/docs).
+
+For a quick offline/demo start, skip live collection and run:
+
+```bash
+source .venv/bin/activate
+export OUTDOORWISE_DATA_MODE=demo
+export ORS_API_KEY=your-key
+python -m outdoorwise.cli collect
+python -m uvicorn outdoorwise.api.app:app --host 127.0.0.1 --port 8000
+```
+
+The fixed-route tab works without `ORS_API_KEY`. The dynamic-route tab needs a valid key and outbound access to openrouteservice. Environment metrics can display `Unavailable` when no matching observations have been collected; the routing API itself does not provide weather or air-quality data.
 
 The **Refresh observations** button collects all configured sources. A failed source produces a `partial` result while collection continues for the other sources. Existing observations remain available with explicit status labels.
 
@@ -172,7 +203,7 @@ The existing frontend passed a DOM integration check against the actual HTTP bac
 
 ### Current full test suite
 
-The current full suite passes **46 tests**. This includes the original pipeline checks plus account, personalization, profile, generic/personalized difficulty, reranking, evaluation, and GPX export coverage.
+The current full suite passes **55 tests**. This includes the original pipeline checks plus account, personalization, profile, generic/personalized difficulty, reranking, evaluation, GPX export, and dynamic-routing coverage.
 
 ## Documentation
 

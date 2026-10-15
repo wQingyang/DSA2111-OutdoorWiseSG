@@ -30,7 +30,7 @@
       updateCards();
       setMessage(`Loaded ${runs.length} run${runs.length === 1 ? '' : 's'}.`, 'success');
     } catch (error) {
-      if (error.message === 'Authentication required') { window.location.href = '/login.html'; return; }
+      if (error.message === 'Authentication required') { setMessage('Sign in to save runs, favourites, and personalized difficulty.'); renderHistory(); return; }
       setMessage(`Personalization unavailable: ${error.message}`, 'error');
       renderHistory();
     }

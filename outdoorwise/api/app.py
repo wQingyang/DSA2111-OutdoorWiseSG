@@ -15,6 +15,11 @@ from outdoorwise.accounts.router import get_current_user, get_repository as get_
 from outdoorwise.accounts.repository import AccountRepository
 from outdoorwise.difficulty.router import router as difficulty_router
 from outdoorwise.export.router import router as export_router
+from outdoorwise.routing.router import router as routing_router
+from outdoorwise.routing.ors_client import OpenRouteServiceClient
+from outdoorwise.routing.repository import GeneratedRouteRepository
+from outdoorwise.routing.service import DynamicRouteService
+from outdoorwise.routing.environment import DynamicRouteEnvironmentService
 def create_app(settings: Settings | None=None):
     settings=settings or Settings.from_env(); pipeline=build_pipeline(settings)
     @asynccontextmanager
@@ -23,16 +28,25 @@ def create_app(settings: Settings | None=None):
         yield
     app=FastAPI(title='OutdoorWise',version='0.2.0',lifespan=lifespan)
     app.state.pipeline=pipeline
-    app.dependency_overrides[get_service] = lambda: PersonalizationService(
-        PersonalizationRepository(settings.data_root))
-    app.dependency_overrides[get_account_repository] = lambda: AccountRepository(settings.data_root)
+    app.state.generated_route_repository = GeneratedRouteRepository(settings.data_root)
+    app.state.dynamic_routes = DynamicRouteService(
+        OpenRouteServiceClient(settings.routing_base_url, settings.routing_api_key),
+        app.state.generated_route_repository)
+    app.state.dynamic_route_environment = DynamicRouteEnvironmentService(
+        pipeline.repository, pipeline.config, pipeline.mode)
+    app.state.account_repository = AccountRepository(settings.data_root)
+    app.state.personalization_service = PersonalizationService(PersonalizationRepository(settings.data_root))
+    app.dependency_overrides[get_service] = lambda: app.state.personalization_service
+    app.dependency_overrides[get_account_repository] = lambda: app.state.account_repository
     app.include_router(personalization_router)
     app.include_router(personalization_me_router)
     app.include_router(accounts_router)
     app.include_router(difficulty_router)
     app.include_router(export_router)
+    app.include_router(routing_router)
     @app.get('/api/health')
-    def health(): return {'ok':True,'schema_version':'2.0','data_mode':settings.data_mode,'agent_mode':settings.agent_mode}
+    def health(): return {'ok':True,'schema_version':'2.0','data_mode':settings.data_mode,'agent_mode':settings.agent_mode,
+                          'dynamic_routing_configured':bool(settings.routing_api_key)}
     @app.get('/api/routes',response_model=list[Route])
     def routes(): return pipeline.repository.load_routes()
     @app.get('/api/routes/{route_id}/environment')
