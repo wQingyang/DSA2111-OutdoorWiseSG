@@ -1,0 +1,60 @@
+/* Compact summaries within the existing form/map dashboard. */
+main > section { min-width: 0; }
+header { padding-top: 24px; padding-bottom: 24px; }
+.map-area { min-width: 0; }
+#map { height: 300px; }
+.results-heading { margin-top: 18px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.results-heading h2 { margin: 0; }
+#results-summary { margin: 0; color: #52675e; font-size: 12px; }
+#cards { align-items: start; }
+.route-summary { padding: 18px; border-color: #d3dfd5; background: #fff; min-width: 0; }
+.route-heading { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; justify-content: space-between; margin-bottom: 9px; font-size: 11px; }
+.rank-label { font-weight: 750; color: #24684c; }
+.assessment-label { padding: 3px 9px; border-radius: 20px; background: #edf3ed; color: #375b47; }
+[data-eligibility="caution"] .assessment-label, [data-eligibility="unknown"] .assessment-label { background: #fff2d8; color: #775112; }
+[data-eligibility="blocked"] .assessment-label { background: #f8e6e3; color: #8f332a; }
+.route-meta, .assessment-time { color: #52675e; }
+.score-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 13px 0 10px; }
+.score-block { border-radius: 10px; background: #f3f6f1; padding: 10px; display: flex; flex-direction: column; line-height: 1.5; }
+.recommendation-score { background: #eaf3e6; }
+.score-title { font-size: 11px; font-weight: 650; }
+.score-block strong { display: block; font-size: 20px; margin: 3px 0; }
+.score-block small { font-size: 10px; color: #52675e; }
+.component-risks { margin: 10px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.component-risks div { border-bottom: 1px solid #e0e8df; padding-bottom: 8px; }
+.component-risks dt { font-size: 11px; color: #52675e; }
+.component-risks dd { margin: 3px 0 0; font-weight: 650; font-size: 12px; }
+.data-quality { font-size: 12px; font-weight: 650; }
+.card .assessment-time { font-size: 11px; margin-top: 0; }
+.route-reasons, .route-warnings { padding-left: 17px; margin: 10px 0; font-size: 12px; line-height: 1.5; }
+.route-reasons li, .route-warnings li { margin: 5px 0; }
+.route-warnings { color: #775112; background: #fff8e9; padding: 9px 10px 9px 26px; border-radius: 8px; }
+.route-warnings:empty { display: none; }
+.distance-warning, .important-warning { color: #84521b; font-weight: 650; }
+.fallback-message { background: #f5f2eb; padding: 9px; border-radius: 8px; font-size: 12px; }
+.card .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 12px; }
+.card .card-actions button, .card .card-actions a { margin: 0; padding: 9px 6px; min-height: 38px; font-size: 11px; width: auto; text-align: center; display: block; border-radius: 7px; }
+.card .view-route-button { background: #24684c; }
+.card .completed-run-button { background: #e9efe7; color: #17382f; }
+.card .difficulty-summary { font-size: 12px; }
+.environmental-details { border-top: 1px solid #e0e8df; margin-top: 14px; padding-top: 10px; }
+.environmental-details summary, .blocked-discovery > summary { cursor: pointer; font-weight: 650; font-size: 12px; }
+.environmental-details[open] summary { margin-bottom: 10px; }
+.environment { min-width: 1050px; }
+.environment caption { text-align: left; margin-bottom: 8px; font-weight: 600; }
+.technical-timestamp { display: block; font-size: 10px; overflow-wrap: anywhere; }
+.detail-note, .technical-notes { font-size: 11px; color: #52675e; }
+.technical-notes { padding-left: 16px; }
+.blocked-discovery { margin-top: 18px; padding: 14px; border: 1px solid #e7d0c5; border-radius: 10px; }
+.blocked-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+.empty-results { grid-column: 1 / -1; }
+button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #bb792c; outline-offset: 3px; }
+@media (min-width: 801px) and (max-width: 1150px) { #cards, .blocked-cards { grid-template-columns: 1fr; } }
+@media (max-width: 800px) {
+  header { padding: 22px 5%; flex-wrap: wrap; }
+  main { padding: 18px 4%; gap: 16px; }
+  section { padding: 16px; }
+  #map { height: 270px; }
+  .blocked-cards { grid-template-columns: 1fr; }
+}
+@media (max-width: 380px) { .score-block strong { font-size: 18px; } .score-title { font-size: 10px; } }

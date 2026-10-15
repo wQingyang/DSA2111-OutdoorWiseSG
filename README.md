@@ -2,7 +2,7 @@
 
 OutdoorWise combines a catalog of 12 Singapore running routes with environmental observations, route recommendations, and an assistant interface. The catalog preserves the original Marina Bay and Woodlands Waterfront routes and adds ten routes. The ten new routes are candidates marked candidate_requires_visual_review; verify their geometry before treating them as approved routes.
 
-The pipeline integrates eight official API endpoints covering ten environmental metrics, stores observations in CSV files, and exposes a shared route environment service. The default data mode is **live**. The default assistant mode is a fixed rule-based demonstration. The existing recommendation baseline uses route distance and rainfall; a comprehensive environmental risk model is not connected yet.
+The pipeline integrates eight official API endpoints covering ten environmental metrics, stores observations in CSV files, and exposes a shared route environment service. The default data mode is **live**. The default assistant mode is a fixed rule-based demonstration. Sprint 1 adds configurable observation-based environmental risk and eligibility, followed by weighted recommendation ranking. Unknown assessments retain explicit fallback discovery; forecasts remain unavailable. See [risk formulas, policy and API compatibility](docs/ENVIRONMENTAL_RISK.md).
 
 ## Requirements
 
@@ -25,7 +25,7 @@ python -m outdoorwise.cli run --horizon 30
 python -m uvicorn outdoorwise.api.app:app --host 127.0.0.1 --port 8000
 ```
 
-Open [the application](http://127.0.0.1:8000). Each route card displays metric values, sources, station distances, observation and fetch times, freshness states, and delivery labels. Hover over a metric row to inspect its matching method, source update time, and status explanation. API documentation is available at [the backend documentation page](http://127.0.0.1:8000/docs).
+Open [the application](http://127.0.0.1:8000). Each route card shows final rank, the new recommendation score, environmental risk/components, freshness/confidence, readable reasons and warnings. Expand Environmental Details for the full observation table, sources, station distances, raw timestamps and matching information. Signed-in route comparisons and refreshes preserve personalized ordering. API documentation is available at [the backend documentation page](http://127.0.0.1:8000/docs).
 
 The **Refresh observations** button collects all configured sources. A failed source produces a `partial` result while collection continues for the other sources. Existing observations remain available with explicit status labels.
 
@@ -149,7 +149,7 @@ Consumer modules must not read or write CSV files directly or independently call
 
 ## Predictions, Risk Assessment, and Agentic AI
 
-Current observations are separate from future 30- or 60-minute forecasts. The live prediction and comprehensive risk modules currently return `unavailable`. Demo forecasts use `is_mock=true`. Prediction outputs are stored separately in `data/runtime/predictions_latest.json`, never in the environmental observation table.
+Current observations are separate from future 30- or 60-minute forecasts. The live prediction module remains unavailable; demo forecasts use `is_mock=true`. Sprint 1 risk scoring uses current observations and returns null overall risk when required components are unreliable. Prediction outputs are stored separately in `data/runtime/predictions_latest.json`, never in the environmental observation table. Neither the forecast window nor run duration implies a verified future-weather estimate.
 
 The existing assistant supports a chat-completions tool loop. Configure a real provider with:
 
@@ -172,7 +172,7 @@ The existing frontend passed a DOM integration check against the actual HTTP bac
 
 ### Current full test suite
 
-The current full suite passes **46 tests**. This includes the original pipeline checks plus account, personalization, profile, generic/personalized difficulty, reranking, evaluation, and GPX export coverage.
+The Sprint 2.1 full Python suite passes **109 tests**; 21 frontend DOM tests and desktop/mobile browser checks also pass. See [frontend verification and screenshots](docs/FRONTEND_VERIFICATION.md). See [development status](docs/DEVELOPMENT_STATUS.md) for the isolated test environment and execution details.
 
 ## Documentation
 
@@ -212,7 +212,7 @@ Personalised difficulty starts from the generic prediction and applies historica
 
 ## Difficulty-Match Route Ranking
 
-The existing team recommender remains authoritative for the candidate set and environmental/feasibility filtering. A request-specific target difficulty reranks only those candidates:
+The existing team recommender remains authoritative for distance/access candidate generation. Sprint 1 risk policy removes explicitly blocked routes. Complete assessments use weighted environmental, distance, accessibility and personal difficulty matching; unknown-risk candidates retain the request-specific difficulty fallback below. No excluded route is reintroduced. See [Sprint 1 ranking](docs/ENVIRONMENTAL_RISK.md).
 
 ```text
 difficulty_mismatch = abs(personalized_difficulty - target_difficulty)
@@ -234,3 +234,5 @@ python -m pytest -q
 python -m outdoorwise.evaluation.personalization
 python -m outdoorwise.evaluation.personalization --synthetic
 ```
+
+The dashboard supports one-shot browser location, selection on the existing map, NUS/Marina Bay/Woodlands presets and Anywhere mode. Access limits use straight-line distance to route starts and are never silently relaxed. See [starting-location usage, API behavior and limitations](docs/STARTING_LOCATION.md).

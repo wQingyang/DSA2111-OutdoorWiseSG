@@ -3,6 +3,7 @@ import tomllib
 from pydantic import BaseModel, ConfigDict, Field
 from dataclasses import dataclass
 from pathlib import Path
+from .contracts.risk import RiskConfig, RankingConfig
 ROOT = Path(__file__).resolve().parents[1]
 @dataclass(frozen=True)
 class Settings:
@@ -52,6 +53,8 @@ class EnvironmentConfig(BaseModel):
     collection: CollectionConfig
     matching: MatchingConfig
     sources: dict[str,SourceConfig]
+    risk: RiskConfig = Field(default_factory=RiskConfig)
+    ranking: RankingConfig = Field(default_factory=RankingConfig)
 def load_environment_config(path: Path) -> EnvironmentConfig:
     from .contracts.environment import METRIC_SPECS
     with path.open("rb") as f: result=EnvironmentConfig.model_validate(tomllib.load(f))

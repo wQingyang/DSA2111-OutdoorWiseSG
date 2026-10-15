@@ -1,2 +1,4 @@
 .auth-page{max-width:520px;margin:50px auto;padding:28px;background:white;border:1px solid #dde5dd;border-radius:16px}.auth-page h1{color:#173e34;font-size:30px}.auth-page button{margin-top:8px}.auth-message{min-height:1.4em;font-size:13px}.auth-message.error{color:#a23d32}.auth-message.success{color:#24684c}.auth-links{margin-top:18px;font-size:13px}.account-nav{display:flex;gap:10px;align-items:center}.account-nav a{color:inherit}.account-nav button{width:auto;padding:8px 12px;background:#dbea9f;color:#173e34}
 .running-profile{margin:24px 0}.running-profile h2{font-size:20px}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-grid p{margin:0;padding:10px;background:#f3f6f1;border-radius:8px;font-size:13px}.profile-grid strong{display:inline-block;margin-top:4px;font-size:16px;color:#173e34}@media(max-width:600px){.profile-grid{grid-template-columns:1fr}}
+
+.auth-page{display:block}

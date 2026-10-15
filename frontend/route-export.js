@@ -7,11 +7,8 @@
       link.textContent = 'Download GPX';
       link.href = `/api/routes/${encodeURIComponent(card.dataset.personalizationRoute)}/export.gpx`;
       link.download = '';
-      card.append(link);
-      const help = document.createElement('small');
-      help.className = 'export-route-help';
-      help.textContent = 'Download this route for use in compatible running or navigation apps.';
-      card.append(help);
+      card.querySelector('.card-actions').append(link);
+      link.title = 'Download the existing route geometry for a compatible running app.';
     });
   });
 })();

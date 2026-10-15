@@ -17,8 +17,8 @@ The following ownership boundaries are a suggested allocation. Replace owner num
 - `EnvironmentCollector.collect() -> tuple[CollectionBatch, int]` does not write files. Transport failures use CollectionFailure. Upstream field changes fail that source rather than being reported as successful collection.
 - `EnvironmentRepository`, `RouteEnvironmentReader`, `Predictor`, `EnvironmentRiskAssessor`, and `Recommender` are defined in contracts/ports.py.
 - Predictor retains the existing Conditions input for compatibility. Inject a reader during construction, as shown in templates/module_template.py, to obtain additional metrics. Outputs must include generated_at, horizon_min, source, is_mock, and status. Unknown probabilities remain None. Live mode rejects mock forecasts.
-- The risk assessor currently returns unavailable. Official heat stress is displayed as a source observation, not presented as the team's comprehensive risk model.
-- BaselineRecommender retains the original distance and rainfall rules. Team implementations may inject the reader to use additional environmental metrics; the current baseline does not use every new metric.
+- Sprint 1 `EnvironmentalRiskAssessor` returns observation-based component scores, completeness and eligibility. Missing/stale/unrepresentative inputs leave the overall score null. Official heat stress is categorical metadata/fallback, not double-counted with WBGT. The policy has no default blocking rules; see ENVIRONMENTAL_RISK.md.
+- BaselineRecommender retains distance/access candidate generation and the legacy score. The injected RiskAwareRanking uses complete environmental risk and existing difficulty predictions for a separate weighted score; unknown groups retain explicit fallback and blocks are removed from recommendations. Personalized requests preserve the candidate boundary and supply personal difficulty without bypassing eligibility.
 - Agent tools consume validated data and module outputs. The existing LLM tool loop is retained, but no real provider call was verified without credentials. Inspect the demo assistant's fixed sequence through its trace.
 
 ## Collaboration Rules

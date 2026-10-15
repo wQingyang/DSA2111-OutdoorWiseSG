@@ -1,0 +1,203 @@
+source,location_id,name,location_type,lon,lat,source_kind,metadata_updated_at
+nea_rainfall,S218,Bukit Batok Street 34,station,103.75065,1.36491,live,2026-10-15T19:18:35
+nea_rainfall,S219,Yio Chu Kang Road,station,103.87639,1.37998,live,2026-10-15T19:18:35
+nea_rainfall,S216,Ang Mo Kio Avenue 10,station,103.85335,1.36019,live,2026-10-15T19:18:35
+nea_rainfall,S217,Bishan Street 13,station,103.855,1.35028,live,2026-10-15T19:18:35
+nea_rainfall,S214,Tanjong Rhu,station,103.88289,1.29911,live,2026-10-15T19:18:35
+nea_rainfall,S215,Geylang East Central,station,103.88194,1.31944,live,2026-10-15T19:18:35
+nea_rainfall,S213,Coronation Walk,station,103.8097,1.32427,live,2026-10-15T19:18:35
+nea_rainfall,S80,Sembawang Meteorological Station,station,103.8201,1.4247,live,2026-10-15T19:18:35
+nea_rainfall,S81,Punggol Central,station,103.9095,1.4028,live,2026-10-15T19:18:35
+nea_rainfall,S40,Mandai Lake Road,station,103.7832,1.4067,live,2026-10-15T19:18:35
+nea_rainfall,S84,Tampines Avenue 5,station,103.9441,1.3443,live,2026-10-15T19:18:35
+nea_rainfall,S180,Taman Jurong Greens,station,103.71828,1.33701,live,2026-10-15T19:18:35
+nea_rainfall,S44,Nanyang Avenue,station,103.6817,1.3458,live,2026-10-15T19:18:35
+nea_rainfall,S88,Toa Payoh North,station,103.8515,1.3417,live,2026-10-15T19:18:35
+nea_rainfall,S43,Kim Chuan Road,station,103.8882,1.3406,live,2026-10-15T19:18:35
+nea_rainfall,S06,Paya Lebar Meteorological Station,station,103.904,1.357,live,2026-10-15T19:18:35
+nea_rainfall,S100,Sungei Kadut Street 3,station,103.74855,1.4172,live,2026-10-15T19:18:35
+nea_rainfall,S221,Hougang Avenue 1,station,103.89088,1.35691,live,2026-10-15T19:18:35
+nea_rainfall,S222,Henderson Road,station,103.82364,1.28987,live,2026-10-15T19:18:35
+nea_rainfall,S08,Lower Peirce Reservoir,station,103.8271,1.37,live,2026-10-15T19:18:35
+nea_rainfall,S07,Macritchie Reservoir,station,103.8339,1.3418,live,2026-10-15T19:18:35
+nea_rainfall,S187,Coronation Road,station,103.80139,1.32251,live,2026-10-15T19:18:35
+nea_rainfall,S220,Compassvale Lane,station,103.89797,1.38666,live,2026-10-15T19:18:35
+nea_rainfall,S184,Sengkang East Avenue,station,103.89852,1.38256,live,2026-10-15T19:18:35
+nea_rainfall,S208,Changi East Close,station,104.00317,1.31363,live,2026-10-15T19:18:35
+nea_rainfall,S129,Bedok Stadium,station,103.93969,1.32575,live,2026-10-15T19:18:35
+nea_rainfall,S127,Kallang Practice Track,station,103.87817,1.30574,live,2026-10-15T19:18:35
+nea_rainfall,S201,Sunset Way,station,103.76714,1.32319,live,2026-10-15T19:18:35
+nea_rainfall,S90,Bukit Timah Road,station,103.8193,1.3191,live,2026-10-15T19:18:35
+nea_rainfall,S92,South Buona Vista Road,station,103.7888,1.2841,live,2026-10-15T19:18:35
+nea_rainfall,S209,Yishun Ring Road,station,103.84472,1.42111,live,2026-10-15T19:18:35
+nea_rainfall,S50,Clementi Road,station,103.7762,1.3318,live,2026-10-15T19:18:35
+nea_rainfall,S94,Pasir Ris Street 51,station,103.9489,1.3679,live,2026-10-15T19:18:35
+nea_rainfall,S210,Woodlands Centre Road,station,103.76904,1.44003,live,2026-10-15T19:18:35
+nea_rainfall,S211,Kranji Road,station,103.75711,1.42918,live,2026-10-15T19:18:35
+nea_rainfall,S132,Jurong West Stadium,station,103.69538,1.33786,live,2026-10-15T19:18:35
+nea_rainfall,S119,Nicoll Highway,station,103.8622,1.295,live,2026-10-15T19:18:35
+nea_rainfall,S117,Banyan Road (Jurong Island),station,103.6741,1.2542,live,2026-10-15T19:18:35
+nea_rainfall,S115,Tuas South Avenue 3,station,103.6184,1.2938,live,2026-10-15T19:18:35
+nea_rainfall,S116,Pasir Panjang Terminal,station,103.7545,1.2824,live,2026-10-15T19:18:35
+nea_rainfall,S113,Marine Parade Road,station,103.9112,1.305,live,2026-10-15T19:18:35
+nea_rainfall,S114,Choa Chu Kang Avenue 4,station,103.7381,1.3821,live,2026-10-15T19:18:35
+nea_rainfall,S60,Artillery Avenue (Sentosa),station,103.8275,1.2504,live,2026-10-15T19:18:35
+nea_rainfall,S64,Bukit Panjang Road,station,103.7607,1.3823,live,2026-10-15T19:18:35
+nea_rainfall,S66,Kranji Reservoir,station,103.736,1.4387,live,2026-10-15T19:18:35
+nea_rainfall,S24,Changi Meteorological Station,station,103.9823,1.3678,live,2026-10-15T19:18:35
+nea_rainfall,S23,Tengah Meteorological Station,station,103.7119,1.3858,live,2026-10-15T19:18:35
+nea_rainfall,S69,Upper Peirce Reservoir Park,station,103.8046,1.3704,live,2026-10-15T19:18:35
+nea_rainfall,S123,Towner Road,station,103.8577,1.3214,live,2026-10-15T19:18:35
+nea_rainfall,S120,Botanic Garden,station,103.818,1.3087,live,2026-10-15T19:18:35
+nea_rainfall,S121,Old Choa Chu Kang Road,station,103.7217,1.3738,live,2026-10-15T19:18:35
+nea_rainfall,S108,Marina Barrage,station,103.8703,1.2799,live,2026-10-15T19:18:35
+nea_rainfall,S229,Jurong West Street 42,station,103.72195,1.35167,live,2026-10-15T19:18:35
+nea_rainfall,S306,Murnane Service Reservoir,station,103.78596,1.35085,live,2026-10-15T19:18:35
+nea_rainfall,S900,Seletar Meteorological Station,station,103.8627,1.4114,live,2026-10-15T19:18:35
+nea_rainfall,S109,Ang Mo Kio Avenue 5,station,103.85,1.3793,live,2026-10-15T19:18:35
+nea_rainfall,S307,Pulau Tekong Reservoir,station,104.04156,1.41076,live,2026-10-15T19:18:35
+nea_rainfall,S106,Jalan Noordin (Pulau Ubin),station,103.9673,1.4168,live,2026-10-15T19:18:35
+nea_rainfall,S227,Woodlands Drive 62,station,103.80389,1.43944,live,2026-10-15T19:18:35
+nea_rainfall,S107,East Coast Park,station,103.962,1.3133,live,2026-10-15T19:18:35
+nea_rainfall,S228,Jurong West Street 73,station,103.70073,1.34703,live,2026-10-15T19:18:35
+nea_rainfall,S305,Sarimbum Reservoir,station,103.68127,1.4216,live,2026-10-15T19:18:35
+nea_rainfall,S104,Woodlands Avenue 9,station,103.7854,1.4439,live,2026-10-15T19:18:35
+nea_rainfall,S148,Pasir Ris Walk,station,103.9642,1.3715,live,2026-10-15T19:18:35
+nea_rainfall,S302,Tengeh Reservoir,station,103.66303,1.33813,live,2026-10-15T19:18:35
+nea_rainfall,S226,Malan Road,station,103.80389,1.27472,live,2026-10-15T19:18:35
+nea_rainfall,S303,Ponyan Reservoir,station,103.65817,1.38375,live,2026-10-15T19:18:35
+nea_rainfall,S102,Semakau Island,station,103.7657,1.1902,live,2026-10-15T19:18:35
+nea_rainfall,S223,Margaret Drive,station,103.80264,1.29984,live,2026-10-15T19:18:35
+nea_rainfall,S300,Bedok Reservoir,station,103.91971,1.34301,live,2026-10-15T19:18:35
+nea_rainfall,S224,Airport Boulevard,station,103.98386,1.34394,live,2026-10-15T19:18:35
+nea_rainfall,S301,Neo Tiew Lane 2,station,103.72871,1.41532,live,2026-10-15T19:18:35
+nea_rainfall,S908,Fernvale Lane,station,103.87412,1.39027,live,2026-10-15T19:18:35
+nea_rainfall,S909,Seraya Road,station,103.90093,1.30568,live,2026-10-15T19:18:35
+nea_rainfall,S907,Rivervale Drive,station,103.87412,1.39316,live,2026-10-15T19:18:35
+nea_rainfall,S71,Kent Ridge Road,station,103.7815,1.2923,live,2026-10-15T19:18:35
+nea_rainfall,S904,Holland Grove Road,station,103.7837,1.31622,live,2026-10-15T19:18:35
+nea_rainfall,S905,Hillcrest Road,station,103.8045,1.3308,live,2026-10-15T19:18:35
+nea_rainfall,S308,Seletar Reservoir,station,103.80814,1.40158,live,2026-10-15T19:18:35
+nea_rainfall,S902,Yishun Walk,station,103.83106,1.41457,live,2026-10-15T19:18:35
+nea_rainfall,S903,Lorong Kismis,station,103.76699,1.33742,live,2026-10-15T19:18:35
+nea_rainfall,S33,Jurong Pier Road,station,103.71,1.3082,live,2026-10-15T19:18:35
+nea_rainfall,S77,Alexandra Road,station,103.8127,1.2937,live,2026-10-15T19:18:35
+nea_rainfall,S35,Old Toh Tuck Road,station,103.755,1.3325,live,2026-10-15T19:18:35
+nea_rainfall,S79,Somerset Road,station,103.8372,1.3003,live,2026-10-15T19:18:35
+nea_rainfall,S78,Poole Road,station,103.8907,1.307,live,2026-10-15T19:18:35
+nea_rainfall,S111,Scotts Road,station,103.8365,1.3106,live,2026-10-15T19:18:35
+nea_rainfall,S112,Lim Chu Kang Road,station,103.7017,1.4388,live,2026-10-15T19:18:35
+nea_rainfall,S230,West Coast Road,station,103.76444,1.30167,live,2026-10-15T19:18:35
+nea_wind_speed,S108,Marina Barrage,station,103.8703,1.2799,live,2026-10-15T19:19:07
+nea_wind_speed,S109,Ang Mo Kio Avenue 5,station,103.85,1.3793,live,2026-10-15T19:19:07
+nea_wind_speed,S106,Jalan Noordin (Pulau Ubin),station,103.9673,1.4168,live,2026-10-15T19:19:07
+nea_wind_speed,S117,Banyan Road (Jurong Island),station,103.6741,1.2542,live,2026-10-15T19:19:07
+nea_wind_speed,S107,East Coast Park,station,103.962,1.3133,live,2026-10-15T19:19:07
+nea_wind_speed,S104,Woodlands Avenue 9,station,103.7854,1.4439,live,2026-10-15T19:19:07
+nea_wind_speed,S115,Tuas South Avenue 3,station,103.6184,1.2938,live,2026-10-15T19:19:07
+nea_wind_speed,S116,Pasir Panjang Terminal,station,103.7545,1.2824,live,2026-10-15T19:19:07
+nea_wind_speed,S102,Semakau Island,station,103.7657,1.1902,live,2026-10-15T19:19:07
+nea_wind_speed,S60,Artillery Avenue (Sentosa),station,103.8275,1.2504,live,2026-10-15T19:19:07
+nea_wind_speed,S50,Clementi Road,station,103.7762,1.3318,live,2026-10-15T19:19:07
+nea_wind_speed,S44,Nanyang Avenue,station,103.6817,1.3458,live,2026-10-15T19:19:07
+nea_wind_speed,S43,Kim Chuan Road,station,103.8882,1.3406,live,2026-10-15T19:19:07
+nea_wind_speed,S23,Tengah Meteorological Station,station,103.7119,1.3858,live,2026-10-15T19:19:07
+nea_wind_speed,S06,Paya Lebar Meteorological Station,station,103.904,1.357,live,2026-10-15T19:19:07
+nea_wind_speed,S111,Scotts Road,station,103.8365,1.3106,live,2026-10-15T19:19:07
+nea_wind_speed,S121,Old Choa Chu Kang Road,station,103.7217,1.3738,live,2026-10-15T19:19:07
+nea_wind_direction,S108,Marina Barrage,station,103.8703,1.2799,live,2026-10-15T19:19:40
+nea_wind_direction,S109,Ang Mo Kio Avenue 5,station,103.85,1.3793,live,2026-10-15T19:19:40
+nea_wind_direction,S106,Jalan Noordin (Pulau Ubin),station,103.9673,1.4168,live,2026-10-15T19:19:40
+nea_wind_direction,S117,Banyan Road (Jurong Island),station,103.6741,1.2542,live,2026-10-15T19:19:40
+nea_wind_direction,S107,East Coast Park,station,103.962,1.3133,live,2026-10-15T19:19:40
+nea_wind_direction,S104,Woodlands Avenue 9,station,103.7854,1.4439,live,2026-10-15T19:19:40
+nea_wind_direction,S115,Tuas South Avenue 3,station,103.6184,1.2938,live,2026-10-15T19:19:40
+nea_wind_direction,S116,Pasir Panjang Terminal,station,103.7545,1.2824,live,2026-10-15T19:19:40
+nea_wind_direction,S102,Semakau Island,station,103.7657,1.1902,live,2026-10-15T19:19:40
+nea_wind_direction,S60,Artillery Avenue (Sentosa),station,103.8275,1.2504,live,2026-10-15T19:19:40
+nea_wind_direction,S50,Clementi Road,station,103.7762,1.3318,live,2026-10-15T19:19:40
+nea_wind_direction,S44,Nanyang Avenue,station,103.6817,1.3458,live,2026-10-15T19:19:40
+nea_wind_direction,S43,Kim Chuan Road,station,103.8882,1.3406,live,2026-10-15T19:19:40
+nea_wind_direction,S23,Tengah Meteorological Station,station,103.7119,1.3858,live,2026-10-15T19:19:40
+nea_wind_direction,S06,Paya Lebar Meteorological Station,station,103.904,1.357,live,2026-10-15T19:19:40
+nea_wind_direction,S111,Scotts Road,station,103.8365,1.3106,live,2026-10-15T19:19:40
+nea_wind_direction,S121,Old Choa Chu Kang Road,station,103.7217,1.3738,live,2026-10-15T19:19:40
+nea_air_temperature,S109,Ang Mo Kio Avenue 5,station,103.85,1.3793,live,2026-10-15T19:20:14
+nea_air_temperature,S106,Jalan Noordin (Pulau Ubin),station,103.9673,1.4168,live,2026-10-15T19:20:14
+nea_air_temperature,S117,Banyan Road (Jurong Island),station,103.6741,1.2542,live,2026-10-15T19:20:14
+nea_air_temperature,S107,East Coast Park,station,103.962,1.3133,live,2026-10-15T19:20:14
+nea_air_temperature,S104,Woodlands Avenue 9,station,103.7854,1.4439,live,2026-10-15T19:20:14
+nea_air_temperature,S115,Tuas South Avenue 3,station,103.6184,1.2938,live,2026-10-15T19:20:14
+nea_air_temperature,S116,Pasir Panjang Terminal,station,103.7545,1.2824,live,2026-10-15T19:20:14
+nea_air_temperature,S102,Semakau Island,station,103.7657,1.1902,live,2026-10-15T19:20:14
+nea_air_temperature,S80,Sembawang Meteorological Station,station,103.8201,1.4247,live,2026-10-15T19:20:14
+nea_air_temperature,S60,Artillery Avenue (Sentosa),station,103.8275,1.2504,live,2026-10-15T19:20:14
+nea_air_temperature,S50,Clementi Road,station,103.7762,1.3318,live,2026-10-15T19:20:14
+nea_air_temperature,S44,Nanyang Avenue,station,103.6817,1.3458,live,2026-10-15T19:20:14
+nea_air_temperature,S43,Kim Chuan Road,station,103.8882,1.3406,live,2026-10-15T19:20:14
+nea_air_temperature,S24,Changi Meteorological Station,station,103.9823,1.3678,live,2026-10-15T19:20:14
+nea_air_temperature,S23,Tengah Meteorological Station,station,103.7119,1.3858,live,2026-10-15T19:20:14
+nea_air_temperature,S06,Paya Lebar Meteorological Station,station,103.904,1.357,live,2026-10-15T19:20:14
+nea_air_temperature,S111,Scotts Road,station,103.8365,1.3106,live,2026-10-15T19:20:14
+nea_air_temperature,S121,Old Choa Chu Kang Road,station,103.7217,1.3738,live,2026-10-15T19:20:14
+nea_relative_humidity,S109,Ang Mo Kio Avenue 5,station,103.85,1.3793,live,2026-10-15T19:15:13
+nea_relative_humidity,S106,Jalan Noordin (Pulau Ubin),station,103.9673,1.4168,live,2026-10-15T19:15:13
+nea_relative_humidity,S117,Banyan Road (Jurong Island),station,103.6741,1.2542,live,2026-10-15T19:15:13
+nea_relative_humidity,S107,East Coast Park,station,103.962,1.3133,live,2026-10-15T19:15:13
+nea_relative_humidity,S104,Woodlands Avenue 9,station,103.7854,1.4439,live,2026-10-15T19:15:13
+nea_relative_humidity,S115,Tuas South Avenue 3,station,103.6184,1.2938,live,2026-10-15T19:15:13
+nea_relative_humidity,S116,Pasir Panjang Terminal,station,103.7545,1.2824,live,2026-10-15T19:15:13
+nea_relative_humidity,S102,Semakau Island,station,103.7657,1.1902,live,2026-10-15T19:15:13
+nea_relative_humidity,S80,Sembawang Meteorological Station,station,103.8201,1.4247,live,2026-10-15T19:15:13
+nea_relative_humidity,S60,Artillery Avenue (Sentosa),station,103.8275,1.2504,live,2026-10-15T19:15:13
+nea_relative_humidity,S50,Clementi Road,station,103.7762,1.3318,live,2026-10-15T19:15:13
+nea_relative_humidity,S44,Nanyang Avenue,station,103.6817,1.3458,live,2026-10-15T19:15:13
+nea_relative_humidity,S43,Kim Chuan Road,station,103.8882,1.3406,live,2026-10-15T19:15:13
+nea_relative_humidity,S24,Changi Meteorological Station,station,103.9823,1.3678,live,2026-10-15T19:15:13
+nea_relative_humidity,S23,Tengah Meteorological Station,station,103.7119,1.3858,live,2026-10-15T19:15:13
+nea_relative_humidity,S06,Paya Lebar Meteorological Station,station,103.904,1.357,live,2026-10-15T19:15:13
+nea_relative_humidity,S111,Scotts Road,station,103.8365,1.3106,live,2026-10-15T19:15:13
+nea_relative_humidity,S121,Old Choa Chu Kang Road,station,103.7217,1.3738,live,2026-10-15T19:15:13
+nea_pm25,north,north,region,103.82,1.41803,live,2026-10-15T19:15:49
+nea_pm25,south,south,region,103.82,1.29587,live,2026-10-15T19:15:49
+nea_pm25,east,east,region,103.94,1.35735,live,2026-10-15T19:15:49
+nea_pm25,west,west,region,103.7,1.35735,live,2026-10-15T19:15:49
+nea_pm25,central,central,region,103.82,1.35735,live,2026-10-15T19:15:49
+nea_psi,north,north,region,103.82,1.41803,live,2026-10-15T19:16:40
+nea_psi,south,south,region,103.82,1.29587,live,2026-10-15T19:16:40
+nea_psi,east,east,region,103.94,1.35735,live,2026-10-15T19:16:40
+nea_psi,west,west,region,103.7,1.35735,live,2026-10-15T19:16:40
+nea_psi,central,central,region,103.82,1.35735,live,2026-10-15T19:16:40
+nea_wbgt,S124,Upper Changi Road North,station,103.982262,1.36777,live,2026-10-15T19:17:19
+nea_wbgt,S125,Woodlands Street 13,station,103.780731,1.433789,live,2026-10-15T19:17:19
+nea_wbgt,S126,Old Chua Chu Kang Road,station,103.724358,1.372566,live,2026-10-15T19:17:19
+nea_wbgt,S127,Stadium Road,station,103.878174,1.305738,live,2026-10-15T19:17:19
+nea_wbgt,S128,Bishan Street,station,103.852219,1.354825,live,2026-10-15T19:17:19
+nea_wbgt,S129,Bedok North Street 2,station,103.939691,1.325746,live,2026-10-15T19:17:19
+nea_wbgt,S132,Jurong West Street 93,station,103.695383,1.337859,live,2026-10-15T19:17:19
+nea_wbgt,S135,Mandai Wildlife Reserve,station,103.7808629,1.4084245,live,2026-10-15T19:17:19
+nea_wbgt,S137,Sakra Road,station,103.698,1.2571,live,2026-10-15T19:17:19
+nea_wbgt,S139,Tuas Terminal Gateway,station,103.616417,1.263757,live,2026-10-15T19:17:19
+nea_wbgt,S140,Choa Chu Kang Stadium,station,103.749664,1.390524,live,2026-10-15T19:17:19
+nea_wbgt,S141,Yio Chu Kang Stadium,station,103.84619,1.382564,live,2026-10-15T19:17:19
+nea_wbgt,S142,Sentosa Palawan Green,station,103.819177652546,1.24950363476734,live,2026-10-15T19:17:19
+nea_wbgt,S143,Punggol North,station,103.904965342662,1.41046864267577,live,2026-10-15T19:17:19
+nea_wbgt,S144,Upper Pickering Street,station,103.846988,1.286011,live,2026-10-15T19:17:19
+nea_wbgt,S145,MacRitchie Reservoir,station,103.833913,1.3418179,live,2026-10-15T19:17:19
+nea_wbgt,S146,Jalan Bahar,station,103.692372,1.365386,live,2026-10-15T19:17:19
+nea_wbgt,S147,Marina Barrage,station,103.8697302,1.280001,live,2026-10-15T19:17:19
+nea_wbgt,S148,Pasir Ris Walk,station,103.9642012,1.3715018,live,2026-10-15T19:17:19
+nea_wbgt,S149,Tampines Walk,station,103.938823,1.353834,live,2026-10-15T19:17:19
+nea_wbgt,S150,Evans Road,station,103.819737,1.321182,live,2026-10-15T19:17:19
+nea_wbgt,S151,Outward Bound Singapore(Pulau ubin),station,103.9299001,1.4214527,live,2026-10-15T19:17:19
+nea_wbgt,S153,Bukit Batok Street 22,station,103.749077,1.344712,live,2026-10-15T19:17:19
+nea_wbgt,S180,Taman Jurong Greens,station,103.7182835,1.3370108,live,2026-10-15T19:17:19
+nea_wbgt,S184,Sengkang East Avenue,station,103.898525,1.382559,live,2026-10-15T19:17:19
+nea_wbgt,S187,Bukit Timah(West),station,103.80139,1.322505,live,2026-10-15T19:17:19
+nea_wbgt,S131,Hougang Stadium,station,103.88611,1.36833,live,2026-10-15T19:17:19
+nea_wbgt,S133,Cathay Green,station,103.84786601,1.29829165,live,2026-10-15T19:17:19
+nea_wbgt,S138,Stirling Road,station,103.80346961,1.29702179,live,2026-10-15T19:17:19
+nea_wbgt,S910,Outward Bound Singapore(East Coast),station,103.95437923,1.31182524,live,2026-10-15T19:17:19
+nea_wind_speed,S199,S199,station,103.9823,1.3678,live,2026-10-15T19:19:07
+nea_wind_direction,S199,S199,station,103.9823,1.3678,live,2026-10-15T19:19:40
+nea_rainfall,S203,Pasir Panjang Road,station,103.7702,1.29164,live,2026-10-15T19:18:35

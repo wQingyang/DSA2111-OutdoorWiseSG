@@ -89,10 +89,13 @@ def personalized_difficulty(route_id: str, request: Request, current: UserPublic
 
 @me_router.post("/recommendations")
 def personalized_recommendations(data: PersonalizedRecommendationRequest, request: Request, current: UserPublic = Depends(get_current_user), service: PersonalizationService = Depends(get_service)):
-    pipeline=request.app.state.pipeline; run=pipeline.run(Preferences.model_validate(data.model_dump(exclude={"target_difficulty"})))
+    pipeline=request.app.state.pipeline
     predictions=[]
-    for route in run.routes:
-        if any(rec.route_id==route.route_id for rec in run.recommendations):
-            predictions.append(service.get_personalized_difficulty(current.user_id, route, pipeline.get_route_environment(route.route_id)))
+    def personal_difficulties(routes,environments):
+        by_id={e.route_id:e for e in environments}
+        for route in routes:
+            predictions.append(service.get_personalized_difficulty(current.user_id, route, by_id[route.route_id]))
+        return {p['route_id']:p['personalized_predicted_difficulty'] for p in predictions}
+    run=pipeline.run(Preferences.model_validate(data.model_dump()), difficulty_provider=personal_difficulties)
     ranked=rank_candidates(run.recommendations,predictions,data.target_difficulty)
     return {"run":run,"target_difficulty":data.target_difficulty,"recommendations":ranked}
