@@ -47,6 +47,7 @@ if (selected.length) {
   if (startingPoint) bounds.extend([startingPoint.lat, startingPoint.lon]);
   map.fitBounds(bounds, {padding: [25, 25]});
 }
+}
 
 function drawDynamic(selected) {
   if (!window.L) { $('dynamic-map').hidden = true; $('dynamic-fallback').hidden = false; $('dynamic-fallback').textContent = 'Map library unavailable.'; return; }
@@ -62,7 +63,6 @@ function drawDynamic(selected) {
   dynamicLayer = L.featureGroup(selected.map((route, index) => L.polyline(route.geometry.coordinates.map(point => [point[1], point[0]]),
     {color: ['#24684c', '#bb792c', '#496bb3'][index % 3], weight: 5}))).addTo(dynamicMap);
   if (selected.length) dynamicMap.fitBounds(dynamicLayer.getBounds(), {padding: [25, 25]});
-}
 }
 
 function render(run) {
