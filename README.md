@@ -4,6 +4,13 @@ OutdoorWise combines a catalog of 12 Singapore running routes with environmental
 
 The pipeline integrates eight official API endpoints covering ten environmental metrics, stores observations in CSV files, and exposes a shared route environment service. The default data mode is **live**. The default assistant mode is a fixed rule-based demonstration. Sprint 1 adds configurable observation-based environmental risk and eligibility, followed by weighted recommendation ranking. Unknown assessments retain explicit fallback discovery; forecasts remain unavailable. See [risk formulas, policy and API compatibility](docs/ENVIRONMENTAL_RISK.md).
 
+## Dynamic-route changes
+
+- Added openrouteservice-backed loop generation from a selected start point, target distance, and walking preferences.
+- Added validation, adaptive distance correction, retries, duplicate filtering, persistence, and GPX export for generated routes.
+- Added along-route environmental sampling plus generic/personalised difficulty assessment and ranking.
+- Split the frontend into independent **Existing route recommendations** and **Generate a dynamic route** tabs, each with its own map and route state.
+
 ## Requirements
 
 - Python 3.11 or later.
@@ -15,17 +22,20 @@ The pipeline integrates eight official API endpoints covering ten environmental 
 Run these commands from the extracted project directory:
 
 ```bash
-cd outdoorwise-demo
+cd DSA2111-OutdoorWiseSG
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
 export OUTDOORWISE_DATA_MODE=live
+export ORS_API_KEY=your-openrouteservice-key  # required only for dynamic routes
 python -m outdoorwise.cli collect
 python -m outdoorwise.cli run --horizon 30
 python -m uvicorn outdoorwise.api.app:app --host 127.0.0.1 --port 8000
 ```
 
 Open [the application](http://127.0.0.1:8000). Each route card shows final rank, the new recommendation score, environmental risk/components, freshness/confidence, readable reasons and warnings. Expand Environmental Details for the full observation table, sources, station distances, raw timestamps and matching information. Signed-in route comparisons and refreshes preserve personalized ordering. API documentation is available at [the backend documentation page](http://127.0.0.1:8000/docs).
+
+The fixed-route tab works without `ORS_API_KEY`. The dynamic-route tab requires a valid key and outbound access to openrouteservice. Generated routes reuse locally collected environmental observations; the routing provider does not supply weather or air-quality data.
 
 The **Refresh observations** button collects all configured sources. A failed source produces a `partial` result while collection continues for the other sources. Existing observations remain available with explicit status labels.
 
@@ -172,7 +182,7 @@ The existing frontend passed a DOM integration check against the actual HTTP bac
 
 ### Current full test suite
 
-The Sprint 2.1 full Python suite passes **109 tests**; 21 frontend DOM tests and desktop/mobile browser checks also pass. See [frontend verification and screenshots](docs/FRONTEND_VERIFICATION.md). See [development status](docs/DEVELOPMENT_STATUS.md) for the isolated test environment and execution details.
+The merged full Python suite passes **118 tests**; the existing frontend DOM and browser checks cover the fixed-route experience. See [frontend verification and screenshots](docs/FRONTEND_VERIFICATION.md). See [development status](docs/DEVELOPMENT_STATUS.md) for the isolated test environment and execution details.
 
 ## Documentation
 

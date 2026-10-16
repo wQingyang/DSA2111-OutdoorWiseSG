@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-let map, layer, routes = [];
+let map, layer, dynamicMap, dynamicLayer, routes = [];
 function preferences() {
   const location = window.outdoorwiseLocation.locationForRequest();
   if (location && !$('access').checkValidity()) throw Error('Enter a valid positive straight-line access limit, or clear the limit.');
@@ -14,6 +14,12 @@ async function api(path, body) {
     error.status = response.status; throw error;
   }
   return response.json();
+}
+async function dynamicApi(path, body) {
+  const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  const data = await response.json();
+  if (!response.ok) throw Error(typeof data.detail === 'string' ? data.detail : 'The dynamic route request failed. Please try again.');
+  return data;
 }
 function ensureMap() {
   if (!window.L) {window.outdoorwiseLocation.mapUnavailable(); return null;}
@@ -40,6 +46,22 @@ if (selected.length) {
   const bounds = layer.getBounds(); const startingPoint = window.outdoorwiseLocation.selectedPoint();
   if (startingPoint) bounds.extend([startingPoint.lat, startingPoint.lon]);
   map.fitBounds(bounds, {padding: [25, 25]});
+}
+
+function drawDynamic(selected) {
+  if (!window.L) { $('dynamic-map').hidden = true; $('dynamic-fallback').hidden = false; $('dynamic-fallback').textContent = 'Map library unavailable.'; return; }
+  if (!dynamicMap) {
+    dynamicMap = L.map('dynamic-map').setView([1.36, 103.82], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution: '© OpenStreetMap contributors', maxZoom: 19}).addTo(dynamicMap);
+    dynamicMap.on('click', event => {
+      $('route-lat').value = event.latlng.lat.toFixed(6); $('route-lon').value = event.latlng.lng.toFixed(6);
+      $('route-generator-status').textContent = 'Start point selected on the dynamic-route map.';
+    });
+  }
+  if (dynamicLayer) dynamicMap.removeLayer(dynamicLayer);
+  dynamicLayer = L.featureGroup(selected.map((route, index) => L.polyline(route.geometry.coordinates.map(point => [point[1], point[0]]),
+    {color: ['#24684c', '#bb792c', '#496bb3'][index % 3], weight: 5}))).addTo(dynamicMap);
+  if (selected.length) dynamicMap.fitBounds(dynamicLayer.getBounds(), {padding: [25, 25]});
 }
 }
 
@@ -126,6 +148,50 @@ $('chat').onsubmit = event => {event.preventDefault(); busy(async () => {
   // Assistant prose does not replace the final user-specific recommendation list.
   render(await personalizedOrGeneric());
 });};
+$('route-generator').onsubmit = async event => {
+  event.preventDefault(); const status = $('route-generator-status'); const cards = $('generated-route-cards');
+  status.textContent = 'Generating, sampling environment, and ranking candidates…'; cards.replaceChildren();
+  try {
+    const result = await dynamicApi('/api/generated-routes', {start: {lat: Number($('route-lat').value), lon: Number($('route-lon').value)},
+      target_distance_km: Number($('route-distance').value), candidate_count: 3, target_difficulty: Number($('dynamic-target-difficulty').value),
+      preferences: {prefer_green: $('route-green').checked, prefer_quiet: $('route-quiet').checked, avoid_steps: $('route-steps').checked}});
+    drawDynamic(result.candidates); const assessments = new Map(result.assessments.map(item => [item.route_id, item]));
+    result.candidates.forEach((route, index) => {
+      const assessment = assessments.get(route.route_id); const card = document.createElement('article'); card.className = 'card'; card.dataset.personalizationRoute = route.route_id;
+      const title = document.createElement('h3'); title.textContent = `${assessment?.rank || index + 1}. ${route.name}`;
+      const detail = document.createElement('p'); detail.textContent = `${route.distance_km.toFixed(2)} km · ${route.distance_error_pct.toFixed(1)}% from target · score ${assessment?.score ?? 'N/A'}`;
+      card.append(title, detail);
+      if (assessment) {
+        const personal = assessment.personalized_difficulty?.personalized_predicted_difficulty; const difficulty = document.createElement('p');
+        difficulty.textContent = `${personal == null ? 'Generic difficulty' : 'Predicted difficulty for you'}: ${(personal ?? assessment.generic_difficulty.predicted_difficulty).toFixed(1)} / 5 · ${assessment.generic_difficulty.data_quality}`;
+        card.append(difficulty); window.outdoorwiseDifficulty = window.outdoorwiseDifficulty || {};
+        window.outdoorwiseDifficulty[route.route_id] = {predicted_difficulty: assessment.generic_difficulty.predicted_difficulty, personalized_predicted_difficulty: personal};
+        const important = new Set(['rainfall', 'wbgt', 'heat_stress_level', 'pm25', 'psi']);
+        assessment.environment.metrics.filter(metric => important.has(metric.metric)).forEach(metric => {
+          const row = document.createElement('p'); const value = metric.category_value ?? (metric.value == null ? 'Unavailable' : `${Number(metric.value.toFixed(1))} ${metric.unit}`);
+          row.textContent = `${metric.metric}: ${value} · ${metric.state}/${metric.delivery}`; row.title = metric.reason; card.append(row);
+        });
+      }
+      const warning = document.createElement('p'); warning.textContent = route.warnings.join(' ');
+      const actions = document.createElement('div'); actions.className = 'card-actions';
+      const favourite = document.createElement('button'); favourite.className = 'favourite-button';
+      const completed = document.createElement('button'); completed.className = 'completed-run-button'; completed.textContent = 'I completed this run'; actions.append(favourite, completed);
+      const show = document.createElement('button'); show.textContent = 'Show route'; show.onclick = () => drawDynamic([route]);
+      const download = document.createElement('a'); download.className = 'export-route-button'; download.href = `/api/generated-routes/${encodeURIComponent(route.route_id)}/export.gpx`; download.textContent = 'Download GPX';
+      card.append(warning, actions, show, download); cards.append(card);
+    });
+    document.dispatchEvent(new CustomEvent('outdoorwise:routes-rendered', {detail: {routes: result.candidates}}));
+    status.textContent = `Generated and ranked ${result.candidates.length} validated candidate(s). ${result.warnings.join(' ')}`;
+  } catch (error) { status.textContent = error.message; }
+};
+function activateRouteTab(name) {
+  const catalog = name === 'catalog'; $('catalog-panel').hidden = !catalog; $('dynamic-panel').hidden = catalog;
+  $('catalog-tab-button').classList.toggle('active', catalog); $('dynamic-tab-button').classList.toggle('active', !catalog);
+  $('catalog-tab-button').setAttribute('aria-selected', String(catalog)); $('dynamic-tab-button').setAttribute('aria-selected', String(!catalog));
+  setTimeout(() => (catalog ? map : dynamicMap)?.invalidateSize(), 0);
+}
+$('catalog-tab-button').onclick = () => activateRouteTab('catalog');
+$('dynamic-tab-button').onclick = () => { activateRouteTab('dynamic'); if (!dynamicMap) drawDynamic([]); };
 document.addEventListener('outdoorwise:location-changed', () => { $('status').textContent = 'Starting point changed. Compare Routes to update your results.'; });
 ensureMap();
 busy(async () => {

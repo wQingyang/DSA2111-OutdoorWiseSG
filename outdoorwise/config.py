@@ -15,6 +15,8 @@ class Settings:
     llm_model: str = ""
     llm_api_key: str = ""
     data_api_key: str = ""
+    routing_base_url: str = "https://api.heigit.org/openrouteservice"
+    routing_api_key: str = ""
     @classmethod
     def from_env(cls):
         s = cls(data_root=Path(os.getenv("OUTDOORWISE_DATA_ROOT", str(ROOT / "data"))),
@@ -23,7 +25,9 @@ class Settings:
                 agent_mode=os.getenv("OUTDOORWISE_AGENT_MODE", "demo"),
                 llm_base_url=os.getenv("LLM_BASE_URL", "https://api.openai.com/v1"),
                 llm_model=os.getenv("LLM_MODEL", ""), llm_api_key=os.getenv("LLM_API_KEY", ""),
-                data_api_key=os.getenv("DATA_GOV_API_KEY", ""))
+                data_api_key=os.getenv("DATA_GOV_API_KEY", ""),
+                routing_base_url=os.getenv("OUTDOORWISE_ROUTING_BASE_URL", "https://api.heigit.org/openrouteservice"),
+                routing_api_key=os.getenv("ORS_API_KEY", ""))
         if s.data_mode not in {"demo", "live"} or s.agent_mode not in {"demo", "llm"}:
             raise ValueError("Modes must be demo/live for data, demo/llm for agent")
         if s.agent_mode == "llm" and not (s.llm_model and s.llm_api_key):
