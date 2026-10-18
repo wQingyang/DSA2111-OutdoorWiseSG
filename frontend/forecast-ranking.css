@@ -1,0 +1,15 @@
+.forecast-ranking { margin-top: 16px; padding: 18px; border: 1px solid #d3dfd5; border-radius: 12px; background: #f6f9f5; }
+.forecast-ranking h3 { margin: 0 0 8px; font-size: 18px; }
+.forecast-ranking-note { color: #637267; font-size: 12px; line-height: 1.6; }
+.forecast-ranked-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin-top: 14px; }
+.forecast-ranked-card { min-width: 0; padding: 16px; border: 1px solid #dbe5dc; border-radius: 10px; background: #fff; }
+.forecast-ranked-card h4 { margin: 8px 0; font-size: 16px; }
+.forecast-ranked-card p { font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.forecast-ranked-card small { color: #617568; font-size: 11px; }
+.forecast-ranked-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.forecast-ranked-scores > div { padding: 10px; border-radius: 8px; background: #edf3eb; }
+.forecast-ranked-scores small, .forecast-ranked-scores strong { display: block; }
+.forecast-ranked-scores strong { margin-top: 5px; font-size: 18px; }
+.forecast-ranking details { margin-top: 14px; font-size: 12px; line-height: 1.6; }
+.forecast-ranking summary { cursor: pointer; }
+@media(max-width: 1000px) { .forecast-ranked-list { grid-template-columns: 1fr; } }

@@ -3,7 +3,7 @@ let map, layer, dynamicMap, dynamicLayer, routes = [];
 function preferences() {
   const location = window.outdoorwiseLocation.locationForRequest();
   if (location && !$('access').checkValidity()) throw Error('Enter a valid positive straight-line access limit, or clear the limit.');
-  return {target_distance_km: Number($('distance').value), duration_min: Number($('duration').value), horizon_min: Number($('horizon').value),
+  return {target_distance_km: Number($('distance').value), duration_min: Number($('duration').value), horizon_min: Number($('duration').value) <= 30 ? 30 : 60,
     target_difficulty: Number($('target-difficulty').value), location,
     max_access_distance_km: location && $('access').value ? Number($('access').value) : null};
 }
@@ -66,6 +66,11 @@ function drawDynamic(selected) {
 }
 
 function render(run) {
+  if (window.outdoorwiseForecastUI && run.mode === 'experimental_historical_forecast_ranking') {
+    routes = run.routes;
+    window.outdoorwiseForecastUI.render(run);
+    return;
+  }
   routes = run.routes;
   draw(routes);
   $('cards').replaceChildren(); $('blocked-routes').replaceChildren();
@@ -106,6 +111,9 @@ function render(run) {
     personalizedRanking: window.personalizedRanking, authenticated: Boolean(window.outdoorwiseSession)}}));
 }
 async function personalizedOrGeneric() {
+  if (window.outdoorwiseForecastUI) {
+    return window.outdoorwiseForecastUI.fetchRecommendations();
+  }
   const base = preferences();
   const revision = window.outdoorwiseLocation.revision();
   const confirmSelection = run => {
@@ -137,12 +145,20 @@ async function busy(action) {
 }
 $('preferences').onsubmit = event => {event.preventDefault(); busy(async () => render(await personalizedOrGeneric()));};
 $('refresh').onclick = () => busy(async () => {
+  if (window.outdoorwiseForecastUI) {
+    render(await personalizedOrGeneric());
+    return;
+  }
   preferences(); // Never drop a pending/unselected location or its access constraint.
   const report = await api('/api/refresh', {});
   $('ingestion').textContent = report.status === 'partial' ? 'Some observations could not be refreshed. Retained data may be outdated.' : 'Environmental observations refreshed.';
   render(await personalizedOrGeneric());
 });
 $('chat').onsubmit = event => {event.preventDefault(); busy(async () => {
+  if (window.outdoorwiseForecastUI) {
+    $('answer').textContent = 'The assistant is not connected to historical replay. Use the route details for this demonstration.';
+    return;
+  }
   const response = await api('/api/chat', {message: $('message').value, preferences: preferences()});
   $('answer').textContent = response.message; $('trace').textContent = JSON.stringify(response.trace, null, 2);
   // Assistant prose does not replace the final user-specific recommendation list.

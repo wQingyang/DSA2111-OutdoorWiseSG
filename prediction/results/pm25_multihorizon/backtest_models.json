@@ -1,0 +1,197 @@
+[
+  {
+    "region": "central",
+    "horizon_min": 60,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      24.24288878360669,
+      0.9773951100537454,
+      -0.17105721404519103,
+      -0.030262451921614482
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "central",
+    "horizon_min": 120,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      35.50568816745798,
+      0.9722233779572782,
+      -0.2712409464253718,
+      -0.03432037479186127
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "central",
+    "horizon_min": 180,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      50.82690251774244,
+      0.8000464856178322,
+      0.04411454453984916,
+      -0.31720640152148544
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "east",
+    "horizon_min": 60,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      25.73426856021856,
+      0.8237321175827593,
+      0.05348187517457002,
+      -0.1617098325415273
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "east",
+    "horizon_min": 120,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      32.81574973481348,
+      0.8123548972361183,
+      -0.170826099714536,
+      -0.008648173563585363
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "east",
+    "horizon_min": 180,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      42.54108825380281,
+      0.5338254212996636,
+      0.08343013502529212,
+      -0.08900204210799716
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "north",
+    "horizon_min": 60,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      17.969293966896476,
+      0.8092202622751785,
+      -0.539352422782678,
+      0.4610854212705446
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "north",
+    "horizon_min": 120,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      23.553014770411625,
+      0.5626040452656296,
+      -0.08471932038679415,
+      0.17819820565148162
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "north",
+    "horizon_min": 180,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      27.991673125797927,
+      0.6696848545128204,
+      -0.060786522587978176,
+      -0.01776262534658041
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "south",
+    "horizon_min": 60,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      17.40944908151483,
+      0.6076175257602099,
+      0.05816112835221126,
+      0.10951464616486885
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "south",
+    "horizon_min": 120,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      23.438037469402158,
+      0.6186258956080412,
+      0.051970315409672396,
+      0.024436770853397103
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "south",
+    "horizon_min": 180,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      29.905621373953515,
+      0.6310340337599956,
+      -0.03587243654700058,
+      0.012966747449238225
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "west",
+    "horizon_min": 60,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      28.70931402158355,
+      0.724071686862809,
+      -0.0117687846655308,
+      0.024246473444640714
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "west",
+    "horizon_min": 120,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      42.97736026717415,
+      0.8181640550614873,
+      -0.2583504591315021,
+      0.04355682967635848
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  },
+  {
+    "region": "west",
+    "horizon_min": 180,
+    "selected_using_validation": "linear",
+    "training_cutoff": "2026-10-14T00:00:00+08:00",
+    "linear_intercept_and_coefficients": [
+      55.299071021811244,
+      0.7037526956216635,
+      -0.3394201887898584,
+      0.1263665200607026
+    ],
+    "linear_output_constraint": "max(prediction, 0)"
+  }
+]
