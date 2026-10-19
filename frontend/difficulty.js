@@ -4,6 +4,8 @@
   document.addEventListener('outdoorwise:routes-rendered', async event => {
     const current = ++generation;
     window.outdoorwiseDifficulty = {};
+    // Replay estimates must not be stored as predictions for a run completed today.
+    if (event.detail.historical_replay) return;
     await Promise.all((event.detail.routes || []).map(async route => {
       const card = [...document.querySelectorAll('[data-personalization-route]')].find(c => c.dataset.personalizationRoute === route.route_id);
       if (!card) return;

@@ -1,3 +1,5 @@
+from outdoorwise.api.forecast_ranking import router as forecast_ranking_router
+from outdoorwise.api.time_selection import router as time_selection_router
 from contextlib import asynccontextmanager
 from pathlib import Path
 import httpx
@@ -44,6 +46,8 @@ def create_app(settings: Settings | None=None):
     app.include_router(difficulty_router)
     app.include_router(export_router)
     app.include_router(routing_router)
+    app.include_router(time_selection_router)
+    app.include_router(forecast_ranking_router)
     @app.get('/api/health')
     def health(): return {'ok':True,'schema_version':'2.0','data_mode':settings.data_mode,'agent_mode':settings.agent_mode,
                           'dynamic_routing_configured':bool(settings.routing_api_key)}
