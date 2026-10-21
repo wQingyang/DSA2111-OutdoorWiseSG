@@ -18,6 +18,8 @@ def test_demo_pipeline_api_agent(pipeline):
     report=pipeline.refresh();assert report['status']=='success' and report['metrics']==len(pipeline.repository.load_routes()) * 10
     run=pipeline.run(Preferences());assert {e.route_id for e in run.environment}=={r.route_id for r in pipeline.repository.load_routes()} and all(p.is_mock for p in run.predictions)
     assert all(len(e.metrics) == 10  for e in run.environment)
+    assert {m.location_id for m in pipeline.repository.environment_snapshot('demo', utc_now())[1] if m.source == 'nea_pm25'} == {'north', 'south', 'east', 'west', 'central'}
+    assert all(r.risk_score is not None and r.recommendation_score is not None for r in run.recommendations)
     distances={r.route_id:r.distance_km for r in run.routes};assert distances['marina_bay']==3.729 and distances['woodlands_waterfront']==1.45
     with TestClient(create_app(Settings(data_root=pipeline.repository.root,data_mode='demo'))) as client:
         assert client.get('/').status_code==200
@@ -28,17 +30,42 @@ def test_demo_pipeline_api_agent(pipeline):
         chat=client.post('/api/chat',json={'message':'compare'}).json()
         assert len(chat['trace'])==4 and len(chat['run']['environment'])==len(pipeline.repository.load_routes())
         assert 'environment' in chat['trace'][1]['result']
+
+def test_demo_coverage_uses_only_current_synthetic_sources(pipeline):
+    pipeline.refresh()
+    locations, observations, _ = pipeline.repository.environment_snapshot('demo', utc_now())
+    assert {location.location_id for location in locations if location.source == 'nea_pm25'} == {'north', 'south', 'east', 'west', 'central'}
+    assert {observation.source_kind for observation in observations} == {'demo'}
+    assert not any('snapshot' in str(value).lower() for value in observations for value in (value.source, value.location_id))
+
+def test_demo_freshness_guard_collects_once_then_reuses_fresh_data(pipeline, monkeypatch):
+    calls=[]
+    original=pipeline.refresh
+    def refresh(*args, **kwargs):
+        calls.append(1)
+        return original(*args, **kwargs)
+    monkeypatch.setattr(pipeline, 'refresh', refresh)
+    pipeline.ensure_demo_data_fresh()
+    pipeline.ensure_demo_data_fresh()
+    assert len(calls)==1
+    assert {o.location_id for o in pipeline.repository.environment_snapshot('demo', utc_now())[1] if o.source == 'nea_pm25'} == {'north','south','east','west','central'}
+
+def test_live_pipeline_never_uses_demo_freshness_guard(tmp_path, monkeypatch):
+    shutil.copytree(ROOT/'data/catalog',tmp_path/'catalog')
+    pipeline=build_pipeline(Settings(data_root=tmp_path,data_mode='live'))
+    monkeypatch.setattr(pipeline, 'refresh', lambda: (_ for _ in ()).throw(AssertionError('live refresh invoked')))
+    assert pipeline.ensure_demo_data_fresh() is None
 def test_dedup_revisions_asof(pipeline):
     batch,_=pipeline.collectors[0].collect();repo=pipeline.repository
     first=repo.ingest(batch,log(batch));again=repo.ingest(batch,log(batch))
-    assert first.inserted_records==2 and again.inserted_records==0 and again.unchanged_records==2
+    assert first.inserted_records==5 and again.inserted_records==0 and again.unchanged_records==5
     after=batch.fetched_at+timedelta(minutes=1)
     changed=batch.model_copy(update={'fetched_at':after,'observations':[o.model_copy(update={'fetched_at':after,'value':8}) for o in batch.observations]})
-    assert repo.ingest(changed,log(changed)).revised_records==2
+    assert repo.ingest(changed,log(changed)).revised_records==5
     assert {o.value for o in repo.environment_snapshot('demo',batch.fetched_at)[1]}=={0,1.2}
     assert {o.value for o in repo.environment_snapshot('demo',after)[1]}=={8}
-    assert len(list(csv.DictReader((repo.runtime/'weather_observations.csv').open())))==2
-    assert len(list(csv.DictReader((repo.runtime/'weather_observation_versions.csv').open())))==4
+    assert len(list(csv.DictReader((repo.runtime/'weather_observations.csv').open())))==5
+    assert len(list(csv.DictReader((repo.runtime/'weather_observation_versions.csv').open())))==10
     assert repo.ingest(batch,log(batch)).revised_records==0
     offset=timezone(timedelta(hours=8))
     alternate=batch.model_copy(update={'observations':[o.model_copy(update={'observed_at':o.observed_at.astimezone(offset)}) for o in batch.observations]})
@@ -92,7 +119,7 @@ def test_atomic_recovery_and_writer_lock(pipeline):
     import concurrent.futures
     repo=pipeline.repository;batch,_=pipeline.collectors[0].collect()
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:list(pool.map(lambda _:repo.ingest(batch,log(batch)),range(8)))
-    assert len(repo.environment_snapshot('demo',utc_now())[1])==2
+    assert len(repo.environment_snapshot('demo',utc_now())[1])==5
     assert not list(repo.runtime.glob('*.tmp'))
     journal=repo.runtime/'.pending_csv_transaction.json'
     journal.write_text(json.dumps({'ingestion_runs.csv':[]}))

@@ -7,6 +7,8 @@
   const duration = byId('duration');
   const access = byId('access');
   if (!form || !cards || !delay || !duration || !access) return;
+  const launcher = byId('forecast-launcher');
+  const forecastStatus = byId('forecast-status');
 
   access.placeholder = 'Clear for no limit';
   const accessHint = document.createElement('small');
@@ -29,6 +31,8 @@
   let expanded = false;
   let version = 0;
   let controller;
+  let active = false;
+  let normalMarkup = '';
 
   function el(tag, text, className) {
     const node = document.createElement(tag);
@@ -39,6 +43,7 @@
 
   function modeLabels() {
     byId('mode').textContent = 'Catalog: historical demo';
+    byId('context-indicator').textContent = 'Historical snapshot';
     byId('warnings').textContent = '';
     byId('warnings').hidden = true;
     byId('ingestion').textContent = '';
@@ -79,6 +84,7 @@
   }
 
   function invalidate() {
+    if (!active) return;
     version += 1;
     controller?.abort();
     current = null;
@@ -102,6 +108,17 @@
     const routeById = new Map(current.routes.map(route => [route.route_id, route]));
     const visible = current.recommendations.slice(0, expanded ? list.length : 3);
     window.draw(visible.map(row => routeById.get(row.route_id)).filter(Boolean));
+  }
+
+  function applySharedVisibility(personalized) {
+    const list = [...cards.querySelectorAll('.card')];
+    list.forEach((card, index) => { card.hidden = index >= 3; });
+    toggle.hidden = list.length <= 3;
+    expanded = false;
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.textContent = `View all routes (${list.length})`;
+    const summary = byId('results-summary');
+    if (summary && list.length) summary.textContent = `Showing ${Math.min(3, list.length)} of ${list.length} routes · ${personalized ? 'Personal difficulty match' : 'Matched to your preferences'}`;
   }
 
   function forecastDetails(row, result) {
@@ -132,6 +149,7 @@
     current = result;
     expanded = false;
     modeLabels();
+    byId('context-indicator').textContent = `Historical snapshot · ${shortTime(result.as_of)}`;
     distanceHint();
     cards.replaceChildren();
     byId('ingestion').textContent = `Historical demo · Run: ${shortTime(result.run_start)} – ${shortTime(result.run_end)} SGT · Experimental estimates`;
@@ -140,7 +158,8 @@
       const route = routeById.get(row.route_id);
       const card = el('article', undefined, 'card unified-route-card');
       card.dataset.personalizationRoute = row.route_id;
-      card.append(el('small', `Rank #${row.final_rank}`, 'unified-rank'));
+      card.append(el('small', `Your difficulty-match rank #${row.personalized_rank ?? row.pipeline_rank ?? row.final_rank}`, 'unified-rank'));
+      card.append(el('small', `Shared rank #${row.pipeline_rank ?? row.reference_rank ?? row.final_rank}`, 'shared-rank-label'));
       card.append(el('h3', row.route_name));
       const lengthLine = el('p', undefined, 'unified-route-meta');
       lengthLine.append(
@@ -181,7 +200,11 @@
       }
       card.append(components);
       card.append(el('p', 'Historical forecast · Includes baseline assumptions', 'unified-muted'));
-      card.append(el('p', `${result.personalized ? 'Personal' : 'Generic'} difficulty: ${row.difficulty.toFixed(1)} / 5`));
+      card.append(el('p', `Generic difficulty: ${(row.generic_difficulty ?? row.difficulty).toFixed(1)} / 5`));
+      if (result.personalized && typeof row.personalized_difficulty === 'number') {
+        card.append(el('p', `Predicted difficulty for you: ${row.personalized_difficulty.toFixed(1)} / 5`));
+        card.append(el('p', `Your target: ${row.target_difficulty} / 5 · Difficulty difference: ${row.difficulty_mismatch.toFixed(1)}.`));
+      }
       if (row.distance_match_warning) card.append(el('p', 'Route length is unchanged; the route is not shortened or extended to match your target.', 'unified-muted'));
       if (row.forecast_risk_score === null) card.append(el('p', 'Incomplete environmental estimate; fallback ranking is used.'));
       const actions = el('div', undefined, 'card-actions');
@@ -211,12 +234,15 @@
   }
 
   async function fetchRecommendations() {
+    active = true;
+    normalMarkup = normalMarkup || cards.innerHTML;
     const body = input();
     const signature = JSON.stringify(body);
     const myVersion = ++version;
     controller?.abort();
     controller = new AbortController();
     const signal = controller.signal;
+    if (forecastStatus) forecastStatus.textContent = 'Loading historical forecast comparison…';
     cards.replaceChildren(el('p', 'Calculating forecasts for all eligible routes…', 'empty-results'));
     toggle.hidden = true;
     modeLabels();
@@ -233,21 +259,48 @@
       const data = await response.json();
       if (!response.ok) throw Error(typeof data.detail === 'string' ? data.detail : 'Check the selected inputs.');
       if (myVersion !== version || signature !== JSON.stringify(input())) throw Error('Preferences changed. Compare routes again.');
+      if (forecastStatus) forecastStatus.textContent = 'Historical forecast comparison loaded.';
       return data;
     } catch (error) {
       if (myVersion === version) {
-        cards.replaceChildren(el('p', error.name === 'AbortError' ? 'Preferences changed. Compare routes again.' : error.message, 'empty-results'));
+        cards.innerHTML = normalMarkup;
+        if (forecastStatus) forecastStatus.textContent = error.name === 'AbortError' ? 'Preferences changed. Compare routes again.' : `Historical forecast unavailable: ${error.message}`;
         byId('results-summary').textContent = 'No updated results';
       }
       throw error;
     }
   }
 
-  toggle.onclick = () => { expanded = !expanded; updateVisible(); };
+  toggle.onclick = () => {
+    if (!current) {
+      const list = [...cards.querySelectorAll('.card')];
+      const showAll = toggle.getAttribute('aria-expanded') !== 'true';
+      list.forEach((card, index) => { card.hidden = !showAll && index >= 3; });
+      toggle.setAttribute('aria-expanded', String(showAll));
+      toggle.textContent = showAll ? 'Show top 3' : `View all routes (${list.length})`;
+      const summary = byId('results-summary');
+      if (summary) summary.textContent = `Showing ${showAll ? list.length : Math.min(3, list.length)} of ${list.length} routes · ${window.personalizedRanking ? 'Personal difficulty match' : 'Matched to your preferences'}`;
+      return;
+    }
+    expanded = !expanded;
+    updateVisible();
+  };
+  launcher?.addEventListener('click', async () => {
+    active = true;
+    launcher.disabled = true;
+    try {
+      const result = await fetchRecommendations();
+      render(result);
+    } catch (_) {
+      // The normal recommendation cards are restored by fetchRecommendations.
+    } finally {
+      launcher.disabled = false;
+    }
+  });
   form.addEventListener('input', invalidate);
   form.addEventListener('change', invalidate);
   document.addEventListener('outdoorwise:location-changed', invalidate);
   window.outdoorwiseForecastUI = {fetchRecommendations, render};
-  modeLabels();
+  window.outdoorwiseRouteVisibility = {apply: applySharedVisibility};
   distanceHint();
 })();

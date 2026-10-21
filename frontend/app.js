@@ -71,6 +71,7 @@ function render(run) {
     window.outdoorwiseForecastUI.render(run);
     return;
   }
+  $('context-indicator').textContent = 'Current conditions';
   routes = run.routes;
   draw(routes);
   $('cards').replaceChildren(); $('blocked-routes').replaceChildren();
@@ -107,6 +108,7 @@ function render(run) {
     blocked.forEach((risk, index) => addCard(routeMap.get(risk.route_id), null, risk, index, container));
     $('blocked-routes').append(details);
   }
+  window.outdoorwiseRouteVisibility?.apply(Boolean(window.personalizedRanking));
   document.dispatchEvent(new CustomEvent('outdoorwise:routes-rendered', {detail: {routes, recommendations: rows,
     personalizedRanking: window.personalizedRanking, authenticated: Boolean(window.outdoorwiseSession)}}));
 }

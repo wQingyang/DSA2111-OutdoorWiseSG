@@ -58,4 +58,9 @@ class PersonalizationService:
         generic = GenericDifficultyEstimator().predict(route, environment)
         runs, feedback = self.list_completed_runs(user_id), self.list_feedback(user_id)
         profile = derive_running_profile(user_id, runs, feedback, [])
-        return PersonalizedDifficultyPredictor().predict(route.route_id, route.distance_km, generic.predicted_difficulty, runs, feedback, profile)
+        return self.adjust_difficulty(user_id, route, generic.predicted_difficulty, runs, feedback, profile)
+
+    def adjust_difficulty(self, user_id, route, generic_difficulty, runs, feedback, profile):
+        """Apply the shared history adjustment to an already computed generic estimate."""
+        return PersonalizedDifficultyPredictor().predict(
+            route.route_id, route.distance_km, generic_difficulty, runs, feedback, profile)

@@ -1,6 +1,7 @@
 from datetime import datetime,timezone
 from uuid import uuid4
 import time
+import threading
 from outdoorwise.contracts.models import Preferences,Run,Conditions,Prediction,Recommendation
 from outdoorwise.contracts.environment import CollectionBatch,IngestionRun,EnvironmentRisk,utc_now
 from outdoorwise.contracts.ports import CollectionFailure,EnvironmentRepository,EnvironmentCollector,RouteEnvironmentReader
@@ -9,6 +10,7 @@ class Pipeline:
         self.repository=repository;self.collectors=collectors;self.environment_service=environment_service
         self.predictor=predictor;self.recommender=recommender;self.risk=risk;self.mode=mode;self.config=config
         self.risk_ranking=risk_ranking;self.difficulty=difficulty
+        self._demo_refresh_lock=threading.Lock()
     def get_route_environment(self,route_id,as_of=None):
         return self.environment_service.get_route_environment(route_id,as_of)
     def refresh(self,due_only=False,should_stop=None):
@@ -29,6 +31,27 @@ class Pipeline:
             logs.append(self.repository.ingest(batch,log))
         environments=self.environment_service.refresh_latest()
         return {'status':'partial' if any(l.status=='failed' for l in logs) else 'success','sources':[l.model_dump(mode='json') for l in logs],'routes':len(environments),'metrics':sum(len(e.metrics) for e in environments)}
+    def ensure_demo_data_fresh(self):
+        """Refresh synthetic observations once when Current demo inputs age out."""
+        if self.mode != 'demo':
+            return None
+        with self._demo_refresh_lock:
+            now=utc_now()
+            environments=self.environment_service.get_all(now)
+            required={'rainfall','wbgt','wind_speed'}
+            fresh=True
+            for environment in environments:
+                metrics={metric.metric: metric for metric in environment.metrics}
+                air_candidates=[metrics.get('pm25'),metrics.get('psi')]
+                heat=metrics.get('wbgt') or metrics.get('heat_stress_level')
+                if (any(metrics.get(name) is None or metrics[name].state != 'fresh' for name in required)
+                        or heat is None or heat.state != 'fresh'
+                        or not any(metric is not None and metric.state == 'fresh' for metric in air_candidates)):
+                    fresh=False
+                    break
+            if fresh and len(environments) == len(self.repository.load_routes()):
+                return None
+            return self.refresh()
     def run(self, preferences: Preferences, difficulty_provider=None):
         routes=self.repository.load_routes()
         environments=self.environment_service.refresh_latest()

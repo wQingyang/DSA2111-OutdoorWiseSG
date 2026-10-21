@@ -34,6 +34,7 @@ async function boot(authenticated = false, options = {}) {
     if (url === '/api/auth/me') return response(authenticated ? {user_id: 'test-user', username: 'Runner'} : {detail: 'Authentication required'}, authenticated ? 200 : 401);
     if (url === '/api/me/recommendations') return failPersonal ? response({}, 503) : response(options.personalized || fixture.personalized);
     if (url === '/api/recommendations') return response(options.generic || fixture.generic);
+    if (url === '/api/experimental/recommendations') return response(fixture.generic);
     if (url === '/api/refresh') return response({status: 'partial', sources: [{source: 'nea_rainfall', status: 'failed', error: 'internal diagnostic'}]});
     if (url === '/api/chat') return response({message: 'Existing demo assistant', trace: [], run: fixture.generic});
     if (url.endsWith('/difficulty')) return response({predicted_difficulty: 2.3, difficulty_label: 'Easy'});
@@ -55,7 +56,7 @@ async function boot(authenticated = false, options = {}) {
     }
     throw Error('Unexpected endpoint ' + url);
   };
-  for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'app']) w.eval(fs.readFileSync(path.join(root, `frontend/${script}.js`), 'utf8'));
+  for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'forecast-ranking', 'app']) w.eval(fs.readFileSync(path.join(root, `frontend/${script}.js`), 'utf8'));
   await until(() => w.document.querySelectorAll('#cards .card').length > 0);
   await until(() => w.document.getElementById('personalization-status').textContent.includes(authenticated ? 'Loaded' : 'Sign in'));
   return {dom, w, d: w.document, leaflet, requests, runs, feedback, forecastCalls: () => forecastCalls, failPersonal: value => failPersonal = value, failFeedback: value => failFeedback = value};
@@ -77,6 +78,33 @@ test('forecast UI presence does not hijack authenticated personalized recommenda
   assert.equal(ui.requests.filter(r => r.url === '/api/me/recommendations').length, 1);
   assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
   assert.match(ui.d.getElementById('results-summary').textContent, /running profile/);
+});
+
+test('historical forecast is opt-in and preserves normal cards when unavailable', async t => {
+  const ui = await boot(false, {forecastUI: true}); t.after(() => ui.dom.window.close());
+  const launcher = ui.d.getElementById('forecast-launcher');
+  assert.equal(launcher.hidden, false);
+  assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
+  assert(ui.d.querySelectorAll('#cards .card').length > 0);
+  launcher.click();
+  await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
+  assert(ui.d.querySelectorAll('#cards .card').length > 0);
+});
+
+test('current recommendations use the shared top-three toggle without refetching', async t => {
+  const ui = await boot(true); t.after(() => ui.dom.window.close());
+  const order = () => [...ui.d.querySelectorAll('#cards .card')].filter(c => !c.hidden).map(c => c.dataset.personalizationRoute);
+  const allOrder = [...ui.d.querySelectorAll('#cards .card')].map(c => c.dataset.personalizationRoute);
+  const before = ui.requests.length;
+  const toggle = ui.d.getElementById('toggle-all-routes');
+  assert.equal(order().length, 3);
+  toggle.click();
+  assert.equal(order().length, allOrder.length);
+  assert.deepEqual(order(), allOrder);
+  toggle.click();
+  assert.equal(order().length, 3);
+  assert.deepEqual(order(), allOrder.slice(0, 3));
+  assert.equal(ui.requests.length, before);
 });
 
  test('cards show new scores and zero risk correctly; technical details are closed', async t => {

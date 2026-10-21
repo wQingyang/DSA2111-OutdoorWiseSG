@@ -90,6 +90,7 @@ def personalized_difficulty(route_id: str, request: Request, current: UserPublic
 @me_router.post("/recommendations")
 def personalized_recommendations(data: PersonalizedRecommendationRequest, request: Request, current: UserPublic = Depends(get_current_user), service: PersonalizationService = Depends(get_service)):
     pipeline=request.app.state.pipeline
+    pipeline.ensure_demo_data_fresh()
     run=pipeline.run(Preferences.model_validate(data.model_dump()))
     by_id={e.route_id:e for e in run.environment}
     route_by_id={route.route_id:route for route in run.routes}
