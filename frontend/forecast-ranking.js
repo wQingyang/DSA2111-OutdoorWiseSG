@@ -105,7 +105,7 @@
     toggle.setAttribute('aria-expanded', String(expanded));
     toggle.textContent = expanded ? 'Show top 3' : `View all routes (${list.length})`;
     const count = expanded ? list.length : Math.min(3, list.length);
-    byId('results-summary').textContent = `Showing ${count} of ${list.length} routes · ${current.personalized ? 'Personal difficulty match' : 'Matched to your preferences'}`;
+    byId('results-summary').textContent = `Showing ${count} of ${list.length} routes · ${current.personalized ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
     const routeById = new Map(current.routes.map(route => [route.route_id, route]));
     const visible = current.recommendations.slice(0, expanded ? list.length : 3);
     window.draw(visible.map(row => routeById.get(row.route_id)).filter(Boolean));
@@ -121,7 +121,7 @@
     toggle.setAttribute('aria-expanded', 'false');
     toggle.textContent = `View all routes (${list.length})`;
     const summary = byId('results-summary');
-    if (summary && list.length) summary.textContent = `Showing ${Math.min(3, list.length)} of ${list.length} routes · ${personalized ? 'Personal difficulty match' : 'Matched to your preferences'}`;
+    if (summary && list.length) summary.textContent = `Showing ${Math.min(3, list.length)} of ${list.length} routes · ${personalized ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
   }
 
   function forecastDetails(row, result) {
@@ -283,7 +283,7 @@
       toggle.setAttribute('aria-expanded', String(showAll));
       toggle.textContent = showAll ? 'Show top 3' : `View all routes (${list.length})`;
       const summary = byId('results-summary');
-      if (summary) summary.textContent = `Showing ${showAll ? list.length : Math.min(3, list.length)} of ${list.length} routes · ${window.personalizedRanking ? 'Personal difficulty match' : 'Matched to your preferences'}`;
+      if (summary) summary.textContent = `Showing ${showAll ? list.length : Math.min(3, list.length)} of ${list.length} routes · ${window.personalizedRanking ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
       return;
     }
     expanded = !expanded;

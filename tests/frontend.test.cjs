@@ -34,7 +34,12 @@ async function boot(authenticated = false, options = {}) {
     if (url === '/api/auth/me') return response(authenticated ? {user_id: 'test-user', username: 'Runner'} : {detail: 'Authentication required'}, authenticated ? 200 : 401);
     if (url === '/api/me/recommendations') return failPersonal ? response({}, 503) : response(options.personalized || fixture.personalized);
     if (url === '/api/recommendations') return response(options.generic || fixture.generic);
-    if (url === '/api/experimental/recommendations') return response(fixture.generic);
+    if (url === '/api/experimental/recommendations') {
+      const run = clone(fixture.generic);
+      const routes = new Map(run.routes.map(route => [route.route_id, route]));
+      return response({mode: 'experimental_historical_forecast_ranking', as_of: '2026-10-15T11:15:00Z', run_start: '2026-10-15T11:15:00Z', run_end: '2026-10-15T11:45:00Z', personalized: false, preferences: run.preferences, routes: run.routes,
+        recommendations: run.recommendations.map((row, index) => ({...row, route_name: routes.get(row.route_id).name, distance_km: routes.get(row.route_id).distance_km, forecast_risk_score: row.risk_score, reference_rank: index + 1, pipeline_rank: index + 1, forecast_metrics: {}, risk_components: {rainfall: {score: 0}, heat: {score: 0}, air_quality: {score: 0}, wind: {score: 0}}})), ranking_weights: {}, warnings: []});
+    }
     if (url === '/api/refresh') return response({status: 'partial', sources: [{source: 'nea_rainfall', status: 'failed', error: 'internal diagnostic'}]});
     if (url === '/api/chat') return response({message: 'Existing demo assistant', trace: [], run: fixture.generic});
     if (url.endsWith('/difficulty')) return response({predicted_difficulty: 2.3, difficulty_label: 'Easy'});
@@ -85,10 +90,10 @@ test('historical forecast is opt-in and preserves normal cards when unavailable'
   const launcher = ui.d.getElementById('forecast-launcher');
   assert.equal(launcher.hidden, false);
   assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
-  assert(ui.d.querySelectorAll('#cards .card').length > 0);
+  assert(ui.d.querySelectorAll('#cards .route-summary').length > 0);
   launcher.click();
   await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
-  assert(ui.d.querySelectorAll('#cards .card').length > 0);
+  assert(ui.d.querySelectorAll('#cards .route-summary').length > 0);
 });
 
 test('current recommendations use the shared top-three toggle without refetching', async t => {
@@ -171,7 +176,7 @@ test('authenticated final ordering persists through load, compare, refresh and c
   assert.deepEqual(order(), expected);
   fixture.personalized.recommendations.forEach((r, i) => {
     assert.equal(card(ui.d, r.route_id).querySelector('.rank-label').textContent, `Your difficulty-match rank #${r.personalized_rank}`);
-    assert.match(card(ui.d, r.route_id).querySelector('.shared-rank-label').textContent, new RegExp(`Shared rank #${r.pipeline_rank}`));
+    assert.match(card(ui.d, r.route_id).querySelector('.shared-rank-label').textContent, new RegExp(`Shared rank #${r.pipeline_rank ?? i + 1}`));
   });
   submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 2); await tick();
   assert.deepEqual(order(), expected);
