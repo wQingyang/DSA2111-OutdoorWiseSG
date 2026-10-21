@@ -81,7 +81,7 @@ function render(run) {
   const predictionMap = new Map((run.predictions || []).map(p => [p.route_id, p]));
   const routeMap = new Map(routes.map(r => [r.route_id, r]));
   const blocked = (run.risks || []).filter(r => r.eligibility === 'blocked');
-  $('results-summary').textContent = `${rows.length} route${rows.length === 1 ? '' : 's'} · ${window.personalizedRanking ? 'Matched to your running profile' : 'Matched to your preferences'}`;
+  $('results-summary').textContent = `${rows.length} route${rows.length === 1 ? '' : 's'} · ${window.personalizedRanking ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
   const messages = [];
   if (rows.length && rows.every(r => r.recommendation_score === null)) messages.push('Environmental assessment unavailable. Routes are ordered using available distance, access and difficulty preferences.');
   if (rows.length && rows.every(r => r.distance_match_warning)) messages.push('No available route closely matches your target distance. Route lengths have not been shortened.');

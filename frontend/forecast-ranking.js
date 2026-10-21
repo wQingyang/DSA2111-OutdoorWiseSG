@@ -29,10 +29,11 @@
 
   let current = null;
   let expanded = false;
+  let activeContext = 'current';
   let version = 0;
   let controller;
   let active = false;
-  let normalMarkup = '';
+  let normalCards = null;
 
   function el(tag, text, className) {
     const node = document.createElement(tag);
@@ -111,6 +112,8 @@
   }
 
   function applySharedVisibility(personalized) {
+    activeContext = 'current';
+    current = null;
     const list = [...cards.querySelectorAll('.card')];
     list.forEach((card, index) => { card.hidden = index >= 3; });
     toggle.hidden = list.length <= 3;
@@ -147,6 +150,7 @@
 
   function render(result) {
     current = result;
+    activeContext = 'historical';
     expanded = false;
     modeLabels();
     byId('context-indicator').textContent = `Historical snapshot · ${shortTime(result.as_of)}`;
@@ -235,7 +239,7 @@
 
   async function fetchRecommendations() {
     active = true;
-    normalMarkup = normalMarkup || cards.innerHTML;
+    normalCards = normalCards || [...cards.childNodes].map(node => node.cloneNode(true));
     const body = input();
     const signature = JSON.stringify(body);
     const myVersion = ++version;
@@ -263,7 +267,7 @@
       return data;
     } catch (error) {
       if (myVersion === version) {
-        cards.innerHTML = normalMarkup;
+        cards.replaceChildren(...(normalCards || []).map(node => node.cloneNode(true)));
         if (forecastStatus) forecastStatus.textContent = error.name === 'AbortError' ? 'Preferences changed. Compare routes again.' : `Historical forecast unavailable: ${error.message}`;
         byId('results-summary').textContent = 'No updated results';
       }
@@ -272,7 +276,7 @@
   }
 
   toggle.onclick = () => {
-    if (!current) {
+    if (activeContext === 'current') {
       const list = [...cards.querySelectorAll('.card')];
       const showAll = toggle.getAttribute('aria-expanded') !== 'true';
       list.forEach((card, index) => { card.hidden = !showAll && index >= 3; });

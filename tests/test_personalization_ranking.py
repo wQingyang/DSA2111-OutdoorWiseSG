@@ -4,6 +4,10 @@ from outdoorwise.personalization.ranking import rank_candidates
 from fastapi.testclient import TestClient
 from outdoorwise.api.app import create_app
 from outdoorwise.config import Settings, ROOT
+from outdoorwise.bootstrap import build_pipeline
+from outdoorwise.api.forecast_ranking import RankingRequest, rank_historical
+from outdoorwise.personalization.repository import PersonalizationRepository
+from outdoorwise.personalization.service import PersonalizationService
 
 def rec(route, score): return SimpleNamespace(route_id=route, score=score)
 def pred(route, difficulty): return {"route_id":route,"generic_predicted_difficulty":difficulty,"personalized_predicted_difficulty":difficulty,"confidence":"none"}
@@ -39,6 +43,29 @@ def test_authenticated_endpoint_and_anonymous_flow(tmp_path):
         result=client.post("/api/me/recommendations", json={"target_difficulty":3})
         assert result.status_code == 200 and set(result.json()) == {"run","target_difficulty","recommendations"}
         assert client.post("/api/recommendations", json={}).status_code == 200
+
+def test_historical_authenticated_dict_rank_results_are_serialized(tmp_path, monkeypatch):
+    import shutil
+    shutil.copytree(ROOT / "data/catalog", tmp_path / "catalog")
+    pipeline = build_pipeline(Settings(data_root=tmp_path, data_mode="demo"))
+    components = {"rainfall": {"score": 0}, "heat": {"score": 0},
+                  "air_quality": {"score": 0}, "wind": {"score": 0}}
+    monkeypatch.setattr(
+        "outdoorwise.api.forecast_ranking.historical_forecast",
+        lambda route_id, start_delay_min, duration_min: {
+            "forecast_risk": {"risk_score": 10, "components": components},
+            "metrics": {},
+        })
+    service = PersonalizationService(PersonalizationRepository(tmp_path))
+    result = rank_historical(
+        RankingRequest(target_distance_km=4, duration_min=30, horizon_min=30,
+                        target_difficulty=3),
+        pipeline, SimpleNamespace(user_id="historical-user"), service)
+    assert len(result["recommendations"]) > 3
+    assert all(row["route_id"] for row in result["recommendations"])
+    assert all({"generic_difficulty", "personalized_difficulty", "target_difficulty",
+                "difficulty_mismatch", "pipeline_rank", "personalized_rank"} <= row.keys()
+               for row in result["recommendations"])
 
 
 def test_user_history_does_not_change_shared_ranking(tmp_path):

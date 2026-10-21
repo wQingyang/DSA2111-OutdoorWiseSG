@@ -156,21 +156,25 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
     else:
         ranked = shared_ranked
     reference_positions = {row.route_id: row.final_rank for row in shared_ranked}
+    # rank_candidates intentionally returns dictionaries. Normalize the
+    # anonymous Pydantic results at this boundary so the response builder has
+    # one representation and cannot mix attribute and mapping access.
+    ranked = [row if isinstance(row, dict) else row.model_dump(mode="json") for row in ranked]
     route_by_id = {route.route_id: route for route in routes}
     rows = []
     for rec in ranked:
-        route = route_by_id[rec.route_id]
-        personal = next((item for item in personal_predictions if item["route_id"] == rec.route_id), None)
-        pipeline_rank = rec.get("pipeline_rank") if isinstance(rec, dict) else reference_positions[rec.route_id]
-        personalized_rank = rec.get("personalized_rank") if isinstance(rec, dict) else None
-        generic = generic_difficulties[rec["route_id"]] if isinstance(rec, dict) else generic_difficulties[rec.route_id]
-        route_id = rec["route_id"] if isinstance(rec, dict) else rec.route_id
-        risk_score = rec.get("risk_score") if isinstance(rec, dict) else rec.risk_score
-        recommendation_score = rec.get("recommendation_score") if isinstance(rec, dict) else rec.recommendation_score
-        recommendation_components = rec.get("recommendation_components") if isinstance(rec, dict) else rec.recommendation_components
-        access_distance = rec.get("access_distance_km") if isinstance(rec, dict) else rec.access_distance_km
-        distance_warning = rec.get("distance_match_warning") if isinstance(rec, dict) else rec.distance_match_warning
-        eligibility = rec.get("eligibility") if isinstance(rec, dict) else rec.eligibility
+        route_id = rec["route_id"]
+        route = route_by_id[route_id]
+        personal = next((item for item in personal_predictions if item["route_id"] == route_id), None)
+        pipeline_rank = rec.get("pipeline_rank", reference_positions[route_id])
+        personalized_rank = rec.get("personalized_rank")
+        generic = generic_difficulties[route_id]
+        risk_score = rec.get("risk_score")
+        recommendation_score = rec.get("recommendation_score")
+        recommendation_components = rec.get("recommendation_components")
+        access_distance = rec.get("access_distance_km")
+        distance_warning = rec.get("distance_match_warning")
+        eligibility = rec.get("eligibility")
         rows.append(dict(route_id=route_id, route_name=route.name, distance_km=route.distance_km,
             context="historical", pipeline_rank=pipeline_rank,
             personalized_rank=personalized_rank, final_rank=personalized_rank or pipeline_rank,
@@ -182,7 +186,7 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
             generic_difficulty=generic,
             personalized_difficulty=personal["personalized_predicted_difficulty"] if personal else None,
             target_difficulty=data.target_difficulty if user is not None else None,
-            difficulty_mismatch=rec.get("difficulty_mismatch") if isinstance(rec, dict) else None,
+            difficulty_mismatch=rec.get("difficulty_mismatch"),
             personal_confidence=personal["confidence"] if personal else None,
             eligibility=eligibility, distance_match_warning=distance_warning,
             risk_components=forecasts[route_id]["forecast_risk"]["components"],

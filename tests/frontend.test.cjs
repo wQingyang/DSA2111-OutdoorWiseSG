@@ -107,6 +107,21 @@ test('current recommendations use the shared top-three toggle without refetching
   assert.equal(ui.requests.length, before);
 });
 
+test('historical collapse uses the active historical cards after a context switch', async t => {
+  const ui = await boot(false); t.after(() => ui.dom.window.close());
+  const launcher = ui.d.getElementById('forecast-launcher');
+  launcher.click();
+  await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
+  await until(() => ui.d.querySelectorAll('#cards .unified-route-card').length > 0);
+  const toggle = ui.d.getElementById('toggle-all-routes');
+  const total = ui.d.querySelectorAll('#cards .unified-route-card').length;
+  toggle.click();
+  assert.equal([...ui.d.querySelectorAll('#cards .unified-route-card')].filter(card => !card.hidden).length, total);
+  toggle.click();
+  assert.equal([...ui.d.querySelectorAll('#cards .unified-route-card')].filter(card => !card.hidden).length, 3);
+  assert.equal(toggle.textContent, `View all routes (${total})`);
+});
+
  test('cards show new scores and zero risk correctly; technical details are closed', async t => {
   const ui = await boot(); t.after(() => ui.dom.window.close());
   const c = card(ui.d, 'marina_bay'); const rec = fixture.generic.recommendations.find(r => r.route_id === 'marina_bay');
@@ -154,7 +169,10 @@ test('authenticated final ordering persists through load, compare, refresh and c
   const order = () => [...ui.d.querySelectorAll('#cards .card')].map(c => c.dataset.personalizationRoute);
   const expected = fixture.personalized.recommendations.map(r => r.route_id);
   assert.deepEqual(order(), expected);
-  fixture.personalized.recommendations.forEach((r, i) => assert.equal(card(ui.d, r.route_id).querySelector('.rank-label').textContent, `Final rank #${r.final_rank}`));
+  fixture.personalized.recommendations.forEach((r, i) => {
+    assert.equal(card(ui.d, r.route_id).querySelector('.rank-label').textContent, `Your difficulty-match rank #${r.personalized_rank}`);
+    assert.match(card(ui.d, r.route_id).querySelector('.shared-rank-label').textContent, new RegExp(`Shared rank #${r.pipeline_rank}`));
+  });
   submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 2); await tick();
   assert.deepEqual(order(), expected);
   ui.d.getElementById('refresh').click(); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 3); await tick();
