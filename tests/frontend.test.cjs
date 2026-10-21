@@ -26,6 +26,8 @@ async function boot(authenticated = false, options = {}) {
     };
   }
   if (options.geolocation) Object.defineProperty(w.navigator, 'geolocation', {value: options.geolocation, configurable: true});
+  let forecastCalls = 0;
+  if (options.forecastUI) w.outdoorwiseForecastUI = {fetchRecommendations: async () => { forecastCalls += 1; return fixture.generic; }};
   w.fetch = async (url, opt = {}) => {
     requests.push({url, method: opt.method || 'GET', body: opt.body ? JSON.parse(opt.body) : null});
     if (url === '/api/health') return response({data_mode: 'live', agent_mode: 'demo'});
@@ -56,10 +58,26 @@ async function boot(authenticated = false, options = {}) {
   for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'app']) w.eval(fs.readFileSync(path.join(root, `frontend/${script}.js`), 'utf8'));
   await until(() => w.document.querySelectorAll('#cards .card').length > 0);
   await until(() => w.document.getElementById('personalization-status').textContent.includes(authenticated ? 'Loaded' : 'Sign in'));
-  return {dom, w, d: w.document, leaflet, requests, runs, feedback, failPersonal: value => failPersonal = value, failFeedback: value => failFeedback = value};
+  return {dom, w, d: w.document, leaflet, requests, runs, feedback, forecastCalls: () => forecastCalls, failPersonal: value => failPersonal = value, failFeedback: value => failFeedback = value};
 }
 const card = (d, id) => d.querySelector(`[data-personalization-route="${id}"]`);
 const submit = (w, id) => w.document.getElementById(id).dispatchEvent(new w.Event('submit', {bubbles: true, cancelable: true}));
+
+test('forecast UI presence does not hijack anonymous normal recommendations', async t => {
+  const ui = await boot(false, {forecastUI: true}); t.after(() => ui.dom.window.close());
+  assert.equal(ui.forecastCalls(), 0);
+  assert.equal(ui.requests.filter(r => r.url === '/api/recommendations').length, 1);
+  assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
+  assert(ui.d.querySelectorAll('#cards .card').length > 0);
+});
+
+test('forecast UI presence does not hijack authenticated personalized recommendations', async t => {
+  const ui = await boot(true, {forecastUI: true}); t.after(() => ui.dom.window.close());
+  assert.equal(ui.forecastCalls(), 0);
+  assert.equal(ui.requests.filter(r => r.url === '/api/me/recommendations').length, 1);
+  assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
+  assert.match(ui.d.getElementById('results-summary').textContent, /running profile/);
+});
 
  test('cards show new scores and zero risk correctly; technical details are closed', async t => {
   const ui = await boot(); t.after(() => ui.dom.window.close());

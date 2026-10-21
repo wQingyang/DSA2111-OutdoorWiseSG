@@ -111,9 +111,6 @@ function render(run) {
     personalizedRanking: window.personalizedRanking, authenticated: Boolean(window.outdoorwiseSession)}}));
 }
 async function personalizedOrGeneric() {
-  if (window.outdoorwiseForecastUI) {
-    return window.outdoorwiseForecastUI.fetchRecommendations();
-  }
   const base = preferences();
   const revision = window.outdoorwiseLocation.revision();
   const confirmSelection = run => {
@@ -145,20 +142,12 @@ async function busy(action) {
 }
 $('preferences').onsubmit = event => {event.preventDefault(); busy(async () => render(await personalizedOrGeneric()));};
 $('refresh').onclick = () => busy(async () => {
-  if (window.outdoorwiseForecastUI) {
-    render(await personalizedOrGeneric());
-    return;
-  }
   preferences(); // Never drop a pending/unselected location or its access constraint.
   const report = await api('/api/refresh', {});
   $('ingestion').textContent = report.status === 'partial' ? 'Some observations could not be refreshed. Retained data may be outdated.' : 'Environmental observations refreshed.';
   render(await personalizedOrGeneric());
 });
 $('chat').onsubmit = event => {event.preventDefault(); busy(async () => {
-  if (window.outdoorwiseForecastUI) {
-    $('answer').textContent = 'The assistant is not connected to historical replay. Use the route details for this demonstration.';
-    return;
-  }
   const response = await api('/api/chat', {message: $('message').value, preferences: preferences()});
   $('answer').textContent = response.message; $('trace').textContent = JSON.stringify(response.trace, null, 2);
   // Assistant prose does not replace the final user-specific recommendation list.

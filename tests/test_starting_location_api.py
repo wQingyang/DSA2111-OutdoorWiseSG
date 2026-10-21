@@ -49,8 +49,8 @@ def test_coordinates_access_calculation_filter_and_clear(app, personal):
         repeat, repeat_outer = run_response(client, endpoint, payload)
         assert [(r['route_id'], r['access_distance_km']) for r in repeat['recommendations']] == [(r['route_id'], r['access_distance_km']) for r in result['recommendations']]
         if personal:
-            assert [r['route_id'] for r in outer['recommendations']] == [r['route_id'] for r in result['recommendations']]
-            assert [r['route_id'] for r in repeat_outer['recommendations']] == [r['route_id'] for r in result['recommendations']]
+            assert {r['route_id'] for r in outer['recommendations']} == {r['route_id'] for r in result['recommendations']}
+            assert [r['route_id'] for r in repeat_outer['recommendations']] == [r['route_id'] for r in outer['recommendations']]
         # One metre at the exact catalog start keeps only the matching route.
         strict, strict_outer = run_response(client, endpoint, {**payload, 'max_access_distance_km': .001})
         assert [r['route_id'] for r in strict['recommendations']] == ['marina_bay']
