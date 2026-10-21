@@ -4,7 +4,10 @@ class DemoEnvironmentCollector:
     def __init__(self,source):self.source=source
     def collect(self):
         now=utc_now();regional=self.source in {"nea_pm25","nea_psi"};locations=[];observations=[]
-        for side,lon,lat in [("south",103.855,1.287),("north",103.782,1.452)]:
+        regions=[("north",103.782,1.452),("south",103.855,1.287),
+                 ("east",103.935,1.352),("west",103.705,1.345),
+                 ("central",103.825,1.365)]
+        for side,lon,lat in regions:
             sid=side if regional else "DEMO_"+side.upper()
             locations.append(Location(source=self.source,location_id=sid,name="Synthetic "+side,
                 location_type="region" if regional else "station",lon=lon,lat=lat,metadata_updated_at=now,source_kind="demo"))

@@ -75,8 +75,12 @@
     const future = selected.some(c => c.freshness === 'unavailable_as_of');
     const complete = risk?.risk_status === 'complete' && number(risk?.risk_score) && !outdated && !future;
     const heading = element('div', undefined, 'route-heading');
-    const rank = blocked ? 'Not recommended' : `Final rank #${rec?.final_rank ?? personal?.final_rank ?? index + 1}`;
-    heading.append(element('span', rank, 'rank-label'), element('span', blocked ? 'Blocked by policy' : complete ? (card.dataset.eligibility === 'caution' ? 'Use caution' : 'Assessment complete') : 'Assessment unavailable', 'assessment-label'));
+    const pipelineRank = rec?.final_rank;
+    const personalizedRank = personal?.personalized_rank;
+    const rank = blocked ? 'Not recommended' : personalizedRank == null ? `Shared rank #${pipelineRank ?? index + 1}` : `Your difficulty-match rank #${personalizedRank}`;
+    heading.append(element('span', rank, 'rank-label'));
+    if (!blocked && personalizedRank != null) heading.append(element('span', `Shared rank #${pipelineRank ?? personal.pipeline_rank ?? index + 1}`, 'shared-rank-label'));
+    heading.append(element('span', blocked ? 'Blocked by policy' : complete ? (card.dataset.eligibility === 'caution' ? 'Use caution' : 'Assessment complete') : 'Assessment unavailable', 'assessment-label'));
     card.append(heading, element('h3', route.name), element('p', `${route.distance_km.toLocaleString('en-SG', {maximumFractionDigits: 3})} km · ${kinds[route.kind] || 'Running route'}`, 'route-meta'));
     const scores = element('div', undefined, 'score-pair');
     const match = element('div', undefined, 'score-block recommendation-score');
@@ -115,7 +119,11 @@
       const names = {rainfall: 'Rainfall', heat: 'Heat', air_quality: 'Air quality', wind: 'Wind'};
       reasons.append(element('li', `${names[highest[0][0]] || 'An environmental factor'} has the highest component risk score.`));
     }
-    if (personal && number(personal.personalized_difficulty)) reasons.append(element('li', `Your requested difficulty: ${personal.target_difficulty} / 5.`));
+    if (personal && number(personal.personalized_difficulty)) {
+      const labels = {1: 'Very easy', 2: 'Easy', 3: 'Comfortable', 4: 'Challenging', 5: 'Very challenging'};
+      reasons.append(element('li', `Generic difficulty: ${Number(personal.generic_difficulty).toFixed(1)} / 5 · Predicted difficulty for you: ${Number(personal.personalized_difficulty).toFixed(1)} / 5.`));
+      reasons.append(element('li', `Your target: ${labels[personal.target_difficulty] || 'Selected'} (${personal.target_difficulty} / 5) · Difficulty difference: ${Number(personal.difficulty_mismatch).toFixed(1)}.`));
+    }
     if (rec && rec.access_distance_km === null) reasons.append(element('li', preferences.location ? 'Straight-line access distance is unavailable for this route.' : 'No starting location selected; access distance is not estimated.'));
     if (rec && number(rec.access_distance_km)) reasons.append(element('li', `${rec.access_distance_km.toFixed(2)} km straight-line distance from your starting point to the route start; not walking or driving distance.`, 'access-distance'));
     card.append(reasons);

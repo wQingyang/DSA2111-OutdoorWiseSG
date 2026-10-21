@@ -18,8 +18,8 @@ from outdoorwise.modules.predictor import UnavailablePredictor
 from outdoorwise.modules.recommender import BaselineRecommender
 from outdoorwise.modules.risk import EnvironmentalRiskAssessor
 from outdoorwise.modules.risk_ranking import RiskAwareRanking
-from outdoorwise.personalization.difficulty import PersonalizedDifficultyPredictor
 from outdoorwise.personalization.profile import derive_running_profile
+from outdoorwise.personalization.ranking import rank_candidates
 from outdoorwise.services.route_environment import RouteEnvironmentService
 from outdoorwise.storage.repository import typed
 from .time_selection import REPLAY_TIME, historical_forecast
@@ -108,7 +108,7 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
     candidates = [row for row in candidates if row.route_id not in excluded]
 
     difficulties = {}
-    personal_details = {}
+    personal_predictions = []
     runs, feedback, profile = [], [], None
     if user is not None:
         runs = [row for row in personal_service.list_completed_runs(user.user_id)
@@ -122,15 +122,17 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
         if user is None:
             difficulties[route.route_id] = generic
         else:
-            personal = PersonalizedDifficultyPredictor().predict(route.route_id, route.distance_km,
-                generic, runs, feedback, profile)
+            personal = personal_service.adjust_difficulty(user.user_id, route, generic, runs, feedback, profile)
+            personal_predictions.append(personal)
             difficulties[route.route_id] = personal["personalized_predicted_difficulty"]
-            personal_details[route.route_id] = personal["confidence"]
 
     ranker = RiskAwareRanking(pipeline.config.ranking)
-    reference = ranker.rank(candidates, observation_risks, routes, preferences,
-                            difficulties, personalized=user is not None)
-    reference_positions = {row.route_id: row.final_rank for row in reference}
+    # Shared historical ordering uses generic difficulty only. Personalization
+    # is applied below through the same helper used by Current recommendations.
+    generic_difficulties = {}
+    for route in routes:
+        generic_difficulties[route.route_id] = pipeline.difficulty.predict(
+            route, env_by_id[route.route_id]).predicted_difficulty
     forecasts, proxy_risks = {}, []
     for candidate in candidates:
         forecast = historical_forecast(candidate.route_id, data.start_delay_min, data.duration_min)
@@ -144,22 +146,51 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
             risk_assessment_mode="experimental_historical_forecast",
             risk_data_quality=SimpleNamespace(confidence="very_low"),
             eligibility="caution" if score is not None else "unknown"))
-    ranked = ranker.rank(candidates, proxy_risks, routes, preferences,
-                         difficulties, personalized=user is not None)
+    shared_ranked = ranker.rank(candidates, proxy_risks, routes, preferences,
+                                generic_difficulties, personalized=False)
+    if user is not None:
+        predictions_by_id = {item["route_id"]: item for item in personal_predictions}
+        ranked = rank_candidates(shared_ranked,
+                                 [predictions_by_id[row.route_id] for row in shared_ranked],
+                                 data.target_difficulty)
+    else:
+        ranked = shared_ranked
+    reference_positions = {row.route_id: row.final_rank for row in shared_ranked}
+    # rank_candidates intentionally returns dictionaries. Normalize the
+    # anonymous Pydantic results at this boundary so the response builder has
+    # one representation and cannot mix attribute and mapping access.
+    ranked = [row if isinstance(row, dict) else row.model_dump(mode="json") for row in ranked]
     route_by_id = {route.route_id: route for route in routes}
     rows = []
     for rec in ranked:
-        route = route_by_id[rec.route_id]
-        rows.append(dict(route_id=rec.route_id, route_name=route.name, distance_km=route.distance_km,
-            final_rank=rec.final_rank, reference_rank=reference_positions[rec.route_id],
-            recommendation_score=rec.recommendation_score,
-            recommendation_components=rec.recommendation_components,
-            forecast_risk_score=rec.risk_score, assessment_status="experimental" if rec.risk_score is not None else "incomplete",
-            access_distance_km=rec.access_distance_km, difficulty=difficulties[rec.route_id],
-            personal_confidence=personal_details.get(rec.route_id),
-            distance_match_warning=rec.distance_match_warning,
-            risk_components=forecasts[rec.route_id]["forecast_risk"]["components"],
-            forecast_metrics=forecasts[rec.route_id]["metrics"]))
+        route_id = rec["route_id"]
+        route = route_by_id[route_id]
+        personal = next((item for item in personal_predictions if item["route_id"] == route_id), None)
+        pipeline_rank = rec.get("pipeline_rank", reference_positions[route_id])
+        personalized_rank = rec.get("personalized_rank")
+        generic = generic_difficulties[route_id]
+        risk_score = rec.get("risk_score")
+        recommendation_score = rec.get("recommendation_score")
+        recommendation_components = rec.get("recommendation_components")
+        access_distance = rec.get("access_distance_km")
+        distance_warning = rec.get("distance_match_warning")
+        eligibility = rec.get("eligibility")
+        rows.append(dict(route_id=route_id, route_name=route.name, distance_km=route.distance_km,
+            context="historical", pipeline_rank=pipeline_rank,
+            personalized_rank=personalized_rank, final_rank=personalized_rank or pipeline_rank,
+            reference_rank=reference_positions[route_id], recommendation_score=recommendation_score,
+            recommendation_components=recommendation_components,
+            forecast_risk_score=risk_score, risk_score=risk_score,
+            assessment_status="experimental" if risk_score is not None else "incomplete",
+            access_distance_km=access_distance, difficulty=(personal["personalized_predicted_difficulty"] if personal else generic),
+            generic_difficulty=generic,
+            personalized_difficulty=personal["personalized_predicted_difficulty"] if personal else None,
+            target_difficulty=data.target_difficulty if user is not None else None,
+            difficulty_mismatch=rec.get("difficulty_mismatch"),
+            personal_confidence=personal["confidence"] if personal else None,
+            eligibility=eligibility, distance_match_warning=distance_warning,
+            risk_components=forecasts[route_id]["forecast_risk"]["components"],
+            forecast_metrics=forecasts[route_id]["metrics"]))
     return dict(mode="experimental_historical_forecast_ranking", as_of=REPLAY_TIME,
         personalized=user is not None, preferences=data.model_dump(mode="json"),
         run_start=(as_of+timedelta(minutes=data.start_delay_min)).isoformat(),

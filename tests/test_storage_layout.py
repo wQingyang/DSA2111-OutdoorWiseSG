@@ -36,7 +36,7 @@ def test_current_tables_startup_is_repeatable(root):
     assert set(path.name for path in (root/'runtime').glob('*.csv'))==set(TABLES)
 def test_all_categories_and_time_columns(root):
     pipeline=build_pipeline(Settings(data_root=root,data_mode='demo'));pipeline.refresh();pipeline.run(__import__('outdoorwise.contracts.models',fromlist=['Preferences']).Preferences())
-    expected={'weather':10,'air_quality':6,'heat_stress':4}
+    expected={'weather':25,'air_quality':15,'heat_stress':10}
     for group,name in OBSERVATION_TABLES.items():
         assert len(read(root/'runtime'/name))==expected[group]
         assert len(read(root/'runtime'/VERSION_TABLES[group]))==expected[group]
@@ -46,4 +46,4 @@ def test_all_categories_and_time_columns(root):
                 if (field.endswith('_at') or field=='as_of') and value:
                     assert re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}',value)
     assert len(pipeline.get_route_environment('marina_bay').metrics)==10
-    assert pipeline.repository.database_status('demo')['observation_records']==20
+    assert pipeline.repository.database_status('demo')['observation_records']==50

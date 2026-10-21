@@ -26,12 +26,21 @@ async function boot(authenticated = false, options = {}) {
     };
   }
   if (options.geolocation) Object.defineProperty(w.navigator, 'geolocation', {value: options.geolocation, configurable: true});
+  let forecastCalls = 0;
+  if (options.forecastUI) w.outdoorwiseForecastUI = {fetchRecommendations: async () => { forecastCalls += 1; return fixture.generic; }};
   w.fetch = async (url, opt = {}) => {
     requests.push({url, method: opt.method || 'GET', body: opt.body ? JSON.parse(opt.body) : null});
     if (url === '/api/health') return response({data_mode: 'live', agent_mode: 'demo'});
     if (url === '/api/auth/me') return response(authenticated ? {user_id: 'test-user', username: 'Runner'} : {detail: 'Authentication required'}, authenticated ? 200 : 401);
     if (url === '/api/me/recommendations') return failPersonal ? response({}, 503) : response(options.personalized || fixture.personalized);
     if (url === '/api/recommendations') return response(options.generic || fixture.generic);
+    if (url === '/api/experimental/recommendations') {
+      if (options.failForecast) return response({detail: 'Required snapshot, prediction modules or model files are missing.'}, 503);
+      const run = clone(fixture.generic);
+      const routes = new Map(run.routes.map(route => [route.route_id, route]));
+      return response({mode: 'experimental_historical_forecast_ranking', as_of: '2026-10-15T11:15:00Z', run_start: '2026-10-15T11:15:00Z', run_end: '2026-10-15T11:45:00Z', personalized: false, preferences: run.preferences, routes: run.routes,
+        recommendations: run.recommendations.map((row, index) => ({...row, route_name: routes.get(row.route_id).name, distance_km: routes.get(row.route_id).distance_km, forecast_risk_score: row.risk_score, generic_difficulty: 3, personalized_difficulty: null, target_difficulty: null, difficulty_mismatch: null, reference_rank: index + 1, pipeline_rank: index + 1, personalized_rank: index + 1, forecast_metrics: {}, risk_components: {rainfall: {score: 0}, heat: {score: 0}, air_quality: {score: 0}, wind: {score: 0}}})), ranking_weights: {}, warnings: []});
+    }
     if (url === '/api/refresh') return response({status: 'partial', sources: [{source: 'nea_rainfall', status: 'failed', error: 'internal diagnostic'}]});
     if (url === '/api/chat') return response({message: 'Existing demo assistant', trace: [], run: fixture.generic});
     if (url.endsWith('/difficulty')) return response({predicted_difficulty: 2.3, difficulty_label: 'Easy'});
@@ -53,13 +62,72 @@ async function boot(authenticated = false, options = {}) {
     }
     throw Error('Unexpected endpoint ' + url);
   };
-  for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'app']) w.eval(fs.readFileSync(path.join(root, `frontend/${script}.js`), 'utf8'));
+  for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'forecast-ranking', 'app']) w.eval(fs.readFileSync(path.join(root, `frontend/${script}.js`), 'utf8'));
   await until(() => w.document.querySelectorAll('#cards .card').length > 0);
   await until(() => w.document.getElementById('personalization-status').textContent.includes(authenticated ? 'Loaded' : 'Sign in'));
-  return {dom, w, d: w.document, leaflet, requests, runs, feedback, failPersonal: value => failPersonal = value, failFeedback: value => failFeedback = value};
+  return {dom, w, d: w.document, leaflet, requests, runs, feedback, forecastCalls: () => forecastCalls, failPersonal: value => failPersonal = value, failFeedback: value => failFeedback = value};
 }
 const card = (d, id) => d.querySelector(`[data-personalization-route="${id}"]`);
 const submit = (w, id) => w.document.getElementById(id).dispatchEvent(new w.Event('submit', {bubbles: true, cancelable: true}));
+
+test('forecast UI presence does not hijack anonymous normal recommendations', async t => {
+  const ui = await boot(false, {forecastUI: true}); t.after(() => ui.dom.window.close());
+  assert.equal(ui.forecastCalls(), 0);
+  assert.equal(ui.requests.filter(r => r.url === '/api/recommendations').length, 1);
+  assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
+  assert(ui.d.querySelectorAll('#cards .card').length > 0);
+});
+
+test('forecast UI presence does not hijack authenticated personalized recommendations', async t => {
+  const ui = await boot(true, {forecastUI: true}); t.after(() => ui.dom.window.close());
+  assert.equal(ui.forecastCalls(), 0);
+  assert.equal(ui.requests.filter(r => r.url === '/api/me/recommendations').length, 1);
+  assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
+  assert.match(ui.d.getElementById('results-summary').textContent, /running profile/);
+});
+
+test('historical forecast is opt-in and preserves normal cards when unavailable', async t => {
+  const ui = await boot(false, {forecastUI: true, failForecast: true}); t.after(() => ui.dom.window.close());
+  const launcher = ui.d.getElementById('forecast-launcher');
+  assert.equal(launcher.hidden, false);
+  assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
+  assert(ui.d.querySelectorAll('#cards .route-summary').length > 0);
+  launcher.click();
+  await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
+  assert(ui.d.querySelectorAll('#cards .route-summary').length > 0);
+  assert.match(ui.d.getElementById('forecast-status').textContent, /Required snapshot/);
+});
+
+test('current recommendations use the shared top-three toggle without refetching', async t => {
+  const ui = await boot(true); t.after(() => ui.dom.window.close());
+  const order = () => [...ui.d.querySelectorAll('#cards .card')].filter(c => !c.hidden).map(c => c.dataset.personalizationRoute);
+  const allOrder = [...ui.d.querySelectorAll('#cards .card')].map(c => c.dataset.personalizationRoute);
+  const before = ui.requests.length;
+  const toggle = ui.d.getElementById('toggle-all-routes');
+  assert.equal(order().length, 3);
+  toggle.click();
+  assert.equal(order().length, allOrder.length);
+  assert.deepEqual(order(), allOrder);
+  toggle.click();
+  assert.equal(order().length, 3);
+  assert.deepEqual(order(), allOrder.slice(0, 3));
+  assert.equal(ui.requests.length, before);
+});
+
+test('historical collapse uses the active historical cards after a context switch', async t => {
+  const ui = await boot(false); t.after(() => ui.dom.window.close());
+  const launcher = ui.d.getElementById('forecast-launcher');
+  launcher.click();
+  await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
+  await until(() => ui.d.querySelectorAll('#cards .unified-route-card').length > 0);
+  const toggle = ui.d.getElementById('toggle-all-routes');
+  const total = ui.d.querySelectorAll('#cards .unified-route-card').length;
+  toggle.click();
+  assert.equal([...ui.d.querySelectorAll('#cards .unified-route-card')].filter(card => !card.hidden).length, total);
+  toggle.click();
+  assert.equal([...ui.d.querySelectorAll('#cards .unified-route-card')].filter(card => !card.hidden).length, 3);
+  assert.equal(toggle.textContent, `View all routes (${total})`);
+});
 
  test('cards show new scores and zero risk correctly; technical details are closed', async t => {
   const ui = await boot(); t.after(() => ui.dom.window.close());
@@ -108,7 +176,10 @@ test('authenticated final ordering persists through load, compare, refresh and c
   const order = () => [...ui.d.querySelectorAll('#cards .card')].map(c => c.dataset.personalizationRoute);
   const expected = fixture.personalized.recommendations.map(r => r.route_id);
   assert.deepEqual(order(), expected);
-  fixture.personalized.recommendations.forEach((r, i) => assert.equal(card(ui.d, r.route_id).querySelector('.rank-label').textContent, `Final rank #${r.final_rank}`));
+  fixture.personalized.recommendations.forEach((r, i) => {
+    assert.equal(card(ui.d, r.route_id).querySelector('.rank-label').textContent, `Your difficulty-match rank #${r.personalized_rank}`);
+    assert.match(card(ui.d, r.route_id).querySelector('.shared-rank-label').textContent, new RegExp(`Shared rank #${r.pipeline_rank ?? i + 1}`));
+  });
   submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 2); await tick();
   assert.deepEqual(order(), expected);
   ui.d.getElementById('refresh').click(); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 3); await tick();

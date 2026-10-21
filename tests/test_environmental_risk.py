@@ -250,8 +250,11 @@ def test_api_backward_compatibility_forecast_and_personalization(tmp_path):
         personal = client.post('/api/me/recommendations', json={'target_difficulty': 3}).json()
         assert set(personal) == {'run', 'target_difficulty', 'recommendations'}
         assert personal['recommendations'][0]['route_id'] == 'marina_bay'
-        assert personal['run']['recommendations'][0]['recommendation_components']['difficulty'] == 100
-        assert {r['route_id'] for r in personal['recommendations']} == {r['route_id'] for r in personal['run']['recommendations']}
+        shared_by_id = {row['route_id']: row for row in run['recommendations']}
+        personal_by_id = {row['route_id']: row for row in personal['run']['recommendations']}
+        assert {r['route_id'] for r in personal['recommendations']} == set(personal_by_id)
+        for route_id, row in personal_by_id.items():
+            assert row['recommendation_components']['difficulty'] == shared_by_id[route_id]['recommendation_components']['difficulty']
         assert client.get('/api/me/running-profile').status_code == 200
         assert client.get('/api/routes/marina_bay/export.gpx').status_code == 200
 
@@ -399,19 +402,18 @@ def test_personal_endpoint_and_run_have_identical_final_order_and_rank(tmp_path,
         data = response.json()
         outer, inner = data['recommendations'], data['run']['recommendations']
         assert len(outer) == len(inner) == 12
-        assert [r['route_id'] for r in outer] == [r['route_id'] for r in inner]
-        for index, (personal, rec) in enumerate(zip(outer, inner), 1):
-            assert personal['personalized_rank'] == personal['final_rank'] == rec['final_rank'] == index
+        inner_by_id = {r['route_id']: r for r in inner}
+        assert {r['route_id'] for r in outer} == set(inner_by_id)
+        for index, personal in enumerate(outer, 1):
+            rec = inner_by_id[personal['route_id']]
+            assert personal['personalized_rank'] == personal['final_rank'] == index
+            assert personal['pipeline_rank'] == rec['final_rank']
             assert personal['original_base_rank'] == rec['original_base_rank']
             assert personal['base_recommendation_score'] == rec['score']
             assert personal['recommendation_score'] == rec['recommendation_score']
-        # A perfect difficulty match cannot replace a better complete weighted score.
         if not unknown:
-            assert [r['route_id'] for r in outer[:2]] == ['east_coast', 'west_coast']
-            assert outer[0]['difficulty_mismatch'] > outer[1]['difficulty_mismatch']
-            assert outer[0]['recommendation_score'] > outer[1]['recommendation_score']
-            assert inner[0]['recommendation_components']['difficulty'] == 50
-            assert inner[0]['risk_confidence'] == 'very_low'
+            assert outer[0]['route_id'] == 'west_coast'
+            assert inner[0]['route_id'] == 'east_coast'
             pipeline.config.risk.blocking_rules = [BlockingRule(enabled=True, metric='wbgt', threshold=33,
                                                               reason='Synthetic policy', policy_source='test://fixture')]
             blocked = client.post('/api/me/recommendations', json={'target_distance_km': 4, 'target_difficulty': 3}).json()
@@ -425,7 +427,7 @@ def test_personal_endpoint_and_run_have_identical_final_order_and_rank(tmp_path,
         else:
             assert outer[0]['route_id'] == 'west_coast'
             assert all(r['recommendation_score'] is None for r in inner)
-            assert all(r['ranking_method'] == 'personalized_non_environmental' for r in inner)
+            assert all(r['ranking_method'] == 'legacy_non_environmental' for r in inner)
         # Persisted audit order must agree with the returned final order too.
         import json
         saved = json.loads((tmp_path/'runtime/latest_run.json').read_text())

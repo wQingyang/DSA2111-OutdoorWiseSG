@@ -3,7 +3,7 @@
 .environment-scroll{overflow-x:auto}.environment{width:100%;font-size:.78rem;border-collapse:collapse}.environment td,.environment th{padding:7px;text-align:left;border-bottom:1px solid #ddd}.environment tr[data-state="stale"]{background:#fff3d6}.environment tr[data-state="missing"]{background:#f5e9e9}#ingestion{font-size:.8rem;overflow-wrap:anywhere}
 .dynamic-routes{grid-column:1}.dynamic-routes label:has(input[type="checkbox"]){display:flex;gap:8px;align-items:center}.dynamic-routes input[type="checkbox"]{width:auto;margin:0}#generated-route-cards{display:grid;gap:10px;margin-top:12px}
 [hidden]{display:none!important}.route-tabs{grid-column:1/-1;display:flex;gap:8px;background:#e5ece3;padding:6px;border-radius:12px}.route-tab{width:auto;flex:1;background:transparent;color:#34564b}.route-tab.active{background:#24684c;color:white}.route-tab-panel{grid-column:1/-1;display:grid;grid-template-columns:300px 1fr;gap:24px}.dynamic-routes{grid-column:auto}#dynamic-map{height:430px;border-radius:10px}#dynamic-fallback svg{width:100%;height:280px}#generated-route-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
-@media(max-width:800px){.route-tab-panel{grid-template-columns:1fr}.route-tabs{flex-direction:column}#generated-route-cards{grid-template-columns:1fr}}
+@media(max-width:800px){.route-tab-panel{grid-template-columns:1fr}.route-tabs{flex-direction:column}#generated-route-cards{grid-template-columns:1fr}}.context-indicator{font-weight:700;color:#24684c;margin:8px 0}
 
 /* Display the main scores in compact, side-by-side boxes. */
 .unified-route-card .unified-score-grid {

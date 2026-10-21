@@ -71,6 +71,7 @@ function render(run) {
     window.outdoorwiseForecastUI.render(run);
     return;
   }
+  $('context-indicator').textContent = 'Current conditions';
   routes = run.routes;
   draw(routes);
   $('cards').replaceChildren(); $('blocked-routes').replaceChildren();
@@ -80,7 +81,7 @@ function render(run) {
   const predictionMap = new Map((run.predictions || []).map(p => [p.route_id, p]));
   const routeMap = new Map(routes.map(r => [r.route_id, r]));
   const blocked = (run.risks || []).filter(r => r.eligibility === 'blocked');
-  $('results-summary').textContent = `${rows.length} route${rows.length === 1 ? '' : 's'} · ${window.personalizedRanking ? 'Matched to your running profile' : 'Matched to your preferences'}`;
+  $('results-summary').textContent = `${rows.length} route${rows.length === 1 ? '' : 's'} · ${window.personalizedRanking ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
   const messages = [];
   if (rows.length && rows.every(r => r.recommendation_score === null)) messages.push('Environmental assessment unavailable. Routes are ordered using available distance, access and difficulty preferences.');
   if (rows.length && rows.every(r => r.distance_match_warning)) messages.push('No available route closely matches your target distance. Route lengths have not been shortened.');
@@ -107,13 +108,11 @@ function render(run) {
     blocked.forEach((risk, index) => addCard(routeMap.get(risk.route_id), null, risk, index, container));
     $('blocked-routes').append(details);
   }
+  window.outdoorwiseRouteVisibility?.apply(Boolean(window.personalizedRanking));
   document.dispatchEvent(new CustomEvent('outdoorwise:routes-rendered', {detail: {routes, recommendations: rows,
     personalizedRanking: window.personalizedRanking, authenticated: Boolean(window.outdoorwiseSession)}}));
 }
 async function personalizedOrGeneric() {
-  if (window.outdoorwiseForecastUI) {
-    return window.outdoorwiseForecastUI.fetchRecommendations();
-  }
   const base = preferences();
   const revision = window.outdoorwiseLocation.revision();
   const confirmSelection = run => {
@@ -145,20 +144,12 @@ async function busy(action) {
 }
 $('preferences').onsubmit = event => {event.preventDefault(); busy(async () => render(await personalizedOrGeneric()));};
 $('refresh').onclick = () => busy(async () => {
-  if (window.outdoorwiseForecastUI) {
-    render(await personalizedOrGeneric());
-    return;
-  }
   preferences(); // Never drop a pending/unselected location or its access constraint.
   const report = await api('/api/refresh', {});
   $('ingestion').textContent = report.status === 'partial' ? 'Some observations could not be refreshed. Retained data may be outdated.' : 'Environmental observations refreshed.';
   render(await personalizedOrGeneric());
 });
 $('chat').onsubmit = event => {event.preventDefault(); busy(async () => {
-  if (window.outdoorwiseForecastUI) {
-    $('answer').textContent = 'The assistant is not connected to historical replay. Use the route details for this demonstration.';
-    return;
-  }
   const response = await api('/api/chat', {message: $('message').value, preferences: preferences()});
   $('answer').textContent = response.message; $('trace').textContent = JSON.stringify(response.trace, null, 2);
   // Assistant prose does not replace the final user-specific recommendation list.
