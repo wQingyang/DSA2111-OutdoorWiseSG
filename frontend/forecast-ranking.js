@@ -28,12 +28,11 @@
   cards.after(toggle);
 
   let current = null;
-  let expanded = false;
   let activeContext = 'current';
+  const showAllByContext = {current: false, historical: false};
   let version = 0;
   let controller;
   let active = false;
-  let normalCards = null;
 
   function el(tag, text, className) {
     const node = document.createElement(tag);
@@ -98,26 +97,27 @@
   }
 
   function updateVisible() {
-    if (!current) return;
+    if (!current || activeContext !== 'historical') return;
     const list = [...cards.querySelectorAll('.unified-route-card')];
-    list.forEach((card, index) => { card.hidden = !expanded && index >= 3; });
+    const showAll = showAllByContext.historical;
+    list.forEach((card, index) => { card.hidden = !showAll && index >= 3; });
     toggle.hidden = list.length <= 3;
-    toggle.setAttribute('aria-expanded', String(expanded));
-    toggle.textContent = expanded ? 'Show top 3' : `View all routes (${list.length})`;
-    const count = expanded ? list.length : Math.min(3, list.length);
+    toggle.setAttribute('aria-expanded', String(showAll));
+    toggle.textContent = showAll ? 'Show top 3' : `View all routes (${list.length})`;
+    const count = showAll ? list.length : Math.min(3, list.length);
     byId('results-summary').textContent = `Showing ${count} of ${list.length} routes · ${current.personalized ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
     const routeById = new Map(current.routes.map(route => [route.route_id, route]));
-    const visible = current.recommendations.slice(0, expanded ? list.length : 3);
+    const visible = current.recommendations.slice(0, showAll ? list.length : 3);
     window.draw(visible.map(row => routeById.get(row.route_id)).filter(Boolean));
   }
 
   function applySharedVisibility(personalized) {
     activeContext = 'current';
     current = null;
-    const list = [...cards.querySelectorAll('.card')];
+    showAllByContext.current = false;
+    const list = [...cards.querySelectorAll('.route-summary')];
     list.forEach((card, index) => { card.hidden = index >= 3; });
     toggle.hidden = list.length <= 3;
-    expanded = false;
     toggle.setAttribute('aria-expanded', 'false');
     toggle.textContent = `View all routes (${list.length})`;
     const summary = byId('results-summary');
@@ -151,7 +151,7 @@
   function render(result) {
     current = result;
     activeContext = 'historical';
-    expanded = false;
+    showAllByContext.historical = false;
     modeLabels();
     byId('context-indicator').textContent = `Historical snapshot · ${shortTime(result.as_of)}`;
     distanceHint();
@@ -239,7 +239,6 @@
 
   async function fetchRecommendations() {
     active = true;
-    normalCards = normalCards || [...cards.childNodes].map(node => node.cloneNode(true));
     const body = input();
     const signature = JSON.stringify(body);
     const myVersion = ++version;
@@ -247,9 +246,6 @@
     controller = new AbortController();
     const signal = controller.signal;
     if (forecastStatus) forecastStatus.textContent = 'Loading historical forecast comparison…';
-    cards.replaceChildren(el('p', 'Calculating forecasts for all eligible routes…', 'empty-results'));
-    toggle.hidden = true;
-    modeLabels();
     try {
       const session = await fetch('/api/auth/me', {signal});
       if (session.status === 401) window.outdoorwiseSession = null;
@@ -267,9 +263,7 @@
       return data;
     } catch (error) {
       if (myVersion === version) {
-        cards.replaceChildren(...(normalCards || []).map(node => node.cloneNode(true)));
         if (forecastStatus) forecastStatus.textContent = error.name === 'AbortError' ? 'Preferences changed. Compare routes again.' : `Historical forecast unavailable: ${error.message}`;
-        byId('results-summary').textContent = 'No updated results';
       }
       throw error;
     }
@@ -277,8 +271,9 @@
 
   toggle.onclick = () => {
     if (activeContext === 'current') {
-      const list = [...cards.querySelectorAll('.card')];
-      const showAll = toggle.getAttribute('aria-expanded') !== 'true';
+      const list = [...cards.querySelectorAll('.route-summary')];
+      const showAll = !showAllByContext.current;
+      showAllByContext.current = showAll;
       list.forEach((card, index) => { card.hidden = !showAll && index >= 3; });
       toggle.setAttribute('aria-expanded', String(showAll));
       toggle.textContent = showAll ? 'Show top 3' : `View all routes (${list.length})`;
@@ -286,7 +281,7 @@
       if (summary) summary.textContent = `Showing ${showAll ? list.length : Math.min(3, list.length)} of ${list.length} routes · ${window.personalizedRanking ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
       return;
     }
-    expanded = !expanded;
+    showAllByContext.historical = !showAllByContext.historical;
     updateVisible();
   };
   launcher?.addEventListener('click', async () => {
@@ -296,7 +291,7 @@
       const result = await fetchRecommendations();
       render(result);
     } catch (_) {
-      // The normal recommendation cards are restored by fetchRecommendations.
+      // The normal recommendation cards remain untouched on forecast failure.
     } finally {
       launcher.disabled = false;
     }

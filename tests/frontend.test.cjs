@@ -35,6 +35,7 @@ async function boot(authenticated = false, options = {}) {
     if (url === '/api/me/recommendations') return failPersonal ? response({}, 503) : response(options.personalized || fixture.personalized);
     if (url === '/api/recommendations') return response(options.generic || fixture.generic);
     if (url === '/api/experimental/recommendations') {
+      if (options.failForecast) return response({detail: 'Required snapshot, prediction modules or model files are missing.'}, 503);
       const run = clone(fixture.generic);
       const routes = new Map(run.routes.map(route => [route.route_id, route]));
       return response({mode: 'experimental_historical_forecast_ranking', as_of: '2026-10-15T11:15:00Z', run_start: '2026-10-15T11:15:00Z', run_end: '2026-10-15T11:45:00Z', personalized: false, preferences: run.preferences, routes: run.routes,
@@ -86,7 +87,7 @@ test('forecast UI presence does not hijack authenticated personalized recommenda
 });
 
 test('historical forecast is opt-in and preserves normal cards when unavailable', async t => {
-  const ui = await boot(false, {forecastUI: true}); t.after(() => ui.dom.window.close());
+  const ui = await boot(false, {forecastUI: true, failForecast: true}); t.after(() => ui.dom.window.close());
   const launcher = ui.d.getElementById('forecast-launcher');
   assert.equal(launcher.hidden, false);
   assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
@@ -94,6 +95,7 @@ test('historical forecast is opt-in and preserves normal cards when unavailable'
   launcher.click();
   await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
   assert(ui.d.querySelectorAll('#cards .route-summary').length > 0);
+  assert.match(ui.d.getElementById('forecast-status').textContent, /Required snapshot/);
 });
 
 test('current recommendations use the shared top-three toggle without refetching', async t => {
