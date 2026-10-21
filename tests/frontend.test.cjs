@@ -39,7 +39,7 @@ async function boot(authenticated = false, options = {}) {
       const run = clone(fixture.generic);
       const routes = new Map(run.routes.map(route => [route.route_id, route]));
       return response({mode: 'experimental_historical_forecast_ranking', as_of: '2026-10-15T11:15:00Z', run_start: '2026-10-15T11:15:00Z', run_end: '2026-10-15T11:45:00Z', personalized: false, preferences: run.preferences, routes: run.routes,
-        recommendations: run.recommendations.map((row, index) => ({...row, route_name: routes.get(row.route_id).name, distance_km: routes.get(row.route_id).distance_km, forecast_risk_score: row.risk_score, reference_rank: index + 1, pipeline_rank: index + 1, forecast_metrics: {}, risk_components: {rainfall: {score: 0}, heat: {score: 0}, air_quality: {score: 0}, wind: {score: 0}}})), ranking_weights: {}, warnings: []});
+        recommendations: run.recommendations.map((row, index) => ({...row, route_name: routes.get(row.route_id).name, distance_km: routes.get(row.route_id).distance_km, forecast_risk_score: row.risk_score, generic_difficulty: 3, personalized_difficulty: null, target_difficulty: null, difficulty_mismatch: null, reference_rank: index + 1, pipeline_rank: index + 1, personalized_rank: index + 1, forecast_metrics: {}, risk_components: {rainfall: {score: 0}, heat: {score: 0}, air_quality: {score: 0}, wind: {score: 0}}})), ranking_weights: {}, warnings: []});
     }
     if (url === '/api/refresh') return response({status: 'partial', sources: [{source: 'nea_rainfall', status: 'failed', error: 'internal diagnostic'}]});
     if (url === '/api/chat') return response({message: 'Existing demo assistant', trace: [], run: fixture.generic});
