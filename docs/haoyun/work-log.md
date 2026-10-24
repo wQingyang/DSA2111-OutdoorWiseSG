@@ -10,7 +10,7 @@
 
 - Date: 2026-10-24
 - Current branch: haoyun/mapping-demo-validation
-- Commit ID: T79dc7f01d586341d9b451c75d123e1f89a61befa
+- Commit ID: 79dc7f01d586341d9b451c75d123e1f89a61befa
 - Application URL: http://127.0.0.1:8000/
 - Data mode: Demo (synthetic observations)
 
@@ -23,14 +23,10 @@
 - Environmental Details display the station or region, distance, timestamps, and matching method.
 - Predefined routes currently use `nearest_available_station_start_point_v1`.
 
-### Pending Validation
+### Manual Validation Status
 
-- Selecting a route highlights the corresponding route on the map.
-- Changing the target distance and starting location updates the results correctly.
-- View All expands and collapses correctly.
-- Personalised recommendations work for logged-in users.
-- Switching between Current and Historical contexts works correctly.
-- Dynamic route generation and error messages work correctly.
+- D01–D10 passed manual browser validation. Details are recorded below.
+- Dynamic route configuration and functional validation are owned by the dynamic-routing developer.
 
 ## Mapping Experiment Plan
 
@@ -66,6 +62,27 @@ Record:
 
 ### Remaining tasks
 
-- Complete the frontend and account-flow validations listed under Pending Validation above.
-- Review route geometries still marked `candidate_requires_visual_review` before treating them as approved routes.
-- Keep production integration separate until the team agrees on along-route aggregation, coverage metadata, and risk-module compatibility.
+- Rehearse the demonstration using docs/haoyun/demo-script.md.
+- Prepare the completed evidence for team review.
+- Production integration remains separate and requires agreement on aggregation, coverage metadata and risk-module compatibility.
+- Route geometries retain their existing visual-review status; this experiment does not approve them for navigation.
+
+
+## Manual Demo Validation
+
+- Test date: 2026-10-24
+- Data mode: Demo (synthetic observations)
+- Validation method: Manual browser testing
+
+| ID | Test | Expected result | Actual result | Status |
+|---|---|---|---|---|
+| D01 | Select two routes using View Route | The map focuses on or highlights the corresponding route each time. | Both selected routes corresponded correctly to their map display. | Pass |
+| D02 | Change target distance from 4 km to 8 km and compare again | Results reload successfully and distance-match explanations reflect the updated target. | At 4 km, Marina Bay waterfront loop ranked first. At 8 km, MacRitchie Reservoir forest loop ranked first. Both requests loaded successfully, and the displayed distance differences were correct. | Pass |
+| D03 | Expand and collapse the route list | View All displays all 12 routes, and collapsing restores the top three. | Both View All and collapse worked correctly. | Pass |
+| D04 | Select NUS as the preset starting location with a 5 km access limit | A start marker appears and all returned routes have access distances within 5 km. | The NUS start marker appeared. Three routes were returned: West Coast (1.76 km), Singapore Botanic Gardens (4.71 km), and Bukit Timah Rail Corridor (2.85 km). All access distances were within the limit. | Pass |
+| D05 | Reduce the NUS access limit to 0.1 km | No routes are returned if none meet the strict access limit. | No matching routes were returned after applying the 0.1 km limit. | Pass |
+| D06 | Restore Anywhere in Singapore and compare again | Routes reappear, the start marker is removed, the access limit is disabled, and the empty-result message clears. | All expected behaviours were confirmed after restoring Anywhere mode. | Pass |
+| D07 | Compare the same route across two synthetic test users with identical preferences | Shared results remain unchanged, while personalised difficulty and difficulty-match ranking reflect each user's history. | For Botanic Gardens, both users had Recommendation Score 74.0, Environmental Risk 11.9, Shared Rank #5 and Generic Difficulty 2.5. Runner 1 had personalised difficulty 3.0, mismatch 0.0 and personal rank #1; Runner 2 had 2.6, 0.4 and #7, respectively. | Pass |
+| D08 | Load historical recommendations while logged in as test_runner_2 | Historical results load and display shared and personalised recommendation fields with an explicit historical label. | Historical comparison loaded successfully. Cards displayed shared rank, personal rank, recommendation score, environmental risk, generic difficulty, personalised difficulty and target mismatch, with a historical baseline label. | Pass |
+| D09 | Expand and collapse historical recommendations | The list switches correctly between all 12 routes and the top three. | View All and collapse both worked correctly in Historical mode. | Pass |
+| D10 | Switch from Historical to Current and back | Each context loads correctly without retaining cards from the previous context. | Compare routes restored Current conditions and demo cards. Historical comparison then loaded successfully again. | Pass |
