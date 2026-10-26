@@ -68,7 +68,9 @@ def create_app(settings: Settings | None=None):
             # Existing observations remain intact; never silently replace live data with demo.
             raise HTTPException(503,'Collection failed. Existing observations are retained; check network/API availability.') from e
     @app.post('/api/recommendations',response_model=Run)
-    def recommendations(preferences: Preferences): return pipeline.run(preferences)
+    def recommendations(preferences: Preferences):
+        pipeline.ensure_demo_data_fresh()
+        return pipeline.run(preferences)
     @app.post('/api/chat',response_model=ChatResponse)
     def chat(request: ChatRequest):
         try: return AgentService(pipeline,settings).chat(request)
