@@ -8,7 +8,7 @@
   "scripts": {
     "test": "node --test tests/frontend.test.cjs",
     "test:smoke": "node tests/frontend_smoke.cjs",
-    "test:browser": "node tests/frontend_browser.cjs"
+    "test:browser": "node tests/frontend_browser.cjs && node tests/frontend_backend_browser.cjs"
   },
   "devDependencies": {
     "jsdom": "^30.1.3",

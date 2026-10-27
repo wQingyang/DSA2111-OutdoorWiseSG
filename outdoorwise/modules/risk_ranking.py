@@ -31,7 +31,7 @@ class RiskAwareRanking:
             rec.relative_distance_difference = round(relative, 6)
             if relative > self.config.distance_relative_tolerance:
                 rec.distance_match_warning = f'Route differs from target by {relative:.0%}; it is not a close distance match. Geometry is unchanged.'
-            reasons = ['Risk uses current observations, not the requested forecast window.']
+            reasons = ['Experimental forecast risk; run-window coverage and eligibility limitations apply.' if risk.risk_assessment_mode == 'experimental_historical_forecast' else 'Risk uses current observations, not the requested forecast window.']
             reasons.append('Complete eligible/caution assessments share weighted ordering; confidence is disclosed separately and explicit blocks take precedence.')
             if rec.risk_confidence in {'low', 'very_low'}:
                 reasons.append(f'Environmental estimate has {rec.risk_confidence} confidence; inspect spatial warnings before choosing a route.')

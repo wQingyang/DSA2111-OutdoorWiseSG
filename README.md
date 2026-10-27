@@ -1,248 +1,208 @@
-# OutdoorWise — Environmental Data Pipeline Demo
+# OutdoorWiseSG
 
-OutdoorWise combines a catalog of 12 Singapore running routes with environmental observations, route recommendations, and an assistant interface. The catalog preserves the original Marina Bay and Woodlands Waterfront routes and adds ten routes. The ten new routes are candidates marked candidate_requires_visual_review; verify their geometry before treating them as approved routes.
+OutdoorWise recommends Singapore running routes from geographic data,
+environmental observations and running preferences. The catalog has **12 routes**.
+Accounts, per-user running history, favourites, difficulty feedback, personalized
+ordering, Leaflet maps and GPX export are supported.
 
-The pipeline integrates eight official API endpoints covering ten environmental metrics, stores observations in CSV files, and exposes a shared route environment service. The default data mode is **live**. The default assistant mode is a fixed rule-based demonstration. Sprint 1 adds configurable observation-based environmental risk and eligibility, followed by weighted recommendation ranking. Unknown assessments retain explicit fallback discovery; forecasts remain unavailable. See [risk formulas, policy and API compatibility](docs/ENVIRONMENTAL_RISK.md).
+- **Tab 1 — Existing route recommendations:** one form and **Find Recommended Routes** action. Live Mode assesses current observations; Historical Mode replays a fixed dataset with explicit prediction limitations.
+- **Tab 2 — Generate a dynamic route:** OpenRouter interprets natural-language preferences, the user confirms coordinates, and OpenRouteService (ORS) generates geometry. Manual preferences remain available without the LLM; geometry generation still requires ORS.
 
-## Dynamic-route changes
+Risk and difficulty are provisional engineering estimates. Source freshness,
+coverage, unavailable values and geometry-review limitations remain visible.
 
-- Added openrouteservice-backed loop generation from a selected start point, target distance, and walking preferences.
-- Added validation, adaptive distance correction, retries, duplicate filtering, persistence, and GPX export for generated routes.
-- Added along-route environmental sampling plus generic/personalised difficulty assessment and ranking.
-- Split the frontend into independent **Existing route recommendations** and **Generate a dynamic route** tabs, each with its own map and route state.
+## Startup options: local Python or Docker Compose
 
-## Requirements
+Both options run the same application: **Tab 1** recommends existing routes using
+current environmental observations; **Tab 2** parses natural-language preferences
+through OpenRouter and generates routes through OpenRouteService (ORS). Choose
+**one** option at a time to avoid duplicate collectors. Use Python 3.11+ for local
+startup; macOS/Linux commands below (Windows: WSL or Docker).
 
-- Python 3.11 or later.
-- Linux or macOS. On Windows, use WSL or Docker because the CSV repository uses `fcntl` for cross-process locking.
-- Internet access to collect live observations. Previously collected data can be read without fetching again.
+### Configure API keys (both options)
 
-## Quick Start
+Create `.env` in the repository root. If `.env.example` is present, copy it with
+`cp .env.example .env`; otherwise create `.env` manually. Populate the keys you
+need, and **never commit `.env` or paste secrets into logs**:
 
-Run these commands from the extracted project directory:
+```dotenv
+# Tab 2: ORS creates route geometry
+ORS_API_KEY=your_ors_key
+# Tab 2: OpenRouter parses natural-language running preferences
+OPENROUTER_API_KEY=your_openrouter_key
+# Optional OpenRouter model
+OPENROUTER_MODEL=openrouter/free
+# Optional public Singapore environmental API key for the collector
+DATA_GOV_API_KEY=
+```
+
+These are **separate services**: OpenRouter parses preferences, while ORS creates
+route geometry. Each can be tested independently; the other key is not needed for
+that individual step. `DATA_GOV_API_KEY` is optional for public data collection.
+All keys remain server-side.
+
+### Option A — Local Python (two terminals)
+
+**One-time installation** from the repository root:
 
 ```bash
-cd DSA2111-OutdoorWiseSG
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
-export OUTDOORWISE_DATA_MODE=live
-export ORS_API_KEY=your-openrouteservice-key  # required only for dynamic routes
-python -m outdoorwise.cli collect
-python -m outdoorwise.cli run --horizon 30
-python -m uvicorn outdoorwise.api.app:app --host 127.0.0.1 --port 8000
 ```
 
-Open [the application](http://127.0.0.1:8000). Each route card shows final rank, the new recommendation score, environmental risk/components, freshness/confidence, readable reasons and warnings. Expand Environmental Details for the full observation table, sources, station distances, raw timestamps and matching information. Signed-in route comparisons and refreshes preserve personalized ordering. API documentation is available at [the backend documentation page](http://127.0.0.1:8000/docs).
-
-The fixed-route tab works without `ORS_API_KEY`. The dynamic-route tab requires a valid key and outbound access to openrouteservice. Generated routes reuse locally collected environmental observations; the routing provider does not supply weather or air-quality data.
-
-The **Refresh observations** button collects all configured sources. A failed source produces a `partial` result while collection continues for the other sources. Existing observations remain available with explicit status labels.
-
-The package includes CSV files from a verified live collection. Their timestamps naturally become stale. Run `collect` again to refresh them. Starting the server in live mode reads stored live observations; it does not automatically fetch data or substitute demo values.
-
-## Collection and Demo Commands
+**Terminal 1 — Live environmental collector:**
 
 ```bash
-# Collect only sources whose configured polling interval has elapsed.
-python -m outdoorwise.cli collect --due
-
-# Run the test suite.
-python -m pytest -q
-
-# Collect explicitly synthetic observations.
-OUTDOORWISE_DATA_MODE=demo python -m outdoorwise.cli collect
-
-# Start the application with demo observations and simulated forecasts.
-OUTDOORWISE_DATA_MODE=demo python -m uvicorn outdoorwise.api.app:app
+cd /path/to/outdoorwise-main
+source .venv/bin/activate
+# Load optional DATA_GOV_API_KEY (and other settings) if present:
+set -a; source .env; set +a
+OUTDOORWISE_DATA_MODE=live \
+python -m outdoorwise.cli watch --tick-seconds 30
 ```
 
-Start continuous collection in a separate terminal:
+Keep this terminal running. `--tick-seconds 30` is a scheduling check interval,
+not a promise to fetch each source every 30 seconds. Only **one collector** may
+own the same runtime data directory. If you get `A collection worker already
+owns this data directory`, first check for and stop the existing collector;
+do not blindly remove its lock.
+
+**Terminal 2 — FastAPI backend and both frontend tabs:**
 
 ```bash
-OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli watch
-# Inspect record counts and the last worker report.
-OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli status
+cd /path/to/outdoorwise-main
+source .venv/bin/activate
+set -a; source .env; set +a
+OUTDOORWISE_APP_MODE=live OUTDOORWISE_DATA_MODE=live \
+python -m uvicorn outdoorwise.api.app:app \
+  --host 127.0.0.1 --port 8001 --workers 1
 ```
 
-`watch` checks configured source intervals every 30 seconds, persists live history, and resumes scheduling from ingestion logs after restart. Stop it with Ctrl+C. Only one continuous worker can own a data directory. `collect --due` remains a one-shot entry point; `collect` without `--due` forces all sources.
+Open **http://127.0.0.1:8001** (API docs: `/docs`). Local Python does **not**
+automatically load `.env`, so run the `set -a; source .env; set +a` command in
+each terminal before starting a process. The API reads existing observations;
+it does not fetch them on startup.
 
-The collector process and host must remain running. The frontend runs independently. See [continuous collection](docs/LIVE_COLLECTION.md) for shutdown, Docker Compose, recovery, and monitoring instructions.
+To test **Tab 1 Historical Mode**, stop Terminal 2 with Ctrl+C and restart it
+with `OUTDOORWISE_APP_MODE=historical` (other arguments unchanged). Historical
+mode does not change Tab 2. You can inspect the collector without starting a
+second collector using `OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli status`.
 
-Live and demo observations are isolated using `source_kind`. The latest route CSV views represent the mode used by the most recent refresh. The shared service recalculates results for the selected mode and query time.
+### Option B — Docker Compose (two services, one command)
 
-## Project Structure
+Install and **start Docker Desktop** (or another Docker Engine). Check
+`docker info` and `docker compose version`; if the daemon is unavailable,
+start Docker Desktop before trying to build. Keep `.env` in the repository root.
+Compose reads this file for variable substitution; there is no need to `source`
+it for Docker Compose.
 
-| Responsibility | File or directory |
+Stop any locally running collector and FastAPI process, then execute:
+
+```bash
+cd /path/to/outdoorwise-main
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps
+```
+
+Docker Compose runs exactly two services: `collector` (continuous data
+collection) and `app` (FastAPI plus Tab 1 and Tab 2). Open
+**http://localhost:8000** (API docs: `/docs`). To inspect operation:
+
+```bash
+docker compose logs --tail=100 collector
+docker compose logs --tail=100 app
+curl -f http://localhost:8000/api/health
+curl -f http://localhost:8000/api/ready
+```
+
+Both containers share the **`outdoorwise-runtime` named volume** at
+`/app/data/runtime`. This is distinct from your host's `data/runtime` folder;
+existing locally collected CSV/SQLite/JSON data is **not automatically copied**
+into the volume. Container restarts retain the volume, whereas
+`docker compose down -v` **deletes** it. Use `docker compose down` to stop the
+services without removing the named volume.
+
+To choose Tab 1 Historical Mode in Compose, set
+`OUTDOORWISE_APP_MODE=historical` in `.env` and recreate the app using
+`docker compose up -d --force-recreate app`; return it to `live` for the normal
+live workflow. The collector continues collecting live data independently.
+
+### Runtime and data modes
+
+`OUTDOORWISE_APP_MODE` selects Tab 1 (`live` by default, or `historical`);
+changing it requires an API restart/recreation. It is independent of
+`OUTDOORWISE_DATA_MODE` (`live` or synthetic `demo`). The frontend reads mode
+metadata from `/api/health`; there is no mode switch in the UI.
+`OUTDOORWISE_DATA_ROOT` defaults to `./data`, with immutable `catalog/` and
+writable `runtime/` data. Live Mode supports **Now only**. Missing or stale
+observations stay unavailable rather than being replaced by historical or
+synthetic values.
+
+## Historical behavior
+
+Historical Tab 1 always uses the frozen **15 Oct 2026, 19:15 SGT** reference and
+`snapshot_20261015`, independently of operational observations. Departures are
+**Now, +30, +60 minutes**; duration is a separate activity preference.
+
+Now uses historical observations for numerical departure risk and shared weighted
+ranking. Delayed departures retain native WBGT persistence point evidence, but
+unsupported rainfall/wind targets and off-grid PM2.5 keep overall risk unknown.
+Those routes use explicitly labeled fallback ordering. Full-run exposure risk is
+separate and remains unknown where continuous forecast coverage is unsupported.
+Prediction Details distinguishes methods, inputs, native targets, available
+exact-target ground truth and saved offline metrics. No request trains a model.
+
+Historical completed-run recording is disabled; favourites and GPX remain available.
+**Tab 2 always uses its current-environment workflow in both application modes.**
+See [architecture](docs/ARCHITECTURE.md), [prediction inventory](docs/PREDICTION_MODELS.md)
+and [current verification/limitations](docs/FINAL_INTEGRATION.md).
+
+## Repository guide
+
+| Area | Responsibility |
 |---|---|
-| API URLs, polling intervals, timeouts, retries, and freshness thresholds | `config/environment.toml` |
-| Independent collectors for each API endpoint | `outdoorwise/collectors/` |
-| Field, unit, aggregation window, and type validation | `outdoorwise/contracts/environment.py` |
-| Module protocols | `outdoorwise/contracts/ports.py` |
-| Single writer, deduplication, revisions, and atomic persistence | `outdoorwise/storage/repository.py` |
-| Independent metric matching and shared environment access | `outdoorwise/services/route_environment.py` |
-| Continuous collector and scheduler | `outdoorwise/pipeline/worker.py` |
-| Collection and module orchestration | `outdoorwise/pipeline/runner.py` |
-| Module composition and implementation selection | `outdoorwise/bootstrap.py` |
-| Account registration, login, sessions | `outdoorwise/accounts/` |
-| Runs, favourites, feedback, profile, difficulty, ranking | `outdoorwise/personalization/` |
-| Generic difficulty estimator and API | `outdoorwise/difficulty/` |
-| GPX-only route export | `outdoorwise/export/` |
-| Chronological evaluation, synthetic data, and plots | `outdoorwise/evaluation/` |
-| Existing frontend with route environment tables | `frontend/` |
-| Route catalog and GeoJSON geometry | `data/catalog/` |
-| Observations, source mappings, route summaries, and ingestion logs | `data/runtime/*.csv` |
-| Integration templates for team members | `templates/module_template.py` |
+| `outdoorwise/api/`, `bootstrap.py`, `cli.py` | HTTP workflow, composition and explicit collection commands |
+| `collectors/`, `pipeline/`, `storage/`, `contracts/` | Validated ingestion, scheduling, CSV v3 persistence and typed contracts |
+| `services/`, `modules/`, `routing/` | Catalog matching, risk/eligibility/ranking and ORS dynamic geometry |
+| `accounts/`, `personalization/`, `difficulty/`, `export/` | Identity, user adaptation, effort estimates and GPX |
+| `llm/`, `frontend/` | OpenRouter interpretation and shared browser interface |
+| `prediction/`, `scripts/evaluate_frozen_forecasts.py` | Protected research training/inference/artifacts and offline evaluation |
+| `experiments/station_route_matching/` | Independent spatial matching methods, scripts, results and figures |
+| `tests/`, `docs/`, `deploy/` | Regression checks, technical references and deployment preparation |
 
-## Environmental Metrics
+Package areas in the table are under `outdoorwise/` unless shown at repository root.
+Environmental observations use CSV; account/session records use SQLite; personalization
+uses atomic per-user JSON. These stores are intentionally distinct.
 
-| Metric | Canonical unit | Aggregation window |
-|---|---|---|
-| Rainfall | `mm` | 5-minute accumulation |
-| Wind speed | `m/s` | 10-minute mean |
-| Wind direction | `degree` | 10-minute mean |
-| Air temperature | `degC` | 1 minute |
-| Relative humidity | `%` | 1 minute |
-| PM2.5 | `ug/m3` | 1 hour |
-| PSI | `index` | 24 hours |
-| PM10 | `ug/m3` | 24 hours |
-| Official WBGT | `degC` | 15-minute mean |
-| Official heat stress level | `category` | Corresponding 15-minute WBGT observation |
+## Validation and deployment
 
-PM10 is extracted from the PSI API's concentration field, not its PM10 sub-index. WBGT and heat stress come directly from the official endpoint. Polling intervals and publication cadence are separate from aggregation windows.
-
-Each metric selects its own available source. Station-based metrics use the route's first GeoJSON coordinate as a representative point.Regional air-quality metrics use the source region configured for each route in config/environment.toml. This version does not implement along-route sampling or regional polygon containment.
-
-## CSV Storage and Data Status
-
-The existing `routes.csv` and GeoJSON files remain in `data/catalog/`. Runtime storage includes:
-
-- `locations.csv`: source station and region metadata.
-- `weather_observations.csv` and `weather_observation_versions.csv`: rainfall, wind speed/direction, temperature, and humidity.
-- `air_quality_observations.csv` and `air_quality_observation_versions.csv`: PM2.5, PSI, and PM10.
-- `heat_stress_observations.csv` and `heat_stress_observation_versions.csv`: official WBGT and heat stress.
-- `route_source_mapping.csv`: route-to-source mappings for each metric.
-- `route_environment_latest.csv`: the latest route environment summary.
-- `ingestion_runs.csv`: collection outcomes and received, inserted, revised, and unchanged record counts.
-
-Observation records distinguish `observed_at`, `source_updated_at`, and `fetched_at`. Every CSV timestamp uses Singapore local time in `YYYY-MM-DDTHH:MM:SS` format, without fractional seconds or a timezone suffix. The repository restores `Asia/Singapore` on read; internal models and HTTP timestamps remain timezone-aware. If a source does not supply an update timestamp, `source_updated_at` remains empty.
-
-Repeated collection does not append duplicate observations. Source corrections update the current observation and retain earlier revisions. CSV writes are serialized through the repository and use temporary files with atomic replacement. A pending transaction journal supports recovery of interrupted multi-file updates.
-
-Freshness is represented by `fresh`, `stale`, or `missing`. Delivery is represented by `live`, `cache`, `demo`, or `unavailable`. Missing measurements remain `None` or `null`; they are never replaced with zero.
-
-## Shared Module Interface
-
-Team modules read structured data through a common interface:
-
-```python
-from datetime import datetime, timezone
-from outdoorwise.bootstrap import build_pipeline
-from outdoorwise.config import Settings
-
-pipeline = build_pipeline(Settings.from_env())
-environment = pipeline.get_route_environment(
-    'marina_bay',
-    datetime.now(timezone.utc),
-)
-```
-
-The equivalent HTTP endpoint is:
-
-```text
-GET /api/routes/marina_bay/environment?as_of=2026-10-05T03:40:00Z
-```
-
-`as_of` must include a timezone. Omit it to query the current environment. The result is a typed `RouteEnvironment` containing metric values, provenance, timestamps, matching details, and status labels.
-
-Consumer modules must not read or write CSV files directly or independently call environmental APIs. Implementations are selected in `bootstrap.py`. A future PostgreSQL adapter should preserve the repository protocol and observation revision semantics.
-
-## Predictions, Risk Assessment, and Agentic AI
-
-Current observations are separate from future 30- or 60-minute forecasts. The live prediction module remains unavailable; demo forecasts use `is_mock=true`. Sprint 1 risk scoring uses current observations and returns null overall risk when required components are unreliable. Prediction outputs are stored separately in `data/runtime/predictions_latest.json`, never in the environmental observation table. Neither the forecast window nor run duration implies a verified future-weather estimate.
-
-The existing assistant supports a chat-completions tool loop. Configure a real provider with:
+Frontend checks require the Node versions declared in `package.json` and installed
+Chrome/Chromium (`CHROME_PATH` can select it):
 
 ```bash
-export OUTDOORWISE_AGENT_MODE=llm
-export LLM_BASE_URL=https://api.openai.com/v1
-export LLM_MODEL=your-provider-model
-export LLM_API_KEY=your-key
+npm ci
+.venv/bin/python -m pytest -q
+npm test
+npm run test:browser
+docker compose config --quiet
+kubectl kustomize deploy/k8s
+git diff --check
 ```
 
-No provider credentials were supplied during verification, so real LLM calls have not been verified. The default demo assistant follows a fixed tool sequence. Its tools consume structured environmental data and module outputs. The `get_route_environment` tool accepts `route_id` and an optional `as_of` timestamp.
+Tests use temporary storage and recorded/synthetic/provider fixtures. Browser tests
+also start isolated real FastAPI servers in both application modes. They do not
+establish real provider access or deployment success. Current results are recorded
+in [FINAL_INTEGRATION.md](docs/FINAL_INTEGRATION.md).
 
-## Verification
+Docker and Kubernetes configurations are prepared, with one API worker/replica and
+one collector sharing persistent runtime storage. Actual image/container and cluster
+acceptance remains future work; follow [deployment instructions](deploy/README.md).
+Never ship local credentials or operational user files as image contents.
 
-### Original environmental-pipeline verification
-
-The verified live collection successfully fetched all eight API endpoints and inserted **234 real observations**. Both routes generated ten environmental metric summaries each. The original test suite passed **20 tests**, covering parsing, deduplication, revisions, historical queries, failure isolation, caching, retries, current-table initialization, and module interfaces.
-
-The existing frontend passed a DOM integration check against the actual HTTP backend, displaying two route cards and twenty environmental metric rows. Full browser screenshots and the online Leaflet map were not visually verified because the browser download failed. Real LLM provider calls and Docker builds were not verified.
-
-### Current full test suite
-
-The merged full Python suite passes **118 tests**; the existing frontend DOM and browser checks cover the fixed-route experience. See [frontend verification and screenshots](docs/FRONTEND_VERIFICATION.md). See [development status](docs/DEVELOPMENT_STATUS.md) for the isolated test environment and execution details.
-
-## Documentation
-
-- [Continuous live collection](docs/LIVE_COLLECTION.md)
-- [API configuration and source semantics](docs/API_CONFIG.md)
-- [CSV schema and persistence rules](docs/CSV_SCHEMA.md)
-- [Architecture and module boundaries](docs/ARCHITECTURE.md)
-- [Six-person ownership and module handoff](docs/TEAM_HANDOFF.md)
-- [Verification results and limitations](docs/VERIFICATION.md)
-- [Personalization and runner adaptation](docs/PERSONALIZATION.md)
-
-## Updating an Existing Installation
-
-Stop the collection worker and web server before replacing code. Preserve the data/runtime directory when replacing an existing installation using the current category tables. Install the updated code and run `python -m outdoorwise.cli status` to inspect the database, then restart the collection worker and frontend.
-
-Repository initialization creates missing current tables and replays interrupted writes. All CSV time fields use local Singapore time at second precision. See docs/CSV_SCHEMA.md for the storage contract.
-
-## User Accounts and Authentication
-
-The frontend supports registration, login, username availability checks, logout, and a profile page. Usernames are unique case-insensitively; each account receives an immutable UUID user ID. Passwords are hashed with scrypt, and sessions are stored server-side in the SQLite accounts database and exposed through HttpOnly cookies.
-
-## Personal Running History and Feedback
-
-Authenticated runners can record completed runs, favourite routes, and post-run perceived difficulty feedback. Runs retain actual distance, duration, and derived pace. Feedback records a 1–5 difficulty rating plus optional tags and comments. All history is isolated by authenticated user. It feeds a derived running profile rather than a permanently stored profile document.
-
-## Derived Running Profile
-
-The profile reports distance statistics, pace statistics, comfortable distance from suitable feedback, perceived-difficulty summaries, recent difficulty trend, usable history, and profile confidence.
-
-## Generic Route Difficulty
-
-Generic difficulty is an application-level effort estimate from 1–5, not a clinical or medical risk score. It uses route distance and rainfall plus a non-double-counting heat hierarchy: WBGT first, official heat-stress category when WBGT is unavailable, then temperature and humidity when both are unavailable.
-
-## Personalised Difficulty
-
-Personalised difficulty starts from the generic prediction and applies historical residual calibration from previous completed runs and feedback, cold-start shrinkage, and a comfortable-distance adjustment. The UI labels this result **Predicted difficulty for you**. Current-run feedback is not used to predict that same run. Detailed equations are documented in [PERSONALIZATION.md](docs/PERSONALIZATION.md).
-
-## Difficulty-Match Route Ranking
-
-The existing team recommender remains authoritative for distance/access candidate generation. Sprint 1 risk policy removes explicitly blocked routes. Complete assessments use weighted environmental, distance, accessibility and personal difficulty matching; unknown-risk candidates retain the request-specific difficulty fallback below. No excluded route is reintroduced. See [Sprint 1 ranking](docs/ENVIRONMENTAL_RISK.md).
-
-```text
-difficulty_mismatch = abs(personalized_difficulty - target_difficulty)
-sort by (difficulty_mismatch ASC, original_rank ASC)
-```
-
-**Overall recommendation rank** is the existing team recommender order. **Your difficulty-match rank** is the order after matching the requested intensity. The candidate set is unchanged; filtered routes are never reintroduced. Favourites do not currently affect difficulty-match ranking.
-
-## GPX Route Export
-
-Routes can be downloaded as GPX through `GET /api/routes/{route_id}/export.gpx`. The existing GeoJSON geometry is converted directly to an ordered GPX track with correct longitude/latitude handling. GPX is the only route export format.
-
-## Evaluation and Synthetic Data
-
-The evaluation framework performs chronological replay without future-feedback leakage and reports generic versus personalised MAE, RMSE, exact rounded accuracy, within-one accuracy, signed error, learning-over-time buckets, and per-user metrics. Synthetic evaluation is explicitly isolated under `data/runtime/evaluation/synthetic/` and must be labelled synthetic rather than treated as real evidence.
-
-```bash
-python -m pytest -q
-python -m outdoorwise.evaluation.personalization
-python -m outdoorwise.evaluation.personalization --synthetic
-```
-
-The dashboard supports one-shot browser location, selection on the existing map, NUS/Marina Bay/Woodlands presets and Anywhere mode. Access limits use straight-line distance to route starts and are never silently relaxed. See [starting-location usage, API behavior and limitations](docs/STARTING_LOCATION.md).
+Technical references: [CSV v3](docs/CSV_SCHEMA.md), [source semantics](docs/API_CONFIG.md),
+[collection](docs/LIVE_COLLECTION.md), [risk policy](docs/ENVIRONMENTAL_RISK.md),
+[personalization](docs/PERSONALIZATION.md), [location/access](docs/STARTING_LOCATION.md),
+[station-matching experiment](experiments/station_route_matching/README.md),
+[cleanup audit](docs/REPOSITORY_CLEANUP.md).

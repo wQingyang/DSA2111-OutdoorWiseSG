@@ -1,8 +1,13 @@
+"""Tab 2 interpretation boundary: validate preferences before deterministic routing.
+
+OpenRouter text is never authoritative weather or geometry. ORS generation
+remains a separate request after starting-coordinate confirmation in the UI.
+"""
 
 import os
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from outdoorwise.routing.models import RouteGenerationResponse
 
@@ -18,6 +23,7 @@ router = APIRouter(
 
 
 class ParseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     text: str = Field(min_length=1, max_length=2000)
 
 

@@ -1,6 +1,6 @@
 # Personalization and Runner Adaptation
 
-Sprint 1 update: for complete environmental assessments, the recommendation score includes a 15% personal difficulty-match component alongside environmental suitability (45%), distance (25%) and access (15%). Generic requests use generic difficulty. The authenticated wrapper preserves its existing fields and the original baseline rank/score; it sorts complete groups by the weighted score and retains the mismatch fallback described below for unknown groups. Eligibility precedes preference, blocked routes are excluded, and candidate sets are never expanded. History/calibration/storage are unchanged. See [Environmental Risk](ENVIRONMENTAL_RISK.md) for exact formulas. The earlier pure mismatch description below now applies to the unknown-risk fallback, not complete weighted assessments.
+Shared weighted ranking uses generic difficulty alongside environmental suitability, distance and access. Authenticated personalization then reorders surviving candidates by predicted difficulty mismatch, with shared rank as tie-breaker. It preserves the shared score and cannot restore a blocked or access-filtered route. Historical personalization filters runs/feedback to the replay reference; favourites do not affect ranking. See [risk policy](ENVIRONMENTAL_RISK.md) and [architecture](ARCHITECTURE.md).
 
 ## Overview
 
@@ -85,7 +85,7 @@ personalized_difficulty = clamp(
 )
 ```
 
-With no usable feedback, `n=0`, shrinkage is zero, and the personalized prediction equals the generic estimate. Feedback from the current run is not available while that run is being predicted. The predictor reports confidence, history count, adjustments, and reasons.
+With no usable feedback, `n=0`, shrinkage is zero, and the personalized prediction equals the generic estimate. Feedback from the current run is not available while that run is being predicted. The predictor reports confidence, history count, adjustments, and reasons. Callers supply the eligible history; the calibration helper itself uses the last ten pairs in input order rather than reconstructing availability.
 
 ## Difficulty-aware reranking
 
@@ -100,7 +100,7 @@ difficulty_mismatch = abs(personalized_difficulty - target_difficulty)
 Candidates are sorted by:
 
 ```text
-(difficulty_mismatch ASC, original_rank ASC)
+(difficulty_mismatch ASC, shared_pipeline_rank ASC)
 ```
 
 The target is request-specific and is not stored in the user profile. **Overall recommendation rank** is the rank from the existing recommender before matching. **Your difficulty-match rank** is the personalization order after the two-stage sort. Cold-start users still rank using generic difficulty, with an explanation that more history is needed.
@@ -111,7 +111,7 @@ The target is request-specific and is not stored in the user profile. **Overall 
 
 ## Evaluation
 
-`outdoorwise.evaluation.personalization` performs chronological replay. An observation is eligible when it has linked feedback, a generic prediction, and a valid completion timestamp. Personalised prediction is replayed using only runs strictly earlier than the evaluated run, preventing future-feedback leakage.
+`outdoorwise.evaluation.personalization` performs chronological replay. An observation is eligible when it has linked feedback, a generic prediction, and a valid completion timestamp. Personalised prediction is replayed using runs strictly earlier than the evaluated run. The offline evaluator does not independently require feedback created_at to precede that prediction; late-feedback leakage must be reviewed before making causal or prospective accuracy claims. Historical Tab 1 applies its separate replay-time feedback filter.
 
 The output includes:
 

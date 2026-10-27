@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const {JSDOM, VirtualConsole} = require('jsdom');
+const workflow = require('./frontend_workflow_fixture.cjs');
 const root = path.resolve(__dirname, '..');
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/frontend_run.json'), 'utf8'));
 const clone = value => JSON.parse(JSON.stringify(value));
@@ -26,23 +27,15 @@ async function boot(authenticated = false, options = {}) {
     };
   }
   if (options.geolocation) Object.defineProperty(w.navigator, 'geolocation', {value: options.geolocation, configurable: true});
-  let forecastCalls = 0;
-  if (options.forecastUI) w.outdoorwiseForecastUI = {fetchRecommendations: async () => { forecastCalls += 1; return fixture.generic; }};
   w.fetch = async (url, opt = {}) => {
     requests.push({url, method: opt.method || 'GET', body: opt.body ? JSON.parse(opt.body) : null});
-    if (url === '/api/health') return response({data_mode: 'live', agent_mode: 'demo'});
+    if (url === '/api/routes') return response(fixture.generic.routes);
+    if (url === '/api/llm/parse') return options.failParse ? response({detail: 'LLM provider request failed.'}, 502) : response({location: 'NUS', target_distance_km: 6, target_difficulty: 2, preferences: {prefer_green: false, prefer_quiet: true, avoid_steps: false}});
+    if (url === '/api/generated-routes') return response({candidates: [], assessments: [], warnings: []});
+    if (url === '/api/health') return response({data_mode: 'live', app_mode: options.appMode || 'live'});
+    if (url === '/api/route-recommendations') return failPersonal ? response({}, 503) : response(workflow({generic: options.generic || fixture.generic, personalized: options.personalized || fixture.personalized}, authenticated, options.appMode || 'live', JSON.parse(opt.body)));
     if (url === '/api/auth/me') return response(authenticated ? {user_id: 'test-user', username: 'Runner'} : {detail: 'Authentication required'}, authenticated ? 200 : 401);
-    if (url === '/api/me/recommendations') return failPersonal ? response({}, 503) : response(options.personalized || fixture.personalized);
-    if (url === '/api/recommendations') return response(options.generic || fixture.generic);
-    if (url === '/api/experimental/recommendations') {
-      if (options.failForecast) return response({detail: 'Required snapshot, prediction modules or model files are missing.'}, 503);
-      const run = clone(fixture.generic);
-      const routes = new Map(run.routes.map(route => [route.route_id, route]));
-      return response({mode: 'experimental_historical_forecast_ranking', as_of: '2026-10-15T11:15:00Z', run_start: '2026-10-15T11:15:00Z', run_end: '2026-10-15T11:45:00Z', personalized: false, preferences: run.preferences, routes: run.routes,
-        recommendations: run.recommendations.map((row, index) => ({...row, route_name: routes.get(row.route_id).name, distance_km: routes.get(row.route_id).distance_km, forecast_risk_score: row.risk_score, generic_difficulty: 3, personalized_difficulty: null, target_difficulty: null, difficulty_mismatch: null, reference_rank: index + 1, pipeline_rank: index + 1, personalized_rank: index + 1, forecast_metrics: {}, risk_components: {rainfall: {score: 0}, heat: {score: 0}, air_quality: {score: 0}, wind: {score: 0}}})), ranking_weights: {}, warnings: []});
-    }
     if (url === '/api/refresh') return response({status: 'partial', sources: [{source: 'nea_rainfall', status: 'failed', error: 'internal diagnostic'}]});
-    if (url === '/api/chat') return response({message: 'Existing demo assistant', trace: [], run: fixture.generic});
     if (url.endsWith('/difficulty')) return response({predicted_difficulty: 2.3, difficulty_label: 'Easy'});
     if (url === '/api/users/test-user/runs') {
       if (opt.method === 'POST') {const run = {...JSON.parse(opt.body), completed_run_id: `run-${runs.length + 1}`}; runs.push(run); return response(run, 201);}
@@ -62,40 +55,43 @@ async function boot(authenticated = false, options = {}) {
     }
     throw Error('Unexpected endpoint ' + url);
   };
-  for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'forecast-ranking', 'app']) w.eval(fs.readFileSync(path.join(root, `frontend/${script}.js`), 'utf8'));
+  for (const script of ['results', 'location', 'route-export', 'difficulty', 'personalization', 'forecast-ranking', 'app', 'ai-assistant']) w.eval(fs.readFileSync(path.join(root, `frontend/${script}.js`), 'utf8'));
+  if (options.generic?.preferences?.target_distance_km) w.document.getElementById('distance').value = options.generic.preferences.target_distance_km;
   await until(() => w.document.querySelectorAll('#cards .card').length > 0);
   await until(() => w.document.getElementById('personalization-status').textContent.includes(authenticated ? 'Loaded' : 'Sign in'));
-  return {dom, w, d: w.document, leaflet, requests, runs, feedback, forecastCalls: () => forecastCalls, failPersonal: value => failPersonal = value, failFeedback: value => failFeedback = value};
+  return {dom, w, d: w.document, leaflet, requests, runs, feedback, failPersonal: value => failPersonal = value, failFeedback: value => failFeedback = value};
 }
 const card = (d, id) => d.querySelector(`[data-personalization-route="${id}"]`);
 const submit = (w, id) => w.document.getElementById(id).dispatchEvent(new w.Event('submit', {bubbles: true, cancelable: true}));
 
-test('forecast UI presence does not hijack anonymous normal recommendations', async t => {
-  const ui = await boot(false, {forecastUI: true}); t.after(() => ui.dom.window.close());
-  assert.equal(ui.forecastCalls(), 0);
-  assert.equal(ui.requests.filter(r => r.url === '/api/recommendations').length, 1);
+test('anonymous startup uses the unified observation endpoint', async t => {
+  const ui = await boot(false); t.after(() => ui.dom.window.close());
+  assert.equal(ui.requests.filter(r => r.url === '/api/route-recommendations').length, 1);
   assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
   assert(ui.d.querySelectorAll('#cards .card').length > 0);
 });
 
-test('forecast UI presence does not hijack authenticated personalized recommendations', async t => {
-  const ui = await boot(true, {forecastUI: true}); t.after(() => ui.dom.window.close());
-  assert.equal(ui.forecastCalls(), 0);
-  assert.equal(ui.requests.filter(r => r.url === '/api/me/recommendations').length, 1);
+test('authenticated startup uses the unified personalized endpoint', async t => {
+  const ui = await boot(true); t.after(() => ui.dom.window.close());
+  assert.equal(ui.requests.filter(r => r.url === '/api/route-recommendations').length, 1);
   assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
   assert.match(ui.d.getElementById('results-summary').textContent, /running profile/);
 });
 
-test('historical forecast is opt-in and preserves normal cards when unavailable', async t => {
-  const ui = await boot(false, {forecastUI: true, failForecast: true}); t.after(() => ui.dom.window.close());
-  const launcher = ui.d.getElementById('forecast-launcher');
-  assert.equal(launcher.hidden, false);
-  assert.equal(ui.requests.filter(r => r.url === '/api/experimental/recommendations').length, 0);
-  assert(ui.d.querySelectorAll('#cards .route-summary').length > 0);
-  launcher.click();
-  await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
-  assert(ui.d.querySelectorAll('#cards .route-summary').length > 0);
-  assert.match(ui.d.getElementById('forecast-status').textContent, /Required snapshot/);
+test('live has one submission and no independent forecast launchers', async t => {
+  const ui = await boot(); t.after(() => ui.dom.window.close());
+  assert.equal(ui.d.querySelectorAll('#preferences button[type=submit]').length, 1);
+  assert.equal(ui.d.querySelector('#preferences button[type=submit]').textContent, 'Find Recommended Routes');
+  assert.equal(ui.d.getElementById('forecast-launcher'), null);
+  assert.equal(ui.d.getElementById('live-forecast-launcher'), null);
+  assert.equal(ui.d.getElementById('departure-control').hidden, true);
+  assert.deepEqual([...ui.d.querySelector('#start-delay').options].map(o => o.value), ['0']);
+  assert.match(ui.d.getElementById('mode').textContent, /^LIVE MODE/);
+  assert(!ui.d.getElementById('catalog-panel').textContent.includes('Historical Simulation'));
+  const before = ui.requests.filter(r => r.url === '/api/route-recommendations').length;
+  submit(ui.w, 'preferences');
+  await until(() => ui.requests.filter(r => r.url === '/api/route-recommendations').length === before + 1);
+  assert(!ui.requests.some(r => r.url.includes('forecast')));
 });
 
 test('current recommendations use the shared top-three toggle without refetching', async t => {
@@ -114,19 +110,30 @@ test('current recommendations use the shared top-three toggle without refetching
   assert.equal(ui.requests.length, before);
 });
 
-test('historical collapse uses the active historical cards after a context switch', async t => {
-  const ui = await boot(false); t.after(() => ui.dom.window.close());
-  const launcher = ui.d.getElementById('forecast-launcher');
-  launcher.click();
-  await until(() => ui.requests.filter(r => r.url === '/api/experimental/recommendations').length === 1);
-  await until(() => ui.d.querySelectorAll('#cards .unified-route-card').length > 0);
-  const toggle = ui.d.getElementById('toggle-all-routes');
-  const total = ui.d.querySelectorAll('#cards .unified-route-card').length;
-  toggle.click();
-  assert.equal([...ui.d.querySelectorAll('#cards .unified-route-card')].filter(card => !card.hidden).length, total);
-  toggle.click();
-  assert.equal([...ui.d.querySelectorAll('#cards .unified-route-card')].filter(card => !card.hidden).length, 3);
-  assert.equal(toggle.textContent, `View all routes (${total})`);
+test('historical uses the same cards and button, fixed mode and safe actions', async t => {
+  const ui = await boot(true, {appMode: 'historical'}); t.after(() => ui.dom.window.close());
+  assert.match(ui.d.getElementById('mode').textContent, /^HISTORICAL MODE/);
+  assert.equal(ui.d.querySelector('#cards .risk-score .score-title').textContent, 'Departure-time risk');
+  assert.match(ui.d.querySelector('#cards .recommendation-basis').textContent, /Historical observation-based risk/);
+  assert.match(ui.d.querySelector('#cards .full-run-coverage').textContent, /partial.*Full-run risk: Unknown/);
+  assert.deepEqual([...ui.d.querySelector('#start-delay').options].map(o => o.value), ['0', '30', '60']);
+  assert.equal(ui.d.getElementById('refresh').hidden, true);
+  assert.match(ui.d.getElementById('time-selection-summary').textContent, /15 Oct 2026, 19:15/);
+  assert.match(ui.d.querySelector('.prediction-details').textContent, /persistence_fallback/);
+  assert.equal(ui.d.querySelector('.prediction-details').open, false);
+  const run = ui.d.querySelector('#cards .completed-run-button'); assert(run.disabled); run.click();
+  assert.equal(ui.d.getElementById('run-modal').hidden, true); assert.equal(ui.runs.length, 0);
+  assert(ui.d.querySelector('#cards .export-route-button'));
+  change(ui, 'start-delay', '60'); submit(ui.w, 'preferences');
+  await until(() => ui.requests.filter(r => r.url === '/api/route-recommendations').length === 2);
+  assert.equal(ui.requests.filter(r => r.url === '/api/route-recommendations').at(-1).body.start_delay_min, 60);
+  await until(() => ui.d.querySelector('#cards .recommendation-basis').textContent.includes('fallback'));
+  assert.match(ui.d.querySelector('#cards .risk-score').textContent, /Unknown/);
+  assert.match(ui.d.querySelector('#cards .full-run-coverage').textContent, /unavailable/);
+  assert(!ui.requests.some(r => r.url === '/api/refresh' || r.url.endsWith('/difficulty')));
+  const toggle = ui.d.getElementById('toggle-all-routes'); toggle.click();
+  assert.equal([...ui.d.querySelectorAll('#cards .card')].filter(c => !c.hidden).length, 11);
+  toggle.click(); assert.equal([...ui.d.querySelectorAll('#cards .card')].filter(c => !c.hidden).length, 3);
 });
 
  test('cards show new scores and zero risk correctly; technical details are closed', async t => {
@@ -159,7 +166,7 @@ test('missing, stale, future and approximate states never become false low-risk 
   assert.match(approximate.textContent, /Very low confidence/); assert.match(approximate.textContent, /5\.19 km/);
   assert.match(approximate.textContent, /not measurements along the full route/);
   assert.match(approximate.textContent, /Heat has the highest component risk score/);
-  assert.match(approximate.textContent, /Forecast unavailable/);
+  assert.match(approximate.textContent, /Current observations assess departure now/);
 });
 
 test('blocked routes are separate discovery items, never given recommendation ranks', async t => {
@@ -171,7 +178,7 @@ test('blocked routes are separate discovery items, never given recommendation ra
   assert.equal(ui.d.querySelector('.blocked-discovery').open, false);
 });
 
-test('authenticated final ordering persists through load, compare, refresh and chat', async t => {
+test('authenticated final ordering persists through load, compare and refresh', async t => {
   const ui = await boot(true); t.after(() => ui.dom.window.close());
   const order = () => [...ui.d.querySelectorAll('#cards .card')].map(c => c.dataset.personalizationRoute);
   const expected = fixture.personalized.recommendations.map(r => r.route_id);
@@ -180,20 +187,19 @@ test('authenticated final ordering persists through load, compare, refresh and c
     assert.equal(card(ui.d, r.route_id).querySelector('.rank-label').textContent, `Your difficulty-match rank #${r.personalized_rank}`);
     assert.match(card(ui.d, r.route_id).querySelector('.shared-rank-label').textContent, new RegExp(`Shared rank #${r.pipeline_rank ?? i + 1}`));
   });
-  submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 2); await tick();
+  submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/route-recommendations').length === 2); await tick();
   assert.deepEqual(order(), expected);
-  ui.d.getElementById('refresh').click(); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 3); await tick();
-  assert.deepEqual(order(), expected); assert(!ui.d.getElementById('ingestion').textContent.includes('nea_rainfall'));
-  submit(ui.w, 'chat'); await until(() => ui.requests.filter(r => r.url === '/api/me/recommendations').length === 4); await tick();
-  assert.deepEqual(order(), expected); assert(!ui.requests.some(r => r.url === '/api/recommendations'));
-  assert(ui.requests.filter(r => r.url === '/api/me/recommendations').every(r => r.body.target_difficulty === 3));
+  ui.d.getElementById('refresh').click(); await until(() => ui.requests.filter(r => r.url === '/api/route-recommendations').length === 3); await tick();
+  assert.deepEqual(order(), expected); assert.match(ui.d.getElementById('ingestion').textContent, /Some observations could not be refreshed/);
+  assert.deepEqual(order(), expected); assert(!ui.requests.some(r => ['/api/recommendations', '/api/me/recommendations'].includes(r.url)));
+  assert(ui.requests.filter(r => r.url === '/api/route-recommendations').every(r => r.body.target_difficulty === 3));
   const c = card(ui.d, 'west_coast'); assert.match(c.querySelector('.difficulty-summary').textContent, /Predicted difficulty for you: 3\.0/);
 });
 
 test('personal endpoint failures remain visible and never silently call generic ranking', async t => {
   const ui = await boot(true); t.after(() => ui.dom.window.close()); ui.failPersonal(true);
   submit(ui.w, 'preferences'); await until(() => ui.d.getElementById('status').textContent.includes('could not update'));
-  assert(!ui.requests.some(r => r.url === '/api/recommendations'));
+  assert(!ui.requests.some(r => ['/api/recommendations', '/api/me/recommendations'].includes(r.url)));
 });
 
 test('favourite, completed-run feedback and GPX actions remain functional', async t => {
@@ -254,7 +260,7 @@ for (const authenticated of [false, true]) test(`presets, compare, refresh and c
   change(ui, 'location-mode', 'preset'); change(ui, 'location-preset', 'bay');
   ui.d.getElementById('access').value = '2';
   assert.match(ui.d.getElementById('selected-coordinates').textContent, /1\.287000.*103\.855000/);
-  const endpoint = authenticated ? '/api/me/recommendations' : '/api/recommendations';
+  const endpoint = authenticated ? '/api/route-recommendations' : '/api/route-recommendations';
   let count = ui.requests.filter(r => r.url === endpoint).length;
   submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === endpoint).length > count); await tick();
   let body = ui.requests.filter(r => r.url === endpoint).at(-1).body;
@@ -290,9 +296,9 @@ test('map clicks replace one marker; dragging and route clicks cannot confuse th
   map.fire('click', {latlng: {lat: 0, lng: 0}, originalEvent: {target}});
   assert.deepEqual({...ui.w.outdoorwiseLocation.selectedPoint()}, before);
   assert(map.layers.has(marker)); assert.equal(ui.leaflet.maps.length, 1);
-  const count = ui.requests.filter(r => r.url === '/api/recommendations').length;
-  submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/recommendations').length > count);
-  assert.deepEqual(ui.requests.filter(r => r.url === '/api/recommendations').at(-1).body.location, before);
+  const count = ui.requests.filter(r => r.url === '/api/route-recommendations').length;
+  submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/route-recommendations').length > count);
+  assert.deepEqual(ui.requests.filter(r => r.url === '/api/route-recommendations').at(-1).body.location, before);
 });
 
 for (const [code, text] of [[1, 'permission was denied'], [2, 'could not be determined'], [3, 'timed out']]) test(`geolocation error ${code} preserves explicit manual fallback without relaxing access`, async t => {
@@ -303,13 +309,13 @@ for (const [code, text] of [[1, 'permission was denied'], [2, 'could not be dete
   ui.d.getElementById('access').value = '2'; ui.d.getElementById('get-current-location').click(); assert.equal(calls.length, 1);
   assert.equal(calls[0].options.timeout, 10000); assert.equal(calls[0].options.maximumAge, 0);
   calls[0].failure({code}); assert.match(ui.d.getElementById('location-status').textContent, new RegExp(text));
-  const count = ui.requests.filter(r => r.url === '/api/recommendations').length;
-  submit(ui.w, 'preferences'); await tick(); assert.equal(ui.requests.filter(r => r.url === '/api/recommendations').length, count);
+  const count = ui.requests.filter(r => r.url === '/api/route-recommendations').length;
+  submit(ui.w, 'preferences'); await tick(); assert.equal(ui.requests.filter(r => r.url === '/api/route-recommendations').length, count);
   assert.match(ui.d.getElementById('status').textContent, /access limit has not been relaxed/);
   ui.d.getElementById('choose-location-on-map').click();
   ui.leaflet.maps[0].fire('click', {latlng: {lat: 1.29, lng: 103.85}});
-  submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/recommendations').length > count);
-  assert.equal(ui.requests.filter(r => r.url === '/api/recommendations').at(-1).body.max_access_distance_km, 2);
+  submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/route-recommendations').length > count);
+  assert.equal(ui.requests.filter(r => r.url === '/api/route-recommendations').at(-1).body.max_access_distance_km, 2);
 });
 
 test('one-shot location success and late callbacks never overwrite a later preset', async t => {
@@ -350,11 +356,11 @@ test('result summaries show the actual API straight-line distance without travel
 test('changing the starting point while a comparison is pending rejects the old result', async t => {
   const ui = await boot(false, {map: true}); t.after(() => ui.dom.window.close());
   const fetch = ui.w.fetch; let release;
-  ui.w.fetch = (url, options) => url === '/api/recommendations' ? new Promise(resolve => release = resolve) : fetch(url, options);
+  ui.w.fetch = (url, options) => url === '/api/route-recommendations' ? new Promise(resolve => release = resolve) : fetch(url, options);
   submit(ui.w, 'preferences'); await until(() => release);
   change(ui, 'location-mode', 'preset');
   release({ok: true, status: 200, json: async () => clone(fixture.generic)});
-  await until(() => ui.d.getElementById('status').textContent.includes('Starting point changed while routes were updating'));
+  await until(() => ui.d.getElementById('status').textContent.includes('Preferences changed while routes were updating'));
   assert.deepEqual({...ui.w.outdoorwiseLocation.selectedPoint()}, {lon: 103.776, lat: 1.296});
 });
 
@@ -364,4 +370,53 @@ test('invalid access limits are not silently cleared on comparison or refresh', 
   const before = ui.requests.length; submit(ui.w, 'preferences'); await tick();
   assert.match(ui.d.getElementById('status').textContent, /valid positive straight-line access limit/);
   ui.d.getElementById('refresh').click(); await tick(); assert.equal(ui.requests.length, before);
+});
+
+
+test('legacy assistant is absent and Tab 2 parsing waits for explicit location confirmation', async t => {
+  const ui = await boot(); t.after(() => ui.dom.window.close());
+  assert.equal(ui.d.getElementById('chat'), null);
+  assert.equal(ui.d.getElementById('answer'), null);
+  ui.d.getElementById('ai-route-input').value = '6 km easy near NUS';
+  ui.d.getElementById('ai-parse-button').click();
+  await until(() => ui.d.getElementById('ai-route-status').textContent.includes('Preferences applied'));
+  assert.match(ui.d.getElementById('dynamic-location-status').textContent, /NUS/);
+  assert.equal(ui.d.getElementById('route-distance').value, '6');
+  assert.equal(ui.d.getElementById('route-green').checked, false);
+  assert(!ui.requests.some(r => r.url === '/api/generated-routes'));
+  submit(ui.w, 'route-generator'); await tick();
+  assert(!ui.requests.some(r => r.url === '/api/generated-routes'));
+  ui.d.getElementById('confirm-route-start').checked = true;
+  submit(ui.w, 'route-generator');
+  await until(() => ui.requests.some(r => r.url === '/api/generated-routes'));
+  const generated = ui.requests.find(r => r.url === '/api/generated-routes');
+  assert.equal(generated.body.target_distance_km, 6);
+  assert.deepEqual(generated.body.start, {lat: 1.2966, lon: 103.7764});
+  ui.d.getElementById('route-lat').dispatchEvent(new ui.w.Event('input'));
+  assert.equal(ui.d.getElementById('confirm-route-start').checked, false);
+  ui.d.getElementById('confirm-route-start').checked = true;
+  ui.d.dispatchEvent(new ui.w.Event('outdoorwise:dynamic-start-selected'));
+  assert.equal(ui.d.getElementById('confirm-route-start').checked, false);
+});
+
+test('manual route generation remains available when OpenRouter fails', async t => {
+  const ui = await boot(false, {failParse: true}); t.after(() => ui.dom.window.close());
+  ui.d.getElementById('ai-route-input').value = 'NUS run';
+  ui.d.getElementById('ai-parse-button').click();
+  await until(() => ui.d.getElementById('ai-route-status').textContent.includes('manual form'));
+  ui.d.getElementById('route-lat').value = '1.32';
+  ui.d.getElementById('route-lon').value = '103.8';
+  ui.d.getElementById('confirm-route-start').checked = true;
+  submit(ui.w, 'route-generator');
+  await until(() => ui.requests.some(r => r.url === '/api/generated-routes'));
+  assert.deepEqual(ui.requests.find(r => r.url === '/api/generated-routes').body.start, {lat: 1.32, lon: 103.8});
+});
+
+
+test('live resubmission retains observation labels and no prediction details', async t => {
+  const ui = await boot(); t.after(() => ui.dom.window.close());
+  submit(ui.w, 'preferences'); await until(() => ui.requests.filter(r => r.url === '/api/route-recommendations').length === 2); await tick();
+  assert.equal(ui.d.getElementById('refresh').hidden, false);
+  assert.equal(ui.d.getElementById('context-indicator').textContent, 'Current conditions');
+  assert.equal(ui.d.querySelectorAll('.prediction-details').length, 0);
 });

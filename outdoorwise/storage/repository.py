@@ -1,6 +1,6 @@
+"""CSV adapter: one locked writer, atomic replacement, recoverable multi-file journal."""
 from datetime import datetime,timezone
 from zoneinfo import ZoneInfo
-"""CSV adapter: one locked writer, atomic replacement, recoverable multi-file journal."""
 import csv,json,os,threading,fcntl
 from contextlib import contextmanager
 from pathlib import Path
@@ -15,6 +15,8 @@ OBSERVATION_GROUPS={
 }
 OBSERVATION_TABLES={g:g+'_observations.csv' for g in OBSERVATION_GROUPS}
 VERSION_TABLES={g:g+'_observation_versions.csv' for g in OBSERVATION_GROUPS}
+# Sampling provenance is HTTP-only; canonical CSV v3 columns are unchanged.
+HTTP_ONLY_METRIC_FIELDS = {'sample_count', 'matched_sample_count', 'sample_provenance'}
 TABLES={
     'locations.csv':Location,
     **{name:EnvironmentObservation for name in [*OBSERVATION_TABLES.values(),*VERSION_TABLES.values()]},
@@ -52,7 +54,7 @@ class FileRepository:
             if journal.exists():
                 self._replay(json.loads(journal.read_text()));journal.unlink()
             for name,model in TABLES.items():
-                if not (self.runtime/name).exists():self._atomic_csv(name,[],list(model.model_fields))
+                if not (self.runtime/name).exists():self._atomic_csv(name,[],[field for field in model.model_fields if field not in HTTP_ONLY_METRIC_FIELDS])
             metadata={"storage_version":3,"csv_timezone":"Asia/Singapore","csv_timestamp_format":"YYYY-MM-DDTHH:MM:SS","precision":"seconds","timezone_suffix":False,"observation_tables":OBSERVATION_TABLES,"revision_tables":VERSION_TABLES}
             metadata_path=self.runtime/"csv_storage_metadata.json"
             if not metadata_path.exists() or json.loads(metadata_path.read_text())!=metadata:
@@ -87,7 +89,7 @@ class FileRepository:
         finally:temp.unlink(missing_ok=True)
     def _replay(self,tables):
         for name,rows in tables.items():
-            self._atomic_csv(name,rows,list(TABLES[name].model_fields))
+            self._atomic_csv(name,rows,[field for field in TABLES[name].model_fields if field not in HTTP_ONLY_METRIC_FIELDS])
     def _commit(self,tables):
         # Caller holds writer lock; journal is durable BEFORE any replacement.
         self._atomic_json('.pending_csv_transaction.json',tables)
@@ -185,7 +187,7 @@ class FileRepository:
                 [r for r in logs if r.source_kind==source_kind and r.finished_at<=as_of])
     def save_route_environment(self,environments,mappings):
         with self._guard():
-            self._commit({'route_environment_latest.csv':[m.model_dump(mode='json') for e in environments for m in e.metrics],
+            self._commit({'route_environment_latest.csv':[m.model_dump(mode='json', exclude=HTTP_ONLY_METRIC_FIELDS) for e in environments for m in e.metrics],
                 'route_source_mapping.csv':[m.model_dump(mode='json') for m in mappings]})
     def save_run(self,run:Run):
         with self._guard():

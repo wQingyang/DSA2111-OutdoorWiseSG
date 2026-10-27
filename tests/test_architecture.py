@@ -4,7 +4,7 @@ from outdoorwise.config import ROOT
 ALLOWED={
  'modules':{'contracts'}, 'storage':{'contracts'},
  'pipeline':{'contracts'}, 'contracts':{'contracts'},
- 'agent':{'contracts','agent'}, 'collectors':{'contracts'}, 'services':{'contracts'},
+ 'collectors':{'contracts'}, 'services':{'contracts'},
 }
 def test_dependency_direction():
     for package,allowed in ALLOWED.items():
@@ -20,7 +20,7 @@ def test_dependency_direction():
                     if name.startswith('outdoorwise.'):
                         target=name.split('.')[1]
                         assert target in allowed, f'{path.name} illegally imports {name}'
-                if package in {'modules','agent'} and isinstance(n,ast.Call):
+                if package in {'modules'} and isinstance(n,ast.Call):
                     func=n.func
                     name=func.id if isinstance(func,ast.Name) else func.attr if isinstance(func,ast.Attribute) else ''
                     assert name not in {'open','read_text','read_bytes','write_text','write_bytes'}, f'File IO in {path}'

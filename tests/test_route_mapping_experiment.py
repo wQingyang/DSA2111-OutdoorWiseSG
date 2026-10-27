@@ -6,7 +6,7 @@ from outdoorwise.config import ROOT, load_environment_config
 from outdoorwise.contracts.environment import EnvironmentObservation, Location, METRIC_SPECS
 from outdoorwise.contracts.models import LineString, Route
 from outdoorwise.contracts.geo import distance_km
-from scripts.compare_route_mapping import compare_snapshot, sample_route_points
+from experiments.station_route_matching.scripts.compare_route_mapping import compare_snapshot, sample_route_points
 
 AS_OF = datetime(2026, 10, 24, 14, 0, tzinfo=timezone.utc)
 CONFIG = load_environment_config(ROOT / "config/environment.toml")

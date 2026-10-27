@@ -3,20 +3,27 @@
 import argparse
 import csv
 import json
+import hashlib
 import math
 import tomllib
 from datetime import timedelta
+from functools import lru_cache
 from pathlib import Path
 
 import train_wbgt_multihorizon as heat
 import train_pm25_multihorizon as air
 import train_rainfall_classification as rain
 import train_rainfall_neighbors as neighbors
-from check_rainfall_sample_rules import build_relaxed_samples
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT = ROOT / "data/datasets/snapshot_20261015"
+
+
+@lru_cache(maxsize=1)
+def snapshot_inputs():
+    """Immutable historical inputs shared across explicit replay requests."""
+    return heat.load_stations(), rain.load_stations(), air.load_regions()
 
 
 def latest_record(records, origin, max_age):
@@ -108,122 +115,11 @@ def coverage(series, start, end):
 
 
 def rain_forecasts(stations, station, origin):
-    """Refit the fixed neighbor experiment using pre-holdout labels."""
-    forecasts = [
-        block(
-            origin + timedelta(minutes=horizon - 15),
-            origin + timedelta(minutes=horizon),
-            None,
-            (
-                "missing_input_or_training"
-                if horizon <= 30
-                else "unsupported_horizon"
-            ),
-        )
-        for horizon in range(15, 181, 15)
-    ]
-
-    if station is None:
-        return forecasts
-
-    cutoff = min(
-        origin,
-        rain.parse_timestamp(rain.HOLDOUT_START),
-    )
-
-    training = {15: [], 30: []}
-    origins = {origin}
-
-    for name, records in stations.items():
-        samples = build_relaxed_samples(records)
-
-        for horizon in training:
-            eligible = rain.training_before(
-                samples[horizon],
-                cutoff,
-            )
-
-            for sample in eligible:
-                # Require complete targets available before the cutoff.
-                complete_and_available = (
-                    sample["target_complete"]
-                    and all(
-                        records[
-                            sample["end"] - timedelta(minutes=5 * index)
-                        ]["available_at"] < cutoff
-                        for index in range(3)
-                    )
-                )
-
-                if complete_and_available:
-                    sample = dict(sample, station=name)
-                    training[horizon].append(sample)
-                    origins.add(sample["origin"])
-
-    links = neighbors.load_neighbors(stations)
-    snapshots = neighbors.build_snapshots(stations, origins)
-
-    if station not in snapshots[origin]:
-        return forecasts
-
-    value, age = snapshots[origin][station]
-
-    hour = origin.hour + origin.minute / 60
-    angle = 2 * math.pi * hour / 24
-
-    features = [
-        value,
-        age,
-        math.sin(angle),
-        math.cos(angle),
-    ]
-
-    query = {
-        "x": features,
-        "persistence": float(value > 0),
-        "neighbor_x": (
-            features
-            + neighbors.neighbor_features(
-                links[station],
-                snapshots[origin],
-            )
-        ),
-    }
-
-    feature_cache = {}
-
-    for horizon, samples in training.items():
-        if not samples:
-            continue
-
-        for sample in samples:
-            key = (sample["station"], sample["origin"])
-
-            if key not in feature_cache:
-                feature_cache[key] = neighbors.neighbor_features(
-                    links[key[0]],
-                    snapshots[key[1]],
-                )
-
-            sample["neighbor_x"] = (
-                sample["x"] + feature_cache[key]
-            )
-
-        probabilities, statuses = neighbors.predict_methods(
-            samples,
-            [query],
-        )
-
-        forecasts[horizon // 15 - 1].update(
-            value=float(
-                probabilities["logistic_neighbors"][0]
-            ),
-            method=statuses["logistic_neighbors"],
-            training_label_cutoff=cutoff.isoformat(),
-            training_samples=len(samples),
-        )
-
-    return forecasts
+    """No frozen rainfall artifact is shipped; never train during a request."""
+    return [block(origin + timedelta(minutes=horizon - 15),
+                  origin + timedelta(minutes=horizon), None,
+                  "unavailable_no_frozen_rainfall_model")
+            for horizon in range(15, 181, 15)]
 
 
 def predict(route_id, as_of, start_delay_min, duration_min):
@@ -275,9 +171,7 @@ def predict(route_id, as_of, start_delay_min, duration_min):
             if row["source_kind"] == "live"
         ]
 
-    heat_stations = heat.load_stations()
-    rain_stations = rain.load_stations()
-    regions = air.load_regions()
+    heat_stations, rain_stations, regions = snapshot_inputs()
 
     # Match the forecast-origin grids used during training.
     quarter = as_of.replace(
@@ -332,6 +226,10 @@ def predict(route_id, as_of, start_delay_min, duration_min):
                 end,
                 value,
                 "persistence" if heat_match else "missing_input",
+                input_provenance=([dict(observed_at=heat_match[2].isoformat(),
+                    available_at=heat_stations[heat_match[1]][heat_match[2]]["available_at"].isoformat(),
+                    value=heat_stations[heat_match[1]][heat_match[2]]["value"], station_id=heat_match[1])]
+                    if heat_match else []),
             )
         )
 
@@ -361,7 +259,9 @@ def predict(route_id, as_of, start_delay_min, duration_min):
         / "backtest_models.json"
     )
 
-    models = json.loads(model_path.read_text())
+    model_bytes = model_path.read_bytes() if model_path.exists() else None
+    models = json.loads(model_bytes) if model_bytes else []
+    model_version = "sha256:" + hashlib.sha256(model_bytes).hexdigest() if model_bytes else "unavailable"
     air_series = []
 
     for horizon in [60, 120, 180]:
@@ -419,15 +319,6 @@ def predict(route_id, as_of, start_delay_min, duration_min):
             value = records[latest]["value"]
             method = "persistence_fallback"
 
-        # Fall back only when a recent observation is available.
-        if (
-            value is None
-            and latest is not None
-            and timedelta(0) <= as_of - latest <= timedelta(minutes=90)
-        ):
-            value = records[latest]["value"]
-            method = "persistence_fallback"
-
         end = hour + timedelta(minutes=horizon)
 
         air_series.append(
@@ -436,6 +327,11 @@ def predict(route_id, as_of, start_delay_min, duration_min):
                 end,
                 value,
                 method,
+                input_provenance=[dict(observed_at=time.isoformat(),
+                    available_at=records[time]["available_at"].isoformat(), value=records[time]["value"], region=region)
+                    for time in (history_times if usable_model and method == "frozen_experimental_linear" else [latest]) if time in records],
+                model_name="pm25_frozen_backtest_or_persistence",
+                model_version=model_version,
                 training_cutoff=(
                     model["training_cutoff"]
                     if model
@@ -502,7 +398,7 @@ def predict(route_id, as_of, start_delay_min, duration_min):
             "No new accuracy evaluation is performed by this script.",
             "Station matching uses the route start and prototype input-age limits.",
             "Snapshot metadata and revision history are not reconstructed.",
-            "Rain values describe whole 15-minute events; do not prorate probabilities.",
+            "Rain probabilities unavailable: no frozen classifier is shipped; HTTP inference never fits models.",
             "PM2.5 values are hourly means, not minute-level predictions.",
             "Risk conversion and time ranking are not implemented.",
         ],

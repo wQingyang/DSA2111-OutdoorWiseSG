@@ -1,4 +1,4 @@
-"""Team interfaces: consumers receive typed structures, not filesystem paths."""
+"""Service interfaces: consumers receive typed structures, not filesystem paths."""
 from datetime import datetime
 from typing import Protocol
 from .models import Route,Conditions,Prediction,Preferences,Recommendation,Run

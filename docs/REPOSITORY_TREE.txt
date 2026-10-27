@@ -1,0 +1,310 @@
+outdoorwise-main/
+├── .github/
+│   └── workflows/
+│       └── check.yml
+├── config/
+│   └── environment.toml
+├── data/
+│   ├── catalog/
+│   │   ├── bedok_reservoir.geojson
+│   │   ├── bishan_ang_mo_kio.geojson
+│   │   ├── east_coast.geojson
+│   │   ├── jurong_lake_gardens.geojson
+│   │   ├── macritchie_reservoir.geojson
+│   │   ├── marina_bay.geojson
+│   │   ├── pasir_ris_park.geojson
+│   │   ├── punggol_waterway.geojson
+│   │   ├── rail_corridor_bukit_timah.geojson
+│   │   ├── routes.csv
+│   │   ├── routes.geojson
+│   │   ├── singapore_botanic_gardens.geojson
+│   │   ├── west_coast.geojson
+│   │   └── woodlands_waterfront.geojson
+│   ├── datasets/
+│   │   └── snapshot_20261015/
+│   │       ├── air_quality_observations.csv
+│   │       ├── heat_stress_observations.csv
+│   │       ├── locations.csv
+│   │       └── weather_observations.csv
+│   └── runtime/
+│       ├── personalization/
+│       │   ├── completed_runs.json
+│       │   ├── difficulty_feedback.json
+│       │   └── favourites.json
+│       ├── .gitkeep
+│       ├── .ingestion_worker.lock
+│       ├── .writer.lock
+│       ├── TEST_RUNNERS.md
+│       ├── accounts.sqlite3
+│       ├── air_quality_observation_versions.csv
+│       ├── air_quality_observations.csv
+│       ├── collection_worker.json
+│       ├── csv_storage_metadata.json
+│       ├── heat_stress_observation_versions.csv
+│       ├── heat_stress_observations.csv
+│       ├── ingestion_runs.csv
+│       ├── latest_run.json
+│       ├── locations.csv
+│       ├── predictions_latest.json
+│       ├── route_environment_latest.csv
+│       ├── route_source_mapping.csv
+│       ├── run_60e455ae4d874434b078811efe6a62c4.json
+│       ├── run_7335079a490c4232b5ec29403870dc92.json
+│       ├── run_cdaaf7a749754406a53383efc6277642.json
+│       ├── weather_observation_versions.csv
+│       └── weather_observations.csv
+├── deploy/
+│   ├── k8s/
+│   │   ├── app.yaml
+│   │   ├── collector.yaml
+│   │   ├── config.yaml
+│   │   ├── kustomization.yaml
+│   │   ├── namespace.yaml
+│   │   └── storage.yaml
+│   └── README.md
+├── docs/
+│   ├── evidence/
+│   │   └── collection/
+│   │       ├── .Rhistory
+│   │       ├── README.md
+│   │       ├── collection_verification.json
+│   │       ├── continuous_collection_verification.json
+│   │       ├── example_run.json
+│   │       └── verification.json
+│   ├── API_CONFIG.md
+│   ├── ARCHITECTURE.md
+│   ├── CSV_SCHEMA.md
+│   ├── ENVIRONMENTAL_RISK.md
+│   ├── FINAL_INTEGRATION.md
+│   ├── LIVE_COLLECTION.md
+│   ├── PERSONALIZATION.md
+│   ├── PREDICTION_MODELS.md
+│   ├── REPOSITORY_CLEANUP.md
+│   ├── REPOSITORY_TREE.txt
+│   ├── STARTING_LOCATION.md
+│   ├── contracts.schema.json
+│   ├── csv.schema.json
+│   └── forecast_evaluation.json
+├── experiments/
+│   └── station_route_matching/
+│       ├── archive/
+│       │   ├── demo-script.md
+│       │   └── work-log.md
+│       ├── figures/
+│       │   ├── baseline-demo-dashboard.png
+│       │   ├── demo-fresh-coverage.png
+│       │   ├── demo-rainfall-matching-map.png
+│       │   ├── demo-rainfall-station-distance.png
+│       │   ├── live-fresh-coverage.png
+│       │   ├── live-rainfall-matching-map.png
+│       │   ├── live-rainfall-station-distance.png
+│       │   ├── nus-access-0.1km-empty.png
+│       │   ├── nus-access-5km-map.png
+│       │   ├── nus-access-5km-third-route.png
+│       │   ├── nus-access-5km.png
+│       │   ├── test-runner-1-current.png
+│       │   ├── test-runner-2-current.png
+│       │   ├── test-runner-2-historical-third-route.png
+│       │   └── test-runner-2-historical.png
+│       ├── results/
+│       │   ├── demo/
+│       │   │   ├── analysis.md
+│       │   │   ├── per_sample.csv
+│       │   │   └── summary.csv
+│       │   ├── live/
+│       │   │   ├── collection-report.md
+│       │   │   ├── per_sample.csv
+│       │   │   └── summary.csv
+│       │   ├── live-retry/
+│       │   │   ├── analysis.md
+│       │   │   ├── per_sample.csv
+│       │   │   └── summary.csv
+│       │   └── study.md
+│       ├── scripts/
+│       │   ├── analyze_route_mapping.py
+│       │   └── compare_route_mapping.py
+│       └── README.md
+├── frontend/
+│   ├── ai-assistant.js
+│   ├── app.js
+│   ├── auth.css
+│   ├── auth.js
+│   ├── difficulty.css
+│   ├── difficulty.js
+│   ├── forecast-ranking.js
+│   ├── index.html
+│   ├── location.css
+│   ├── location.js
+│   ├── login.html
+│   ├── personalization.css
+│   ├── personalization.js
+│   ├── profile.html
+│   ├── profile.js
+│   ├── register.html
+│   ├── results.css
+│   ├── results.js
+│   ├── route-export.css
+│   ├── route-export.js
+│   └── style.css
+├── outdoorwise/
+│   ├── accounts/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── repository.py
+│   │   ├── router.py
+│   │   ├── security.py
+│   │   └── service.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── app.py
+│   │   ├── forecast_ranking.py
+│   │   ├── historical_departure.py
+│   │   ├── historical_evidence.py
+│   │   ├── recommendation_workflow.py
+│   │   └── time_selection.py
+│   ├── collectors/
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── demo.py
+│   │   ├── humidity.py
+│   │   ├── pm25.py
+│   │   ├── psi.py
+│   │   ├── rainfall.py
+│   │   ├── temperature.py
+│   │   ├── wbgt.py
+│   │   ├── wind_direction.py
+│   │   └── wind_speed.py
+│   ├── contracts/
+│   │   ├── __init__.py
+│   │   ├── core.py
+│   │   ├── environment.py
+│   │   ├── geo.py
+│   │   ├── models.py
+│   │   ├── ports.py
+│   │   └── risk.py
+│   ├── difficulty/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── router.py
+│   │   └── service.py
+│   ├── evaluation/
+│   │   ├── __init__.py
+│   │   ├── personalization.py
+│   │   ├── plots.py
+│   │   └── synthetic_personalization.py
+│   ├── export/
+│   │   ├── __init__.py
+│   │   ├── router.py
+│   │   └── service.py
+│   ├── llm/
+│   │   ├── __init__.py
+│   │   ├── explainer.py
+│   │   ├── models.py
+│   │   ├── parser.py
+│   │   └── router.py
+│   ├── modules/
+│   │   ├── __init__.py
+│   │   ├── predictor.py
+│   │   ├── recommender.py
+│   │   ├── risk.py
+│   │   ├── risk_policy.py
+│   │   └── risk_ranking.py
+│   ├── personalization/
+│   │   ├── __init__.py
+│   │   ├── difficulty.py
+│   │   ├── models.py
+│   │   ├── profile.py
+│   │   ├── ranking.py
+│   │   ├── repository.py
+│   │   ├── router.py
+│   │   └── service.py
+│   ├── pipeline/
+│   │   ├── __init__.py
+│   │   ├── collector_health.py
+│   │   ├── runner.py
+│   │   └── worker.py
+│   ├── routing/
+│   │   ├── __init__.py
+│   │   ├── environment.py
+│   │   ├── models.py
+│   │   ├── ors_client.py
+│   │   ├── repository.py
+│   │   ├── router.py
+│   │   └── service.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── live_prediction.py
+│   │   └── route_environment.py
+│   ├── storage/
+│   │   ├── __init__.py
+│   │   └── repository.py
+│   ├── __init__.py
+│   ├── bootstrap.py
+│   ├── cli.py
+│   └── config.py
+├── prediction/
+│   ├── results/
+│   │   └── pm25_multihorizon/
+│   │       └── backtest_models.json
+│   ├── check_rainfall_sample_rules.py
+│   ├── predict_route_environment.py
+│   ├── predict_route_risk.py
+│   ├── train_pm25_multihorizon.py
+│   ├── train_rainfall_classification.py
+│   ├── train_rainfall_neighbors.py
+│   └── train_wbgt_multihorizon.py
+├── scripts/
+│   ├── copy_synthetic_fixture.py
+│   └── evaluate_frozen_forecasts.py
+├── tests/
+│   ├── fixtures/
+│   │   ├── environment/
+│   │   │   ├── air-temperature.json
+│   │   │   ├── pm25.json
+│   │   │   ├── psi.json
+│   │   │   ├── rainfall.json
+│   │   │   ├── relative-humidity.json
+│   │   │   ├── wbgt.json
+│   │   │   ├── wind-direction.json
+│   │   │   └── wind-speed.json
+│   │   ├── frontend_run.json
+│   │   └── rainfall_api_sample.json
+│   ├── build_frontend_fixture.py
+│   ├── conftest.py
+│   ├── frontend.test.cjs
+│   ├── frontend_backend_browser.cjs
+│   ├── frontend_browser.cjs
+│   ├── frontend_smoke.cjs
+│   ├── frontend_workflow_fixture.cjs
+│   ├── test_accounts_api.py
+│   ├── test_architecture.py
+│   ├── test_difficulty.py
+│   ├── test_dynamic_routing.py
+│   ├── test_environmental_risk.py
+│   ├── test_evaluation_tooling.py
+│   ├── test_frontend_contract.py
+│   ├── test_historical_departure.py
+│   ├── test_integration_sprint.py
+│   ├── test_personalization_api.py
+│   ├── test_personalization_evaluation.py
+│   ├── test_personalization_ranking.py
+│   ├── test_personalization_repository.py
+│   ├── test_personalized_difficulty.py
+│   ├── test_pipeline.py
+│   ├── test_route_export.py
+│   ├── test_route_mapping_experiment.py
+│   ├── test_running_profile.py
+│   ├── test_starting_location_api.py
+│   ├── test_storage_layout.py
+│   ├── test_unified_recommendations.py
+│   └── test_worker.py
+├── .dockerignore
+├── .env.example
+├── .gitignore
+├── AGENTS.md
+├── Dockerfile
+├── README.md
+├── compose.yaml
+├── package-lock.json
+├── package.json
+└── pyproject.toml

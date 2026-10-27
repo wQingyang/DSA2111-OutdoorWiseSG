@@ -49,11 +49,17 @@ class EnvironmentalRiskAssessor:
             return component
         age = (as_of - metric.observed_at).total_seconds()
         component.freshness = 'fresh' if age <= self.config.sources[source].stale_after_seconds else 'stale'
+        along_route = metric.match_method == 'along_route_sampling_500m_v1'
+        if along_route:
+            component.warnings.append('Conservative aggregation of along-route station samples; regional pollution uses nearest centroids, without polygon containment.')
+            if not metric.sample_count or metric.matched_sample_count != metric.sample_count:
+                component.warnings.append('Incomplete along-route sample coverage; environmental component unavailable.')
+                return component
         if metric.metric in {'pm25', 'psi'}:
-            if metric.match_method == 'configured_source_region_v1' and metric.location_id:
+            if metric.match_method in {'configured_source_region_v1', 'along_route_sampling_500m_v1'} and metric.location_id:
                 component.spatial_quality = 'regional'
                 component.warnings.append('Configured regional measurement, not route-specific pollution.')
-        elif metric.match_method == 'nearest_available_station_start_point_v1' and metric.location_id:
+        elif metric.match_method in {'nearest_available_station_start_point_v1', 'along_route_sampling_500m_v1'} and metric.location_id:
             distance = metric.station_distance_km
             if distance is not None and isfinite(distance) and distance >= 0:
                 bands = cfg.spatial_bands_km
@@ -143,6 +149,8 @@ class EnvironmentalRiskAssessor:
         warnings = ['Provisional engineering score, not a medical or safety guarantee.',
                     'Mapping V1 uses route start-point stations and configured regions, not measurements along the entire route.',
                     'Current observations only; no future weather values are inferred.']
+        if any(m.match_method == 'along_route_sampling_500m_v1' for m in environment.metrics):
+            warnings[1] = 'Dynamic routes use along-route samples with conservative component maxima; station distances refer to samples, not the route start. Regional matching uses nearest centroids.'
         warnings += [f'{name}: {warning}' for name, c in components.items() for warning in c.warnings]
         risk = EnvironmentRisk(route_id=environment.route_id, assessed_at=as_of,
                                status=('demo' if simulated else 'available') if score is not None else 'unavailable',

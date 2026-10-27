@@ -117,6 +117,9 @@ class RouteMetric(Contract):
     as_of: AwareDatetime
     revision: int | None = None
     reason: str = ""
+    sample_count: int | None = None
+    matched_sample_count: int | None = None
+    sample_provenance: list[dict] = Field(default_factory=list)
 class RouteEnvironment(Contract):
     schema_version: Literal["2.0"] = "2.0"
     route_id: str

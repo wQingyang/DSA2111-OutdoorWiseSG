@@ -1,4 +1,4 @@
-"""Owner 5: transparent baseline, replace with your scoring implementation."""
+"""Generate access-feasible catalog candidates and preserve their baseline scores."""
 from outdoorwise.contracts.models import Recommendation, Coordinate
 from outdoorwise.contracts.geo import distance_km
 class BaselineRecommender:

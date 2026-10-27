@@ -1,40 +1,126 @@
-# Module Boundaries
+# Application architecture
 
-Sprint 1 update: `modules/risk.py` now implements observation-based component scoring; `modules/risk_policy.py` applies eligibility, with no default blocks; and `modules/risk_ranking.py` scores existing candidates after the baseline. `bootstrap.py` injects these and the existing difficulty estimator. Authenticated requests supply personalized difficulty from the same environment snapshot. Blocked routes remain in catalog/risk results but are excluded from recommendations. Unknown risk has a null weighted score and explicit fallback. Environmental CSV schema v3 is unchanged. See [the current formulas and API semantics](ENVIRONMENTAL_RISK.md).
+OutdoorWise is one FastAPI application serving a vanilla JavaScript frontend,
+plus one explicitly started environmental collector. The API and worker share
+operational storage. Research and experiments remain separate from application
+startup; no prediction microservice or cloud database is required.
 
 ```mermaid
 flowchart TD
-    C["8 independent collectors"] --> S["Typed batch validation"]
-    S --> R["CSV repository and revision history"]
-    R --> E["Route environment service"]
-    E --> P["Pipeline: forecasts and risk modules"]
-    E --> A["Agent evidence tools"]
-    P --> F["Existing frontend and recommendations"]
-    A --> F
+  Official[Official environmental APIs] --> Collect[Collectors: transport and normalization]
+  Collect --> Worker[Pipeline: validation and scheduled collection]
+  Worker --> CSV[CSV v3 repository: availability and revisions]
+  Form[One Tab 1 form] --> Dispatch[Server-selected application mode]
+  Dispatch --> Live[Live: current observations]
+  CSV --> Live
+  Dispatch --> Historical[Historical: frozen snapshot and native predictions]
+  Snapshot[Fixed historical data and frozen artifacts] --> Historical
+  Live --> Match[Route matching and environmental assessment]
+  Historical --> Departure[Departure adapter; separate full-run coverage]
+  Departure --> Risk[Shared risk curves and eligibility]
+  Match --> Risk
+  Risk --> Rank[Shared candidate filtering and weighted ranking]
+  Rank --> Personal[Authenticated difficulty reordering]
+  Personal --> UI[Shared cards, maps and GPX]
+  Evidence[Evaluation-only labels and saved pooled metrics] --> UI
+  Text[Tab 2 text or manual preferences] --> Parse[OpenRouter interpretation and coordinate confirmation]
+  Parse --> ORS[ORS dynamic geometry]
+  ORS --> Dynamic[Current-environment along-route sampling]
+  CSV --> Dynamic
+  Dynamic --> Risk
 ```
 
-bootstrap.py is the only composition root. contracts defines schemas and protocols. Collectors handle HTTP requests and normalization without CSV access. The repository owns persistence, locks, deduplication, and revisions. The service independently matches each metric to sources and evaluates freshness. The pipeline collects sources sequentially, isolates source failures, refreshes summaries, and validates prediction, risk, and recommendation outputs. The frontend and agent consume structured data through HTTP or the shared reader.
+## Execution and module boundaries
 
-pipeline.refresh continues after individual source failures. Repository disk-write failures still propagate rather than being reported as successful ingestion. route_environment_latest is a cached materialized view; get_route_environment recalculates state at the requested time. pipeline.run projects rainfall into the existing Conditions contract to preserve the original prediction and recommendation interfaces while exposing complete environment and risks outputs.
+| Entry/component | Inputs → outputs and responsibility |
+|---|---|
+| `api/app.py:create_app` | Settings → FastAPI routers, injected repositories/services and frontend assets. Tests supply temporary data roots. |
+| `bootstrap.py:build_pipeline` | TOML/settings → one environmental repository, collectors, catalog matching, risk and ranker. Construction does not collect live APIs. |
+| `cli.py` | Explicit collect/watch/status/run/schemas commands; signal-aware worker shutdown. |
+| `collectors/` | HTTP payloads → typed batches with canonical units; bounded retries/timeouts, no direct CSV writes. |
+| `pipeline/` | Batch validation/ingestion, source cadence, worker lease/heartbeat and catalog recommendation orchestration. |
+| `storage/repository.py` | Operational CSV access, source availability, revisions, locks and recoverable atomic replacement. |
+| `services/route_environment.py` | One source-kind snapshot → catalog station/region metrics with timestamp and distance provenance. |
+| `modules/` | Existing candidate generation, component normalization, eligibility and weighted ranking. Missing required components never become zero. |
+| `accounts/`, `personalization/` | Server-side identity and isolated user history; personalization only reorders approved candidates. |
+| `llm/`, `routing/` | Tab 2 language interpretation and deterministic ORS geometry/assessment. The LLM does not invent weather, geometry or tool results. |
+| `prediction/` | Read-only research feature/training code, native historical inference and frozen coefficients. |
+| `experiments/station_route_matching/` | Independent offline spatial comparison; no runtime imports from the application. |
 
-## Matching Extension
+## Tab 1 request flow
 
-StartPointStrategy uses the first original GeoJSON coordinate as the route representative point. Each station metric independently selects the nearest station with usable observations for that metric, preferring fresh stations. A source beyond 15 km produces missing. If no fresh source is available, the nearest stale source is selected and labelled stale.
+`frontend/app.js` obtains `/api/health.app_mode`, validates the location/preferences,
+checks the session and sends one POST to `/api/route-recommendations`. `results.js`
+owns shared route cards; `forecast-ranking.js` adapts replay evidence and adds
+Prediction Details without a second request/submission flow. Location, difficulty,
+personalization and export modules enrich the existing cards.
 
-WBGT and heat stress do not assume that temperature stations supply those metrics. Regional sources follow the curated TOML assignments. Station distance is a straight-line spherical distance, not a travel distance.
+Live dispatch calls the existing observation pipeline once, then optional authenticated
+candidate reordering. It supports Now only. Duration does not imply environmental
+forecast coverage, and no supplementary persistence service is called.
 
-Future along-route sampling can be introduced through geometry_strategy and an extended segment-level matching and aggregation strategy. The current implementation does not claim along-route precision.
+Historical dispatch uses `api/forecast_ranking.py` with the fixed 2026-10-15 19:15 SGT
+snapshot. It never uses the operational environmental repository as a prediction
+input. PM2.5 retains its native hourly origin/horizons; no request fits models.
+`api/historical_departure.py` reuses production observation assessment for Now and
+accepts only exact native delayed targets with matching origin-time input provenance.
+Now has numerical risk; +30/+60 retain unknown overall risk because required future
+inputs are unsupported. `api/historical_evidence.py` preserves native research values,
+keeps ground truth evaluation-only, and reports separate continuous-window limitations.
+The [current verification](FINAL_INTEGRATION.md) records the actual availability matrix.
 
-## PostgreSQL Migration
+## Matching, risk and personalization
 
-Implement EnvironmentRepository with a PostgreSQLRepository and replace its construction in bootstrap. Preserve observation keys, revision history, as_of availability rules, source_kind isolation, concurrency guarantees, and typed return contracts.
+Catalog matching uses each route start and curated pollution regions. Dynamic routes
+use samples at a target 500 m spacing, capped at 30 points, conservative component
+maxima and nearest pollution-region centroids. Partial sample coverage makes the
+affected risk component unavailable. Regional centroids are not polygon containment;
+station distance does not establish measurement accuracy along the route. The
+[independent experiment](../experiments/station_route_matching/README.md) measures
+spatial matching proxies separately from production risk semantics.
 
-Collectors, the service, the frontend, and agent consumers should not need CSV-path changes. Prediction snapshot storage remains a repository responsibility. The static route catalog can remain CSV/GeoJSON or move into database tables. This version has no production database driver or paid database dependency.
+The configured `EnvironmentalRiskAssessor`, `RiskPolicy` and `RiskAwareRanking` own
+numeric curves, explicit blocks and weighted ordering. Complete non-blocked
+assessments share weighted ranking; unknown assessments use the established
+non-environmental fallback. Shared scores use generic difficulty. Authenticated
+personalization only reorders survivors by difficulty mismatch, resolving ties with
+shared rank; it cannot restore exclusions or overwrite scores. Historical history
+and feedback are restricted to replay time. Favourites do not change ranking.
 
-## Continuous Worker
+## Data and compatibility
 
-pipeline/worker.py calls the same pipeline.refresh(due_only=True) path. The repository port owns the lifetime worker lease, persisted worker state, and database status report. Only live data mode is accepted. Source cooldowns survive restarts through ingestion_runs.csv. The web server does not automatically start a worker. Docker Compose defines a separate collector service sharing the existing runtime volume. See LIVE_COLLECTION.md for operation and limitations.
+CSV v3 stores Singapore-local second-precision timestamps without an offset suffix;
+internal/HTTP values remain timezone-aware. Snapshot eligibility depends on observed,
+first-fetch and optional source-update times, preserving revision provenance. Live
+failures retain data with stale/missing labels rather than synthetic replacements.
+Read [CSV schema](CSV_SCHEMA.md), [source semantics](API_CONFIG.md) and
+[risk policy](ENVIRONMENTAL_RISK.md) for contracts.
 
-## Category Storage
+Accounts/sessions use SQLite with scrypt hashes and HttpOnly cookies. Personalization
+uses per-user atomic JSON; profiles are derived from history. Identity comes from the
+server session, not arbitrary client IDs. Historical recommendations are not saved as
+actual completed runs. GPX preserves geometry order and longitude/latitude conventions.
 
-The repository routes metrics into weather, air_quality, and heat_stress observation and revision tables while keeping the existing environment_snapshot and get_route_environment interfaces. locations remains shared and source-specific. Category tables are long-format observations, not synchronized wide rows. CSV encoding converts time columns to Asia/Singapore local seconds without suffixes and restores aware datetimes on read. No collector or prediction module needs to interpret CSV timestamps directly.
+| Retained API | Reason |
+|---|---|
+| `/api/recommendations`, `/api/me/recommendations` | Existing observation-based clients and regression contracts |
+| `/api/experimental/recommendations` | Legacy research ranking, with interval assumptions distinct from unified departure assessment |
+| `/api/time-selection/forecast` | Native historical replay evidence, including older supported offsets |
+| `/api/time-selection/live-forecast` | Supplementary experimental persistence compatibility; never a Tab 1 launcher |
+| `/api/llm/explain` | Optional structured-candidate explanation client; the current frontend uses Tab 2 parsing |
+
+The research inventory and evaluation files remain protected scientific evidence;
+current application integration is described here and in FINAL_INTEGRATION.md.
+
+## Deployment boundary
+
+The image includes the package, config, frontend, catalog, frozen snapshot/artifact
+and saved evaluation JSON. It excludes local runtime users/secrets and dependencies
+used only by browser tests. Compose/Kubernetes share only runtime storage and retain
+one API worker/replica and one collector. Scaling requires a separate durable-storage
+plan for CSV, SQLite, generated routes, user JSON and sessions.
+
+`/api/health` reports process/configuration state; `/api/ready` checks local catalog and
+writable runtime storage. Neither promises fresh external observations. Collector
+probes inspect heartbeat recency. See [deployment preparation](../deploy/README.md);
+manifest rendering is not a running deployment.

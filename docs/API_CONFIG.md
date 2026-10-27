@@ -1,10 +1,10 @@
 # API Configuration and Source Semantics
 
-Endpoint URLs are configured in `config/environment.toml`. Independent collectors live in `outdoorwise/collectors/`. The verified public requests did not require an API key. An optional DATA_GOV_API_KEY is sent through the x-api-key header and is never written to CSV.
+Endpoint URLs are configured in `config/environment.toml`. Independent collectors live in `outdoorwise/collectors/`. The archived public-request evidence did not require an API key; current availability is not established by offline tests. An optional DATA_GOV_API_KEY is sent through the x-api-key header and is never written to CSV.
 
 Use `OUTDOORWISE_ENV_CONFIG` to select another TOML configuration and `OUTDOORWISE_DATA_ROOT` to select another data directory.
 
-The base URL is `https://api-open.data.gov.sg/v2/real-time/api/`. Append each endpoint below to that base URL. All eight endpoints were requested successfully and parsed into real CSV observations.
+The base URL is `https://api-open.data.gov.sg/v2/real-time/api/`. Append each endpoint below to that base URL. Earlier successful requests are retained in [dated collection evidence](evidence/collection/README.md).
 
 | Endpoint / collector | Actual response fields | Upstream to canonical unit | Aggregation window | Published cadence / polling interval |
 |---|---|---|---|---|
@@ -42,4 +42,4 @@ stale_after_seconds is an application policy, not an official health standard: 9
 
 ## Regional Matching
 
-Air quality regions are explicit curated source assignments: Marina Bay=south and Woodlands=north. The service does not implement official region polygon containment. A regional labelLocation is not a route station, so station_distance_km remains empty for regional metrics. New routes require reviewed route_regions entries.
+Air quality regions are explicit curated source assignments for all catalog routes; for example, Marina Bay=south and Woodlands=north. The service does not implement official region polygon containment. A regional labelLocation is not a route station, so station_distance_km remains empty for regional metrics. New routes require reviewed route_regions entries.

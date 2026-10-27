@@ -49,7 +49,7 @@ def test_cli_sigterm_and_duplicate_worker(live_pipeline):
     repo=live_pipeline.repository;now=utc_now()
     for source in live_pipeline.config.sources:
         repo.record_failure(IngestionRun(run_id=source,source=source,source_kind='live',started_at=now,finished_at=now,status='failed',error='Test fixture: skip external requests'))
-    env=os.environ.copy();env['OUTDOORWISE_DATA_ROOT']=str(repo.root);env['OUTDOORWISE_DATA_MODE']='live';env['OUTDOORWISE_AGENT_MODE']='demo'
+    env=os.environ.copy();env['OUTDOORWISE_DATA_ROOT']=str(repo.root);env['OUTDOORWISE_DATA_MODE']='live'
     with repo.ingestion_worker_lock():
         duplicate=subprocess.run([sys.executable,'-m','outdoorwise.cli','watch','--max-cycles','1'],env=env,capture_output=True,text=True,timeout=10)
         assert duplicate.returncode==1 and 'already owns' in duplicate.stderr

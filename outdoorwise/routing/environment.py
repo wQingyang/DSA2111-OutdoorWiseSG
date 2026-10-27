@@ -64,14 +64,14 @@ class DynamicRouteEnvironmentService:
                 separation = distance_km(point, Coordinate(lon=selected.lon, lat=selected.lat))
                 if not regional and separation > self.config.matching.station_max_distance_km:
                     continue
-                matched.append((selected, latest[(source, selected.location_id, metric)], separation))
+                matched.append((selected, latest[(source, selected.location_id, metric)], separation, point))
             if matched:
                 if metric == "heat_stress_level":
-                    selected, observation, separation = max(matched, key=lambda item: HEAT_ORDER.get(item[1].category_value, -1))
+                    selected, observation, separation, selected_point = max(matched, key=lambda item: HEAT_ORDER.get(item[1].category_value, -1))
                 elif metric == "wind_direction":
-                    selected, observation, separation = matched[len(matched) // 2]
+                    selected, observation, separation, selected_point = matched[len(matched) // 2]
                 else:
-                    selected, observation, separation = max(matched, key=lambda item: item[1].value)
+                    selected, observation, separation, selected_point = max(matched, key=lambda item: item[1].value)
                 states = ["fresh" if 0 <= (as_of-item[1].observed_at).total_seconds() <= self.config.sources[source].stale_after_seconds else "stale" for item in matched]
                 state = "stale" if "stale" in states else "fresh"
                 failed = source in last_ingestion and last_ingestion[source].status == "failed"
@@ -79,7 +79,7 @@ class DynamicRouteEnvironmentService:
                 delivery = "demo" if self.source_kind == "demo" else ("cache" if cached else "live")
                 unique_locations = len({item[0].location_id for item in matched})
                 reason = (f"Matched {len(matched)}/{len(samples)} route samples across {unique_locations} source location(s); "
-                          f"the displayed value is conservative along-route aggregation.")
+                          f"the displayed value is conservative along-route aggregation. Aggregate observation/fetch times are the oldest matched times; individual source times are in sample provenance.")
                 value = observation.value; category = observation.category_value
                 location_id = selected.location_id; location_name = selected.name
                 station_distance = max(item[2] for item in matched) if not regional else None
@@ -95,5 +95,10 @@ class DynamicRouteEnvironmentService:
                 source_kind=self.source_kind, delivery=delivery, state=state,
                 match_method="along_route_sampling_500m_v1", station_distance_km=round(station_distance, 3) if station_distance is not None else None,
                 observed_at=observed_at, source_updated_at=source_updated, fetched_at=fetched_at, as_of=as_of,
-                revision=revision, reason=reason))
+                revision=revision, reason=reason, sample_count=len(samples), matched_sample_count=len(matched),
+                sample_provenance=[dict(sample_lat=item[3].lat, sample_lon=item[3].lon, location_id=item[0].location_id, source=source,
+                    distance_km=round(item[2], 3), observed_at=item[1].observed_at.isoformat(),
+                    first_fetched_at=(item[1].first_fetched_at or item[1].fetched_at).isoformat(),
+                    source_updated_at=item[1].source_updated_at.isoformat() if item[1].source_updated_at else None,
+                    revision=item[1].revision) for item in matched]))
         return RouteEnvironment(route_id=route.route_id, as_of=as_of, metrics=metrics)

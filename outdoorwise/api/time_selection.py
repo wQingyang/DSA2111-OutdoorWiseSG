@@ -1,11 +1,11 @@
-"""Historical forecast API for the time-selection prototype."""
+"""Compatibility APIs for native historical forecasts and supplementary live baselines."""
 
 import sys
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -85,3 +85,15 @@ def forecast(request: ForecastRequest):
             status_code=422,
             detail=str(exc),
         ) from exc
+
+@router.post("/live-forecast")
+def live_forecast(data: ForecastRequest, request: Request, response: Response):
+    """Live persistence evidence, separate from the fixed historical replay."""
+    from outdoorwise.services.live_prediction import LivePredictionService
+    response.headers['Cache-Control'] = 'no-store'
+    pipeline = request.app.state.pipeline
+    try:
+        return LivePredictionService(pipeline.repository, pipeline.config, pipeline.mode).predict(
+            data.route_id, data.start_delay_min, data.duration_min)
+    except KeyError as exc:
+        raise HTTPException(404, 'Unknown route') from exc

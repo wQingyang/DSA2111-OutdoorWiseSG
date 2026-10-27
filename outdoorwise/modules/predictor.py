@@ -1,4 +1,4 @@
-"""Owner 4: trained model goes here. DEMO probabilities are fixtures, not forecasts."""
+"""Legacy rain-probability contract: explicit demo fixtures or unavailable live output."""
 from datetime import datetime,timezone
 from outdoorwise.contracts.models import Prediction
 class DemoPredictor:

@@ -1,3 +1,8 @@
+"""Calibrate effort from rated runs without changing shared recommendation scores.
+
+Callers supply eligible history. Residual selection uses the last ten input pairs;
+this module does not independently reconstruct feedback availability or chronology.
+"""
 from datetime import datetime, timezone
 from statistics import median
 from .models import CompletedRun, DifficultyFeedback, UserRunningProfile
@@ -6,7 +11,6 @@ class PersonalizedDifficultyPredictor:
     model_version = "personalized-difficulty-v1"
     def predict(self, route_id, route_distance_km, generic_difficulty, runs: list[CompletedRun], feedback: list[DifficultyFeedback], profile: UserRunningProfile):
         feedback_by_run = {f.completed_run_id: f for f in feedback}
-        pairs = [r.actual_distance_km for r in []]  # keeps inputs explicit; no favourites/profile inference
         residuals = [feedback_by_run[r.completed_run_id].difficulty - r.predicted_difficulty for r in runs if r.completed_run_id in feedback_by_run and r.predicted_difficulty is not None]
         residuals = residuals[-10:]; n = len(residuals); shrinkage = n / (n + 3) if n else 0
         historical_bias = median(residuals) if residuals else 0; bias_adjustment = shrinkage * historical_bias

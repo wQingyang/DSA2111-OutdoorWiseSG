@@ -14,7 +14,7 @@ def pipeline(tmp_path):
     shutil.copytree(ROOT/'data/catalog',tmp_path/'catalog')
     return build_pipeline(Settings(data_root=tmp_path,data_mode='demo'))
 def log(batch):return IngestionRun(run_id='test',source=batch.source,source_kind=batch.observations[0].source_kind,started_at=batch.fetched_at,finished_at=batch.fetched_at,status='success')
-def test_demo_pipeline_api_agent(pipeline):
+def test_demo_pipeline_api(pipeline):
     report=pipeline.refresh();assert report['status']=='success' and report['metrics']==len(pipeline.repository.load_routes()) * 10
     run=pipeline.run(Preferences());assert {e.route_id for e in run.environment}=={r.route_id for r in pipeline.repository.load_routes()} and all(p.is_mock for p in run.predictions)
     assert all(len(e.metrics) == 10  for e in run.environment)
@@ -27,9 +27,7 @@ def test_demo_pipeline_api_agent(pipeline):
         assert client.get('/api/routes/marina_bay/environment?as_of=2026-10-05T10:00:00').status_code==422
         assert client.get('/api/routes/bad/environment').status_code==404
         assert client.post('/api/recommendations',json={'horizon_min':45}).status_code==422
-        chat=client.post('/api/chat',json={'message':'compare'}).json()
-        assert len(chat['trace'])==4 and len(chat['run']['environment'])==len(pipeline.repository.load_routes())
-        assert 'environment' in chat['trace'][1]['result']
+        assert client.post('/api/chat',json={'message':'compare'}).status_code == 404
 
 def test_demo_coverage_uses_only_current_synthetic_sources(pipeline):
     pipeline.refresh()
@@ -131,11 +129,6 @@ def test_module_output_validation(pipeline):
         def predict(self,*args):return []
     pipeline.predictor=Bad()
     with pytest.raises(ValueError,match='exactly one'):pipeline.run(Preferences())
-def test_tool_allowlist(pipeline):
-    from outdoorwise.agent.tools import ToolRegistry
-    registry=ToolRegistry(pipeline,Preferences())
-    with pytest.raises(ValueError):registry.call('delete',{})
-    with pytest.raises(ValueError):registry.call('rank_routes',{'arbitrary':1})
 def test_live_failure_uses_cache_and_due(tmp_path):
     shutil.copytree(ROOT/'data/catalog',tmp_path/'catalog')
     pipe=build_pipeline(Settings(data_root=tmp_path,data_mode='live'));now=utc_now()
@@ -147,7 +140,7 @@ def test_live_failure_uses_cache_and_due(tmp_path):
     metric=pipe.get_route_environment('marina_bay',now+timedelta(seconds=2)).metrics[0]
     assert metric.delivery=='cache' and metric.source_kind=='live' and metric.value is not None
     assert all(m.state=='missing' for m in pipe.get_route_environment('woodlands_waterfront',now+timedelta(seconds=2)).metrics[1:])
-def test_retry_transport_and_llm_tool_loop(pipeline,monkeypatch):
+def test_retry_transport(pipeline,monkeypatch):
     from unittest.mock import Mock
     import httpx
     collector=COLLECTORS['nea_rainfall'](pipeline.config.sources['nea_rainfall'],pipeline.config.collection)
@@ -158,12 +151,3 @@ def test_retry_transport_and_llm_tool_loop(pipeline,monkeypatch):
     monkeypatch.setattr('outdoorwise.collectors.base.httpx.Client',lambda **kw:client)
     monkeypatch.setattr('outdoorwise.collectors.base.time.sleep',lambda s:None)
     batch,attempts=collector.collect();assert attempts==2 and len(batch.observations)>20
-    pipeline.refresh()
-    from outdoorwise.agent.service import AgentService
-    from outdoorwise.contracts.models import ChatRequest
-    replies=[{'choices':[{'message':{'role':'assistant','content':None,'tool_calls':[{'id':'1','type':'function','function':{'name':'get_route_environment','arguments':'{"route_id":"marina_bay"}'}},{'id':'2','type':'function','function':{'name':'rank_routes','arguments':'{}'}}]}}]}, {'choices':[{'message':{'role':'assistant','content':'Structured output explanation.'}}]}]
-    client.post.side_effect=[Mock(json=Mock(return_value=r),raise_for_status=Mock()) for r in replies]
-    result=AgentService(pipeline,Settings(data_root=pipeline.repository.root,data_mode='demo',agent_mode='llm',llm_model='test',llm_api_key='test')).chat(ChatRequest(message='compare'))
-    assert len(result.trace)==2 and set(result.recommended_route_ids)=={r.route_id for r in pipeline.repository.load_routes()}
-    assert len(result.trace[0].result['environment']['metrics'])==10
-    # This checks the tool loop only, not a real provider call.

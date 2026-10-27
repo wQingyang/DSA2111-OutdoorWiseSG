@@ -47,3 +47,10 @@ def test_all_categories_and_time_columns(root):
                     assert re.fullmatch(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}',value)
     assert len(pipeline.get_route_environment('marina_bay').metrics)==10
     assert pipeline.repository.database_status('demo')['observation_records']==50
+
+
+def test_http_sampling_metadata_does_not_change_csv_v3(root):
+    pipeline=build_pipeline(Settings(data_root=root,data_mode='demo'))
+    pipeline.refresh()
+    rows=read(root/'runtime/route_environment_latest.csv')
+    assert rows and not {'sample_count','matched_sample_count','sample_provenance'} & set(rows[0])

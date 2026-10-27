@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: outdoorwise-config
+data:
+  OUTDOORWISE_DATA_MODE: live
+  OUTDOORWISE_DATA_ROOT: /app/data
+  OPENROUTER_MODEL: openrouter/free
+  OUTDOORWISE_SECURE_COOKIES: "0"

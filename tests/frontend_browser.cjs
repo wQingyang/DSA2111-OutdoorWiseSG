@@ -6,31 +6,31 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = require('node:assert/strict');
 const root = path.resolve(__dirname, '..');
+const workflow = require('./frontend_workflow_fixture.cjs');
 const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/frontend_run.json'), 'utf8'));
 const destination = process.env.SCREENSHOT_DIR || '/tmp/outdoorwise-sprint2-screenshots';
 fs.mkdirSync(destination, {recursive: true});
+let appMode = 'live';
 let authenticated = false; let favourites = []; const runs = []; const feedback = []; const comparisons = [];
 const server = http.createServer((request, response) => {
   const url = new URL(request.url, 'http://localhost');
   const route = url.pathname;
   if (route.startsWith('/api/')) {
     const json = (data, status = 200) => {response.writeHead(status, {'Content-Type': 'application/json'}); response.end(JSON.stringify(data));};
-    if (route === '/api/health') return json({data_mode: 'live', agent_mode: 'demo'});
+    if (route === '/api/health') return json({data_mode: 'live', app_mode: appMode});
     if (route === '/api/auth/me') return json(authenticated ? {user_id: 'browser-user', username: 'DemoRunner', created_at: '2026-10-15T12:00:00Z'} : {detail: 'Authentication required'}, authenticated ? 200 : 401);
     if (route === '/api/auth/login' || route === '/api/auth/register') {authenticated = true; return json({user_id: 'browser-user', username: 'DemoRunner'});}
     if (route.startsWith('/api/auth/username-availability')) return json({available: true});
     if (route === '/api/auth/logout') {authenticated = false; return json({}, 204);}
-    if (route === '/api/recommendations' || route === '/api/me/recommendations') {
+    if (route === '/api/route-recommendations') {
       let body = ''; request.on('data', chunk => body += chunk); request.on('end', () => {
         const preferences = JSON.parse(body); comparisons.push({endpoint: route, preferences});
-        const data = JSON.parse(JSON.stringify(route === '/api/me/recommendations' ? fixture.personalized : fixture.generic));
-        const run = route === '/api/me/recommendations' ? data.run : data;
-        run.preferences = {...run.preferences, ...preferences};
+        const run = workflow(fixture, authenticated, appMode, preferences);
         // Explicit synthetic empty-result scenario; real access math is API-tested.
         if (preferences.location && preferences.max_access_distance_km === .001) {
-          run.recommendations = []; if (data.run) data.recommendations = [];
+          run.recommendations = [];
         }
-        json(data);
+        json(run);
       }); return;
     }
     if (route === '/api/refresh') return json({status: 'success', sources: []});
@@ -75,6 +75,7 @@ const server = http.createServer((request, response) => {
     assert.equal(await page.locator('.environmental-details[open]').count(), 0);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     await page.screenshot({path: path.join(destination, 'dashboard-desktop.png'), fullPage: false});
+    await page.locator('#toggle-all-routes').click();
     const coast = page.locator('[data-personalization-route="east_coast"]');
     await coast.locator('summary').click(); assert.equal(await coast.locator('tr[data-metric]').count(), 10);
     await coast.locator('summary').click(); await coast.locator('.view-route-button').click();
@@ -122,7 +123,7 @@ const server = http.createServer((request, response) => {
     assert.deepEqual(await selection(), dragged); assert.equal(await page.locator('.leaflet-container').count(), 1);
     await page.locator('#access').fill('25');
     await page.locator('#preferences > button').click(); await page.waitForFunction(() => document.getElementById('status').textContent === 'Routes updated.');
-    assert.deepEqual(comparisons.at(-1).preferences.location, dragged); assert.equal(comparisons.at(-1).endpoint, '/api/me/recommendations');
+    assert.deepEqual(comparisons.at(-1).preferences.location, dragged); assert.equal(comparisons.at(-1).endpoint, '/api/route-recommendations');
     await page.locator('#refresh').click(); await page.waitForFunction(() => document.getElementById('status').textContent === 'Routes updated.');
     assert.deepEqual(comparisons.at(-1).preferences.location, dragged); assert.equal(comparisons.at(-1).preferences.max_access_distance_km, 25);
     await page.screenshot({path: path.join(destination, 'location-desktop.png')});
@@ -166,6 +167,34 @@ const server = http.createServer((request, response) => {
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     assert.equal(await page.locator('.leaflet-container').count(), 1);
     console.log('Starting location passed: map click/drag/replacement, route isolation, presets, native geolocation success/denial, personal compare/refresh payloads, strict empty state, clear and mobile.');
+    // Server mode changes only on a new page load, mirroring a restart.
+    appMode = 'historical';
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({width, height: 1000}); await page.goto(base);
+      await page.locator('#cards .prediction-details').first().waitFor();
+      assert.match(await page.locator('#mode').textContent(), /^HISTORICAL MODE/);
+      assert.equal(await page.locator('#refresh').isVisible(), false);
+      assert.equal(await page.locator('#forecast-launcher, #live-forecast-launcher').count(), 0);
+      assert.equal(await page.locator('#preferences button[type=submit]').count(), 1);
+      assert.deepEqual(await page.locator('#start-delay option').evaluateAll(opts => opts.map(o => o.value)), ['0', '30', '60']);
+      const before = comparisons.length;
+      await page.locator('#start-delay').selectOption('60');
+      await page.locator('#preferences > button').click();
+      await page.waitForFunction(() => document.getElementById('status').textContent === 'Routes updated.');
+      assert.equal(comparisons.length, before + 1); assert.equal(comparisons.at(-1).preferences.start_delay_min, 60);
+      assert(await page.locator('#cards .completed-run-button').first().isDisabled());
+      await page.locator('#cards .prediction-details summary').first().click();
+      assert.match(await page.locator('#cards .prediction-details').first().textContent(), /Ground truth: Unavailable/);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      await page.screenshot({path: path.join(destination, `historical-${width}.png`), fullPage: true});
+      await page.locator('#dynamic-tab-button').click();
+      assert(await page.locator('#dynamic-environment-note').isVisible());
+      assert(await page.locator('#ai-parse-button').isVisible());
+    }
+    appMode = 'live'; await page.goto(base); await page.locator('#cards .card').first().waitFor();
+    assert.match(await page.locator('#mode').textContent(), /^LIVE MODE/);
+    assert.equal(await page.locator('#cards .prediction-details').count(), 0);
+    assert.equal(await page.locator('#departure-control').isVisible(), false);
     assert.deepEqual(errors, []);
     console.log('Chromium passed: desktop/mobile, Leaflet geometry and View Route, login/profile/register, personal refresh order, favourite, completed run/feedback, GPX, no page errors. Screenshots: ' + destination);
   } finally {if (browser) await browser.close(); await new Promise(resolve => server.close(resolve));}

@@ -1,4 +1,4 @@
-# Flexible starting location — Sprint 2.1
+# Starting location and access constraints
 
 The dashboard keeps its existing Plan Your Run form and single Leaflet map. Choose one of four starting-location modes:
 
@@ -7,11 +7,11 @@ The dashboard keeps its existing Plan Your Run form and single Leaflet map. Choo
 - **Choose a preset:** NUS (1.296, 103.776), Marina Bay (1.287, 103.855), Woodlands (1.438, 103.786). These are approximate reference coordinates, not verified entrances.
 - **Anywhere in Singapore:** no starting-location or maximum-access constraint. Clear starting location returns to this mode and removes the marker.
 
-Coordinates appear in the form to six decimal places; full selected coordinates are sent. Compare Routes applies changes. Observation refresh retains the chosen point and access limit and requests personalized recommendations for authenticated users. Pending recommendations for an earlier point or access limit are rejected rather than displayed as results for the new choice. This state lives only in page memory: full page reload/navigation resets it. The default is Anywhere.
+Coordinates appear in the form to six decimal places; full selected coordinates are sent. Find Recommended Routes applies changes. Observation refresh retains the chosen point and access limit and requests personalized recommendations for authenticated users. Pending recommendations for an earlier point or access limit are rejected rather than displayed as results for the new choice. This state lives only in page memory: full page reload/navigation resets it. The default is Anywhere.
 
 ## Existing API and distance semantics
 
-Both POST /api/recommendations and POST /api/me/recommendations receive the existing preferences fields:
+The unified `POST /api/route-recommendations` and retained compatibility endpoints `/api/recommendations` and `/api/me/recommendations` accept these preferences:
 
 ```json
 {"location": {"lon": 103.776, "lat": 1.296}, "max_access_distance_km": 5}
@@ -29,6 +29,4 @@ A location request occurs only after an explicit button press, using getCurrentP
 
 Implementation: frontend/location.js owns selection and the single marker; frontend/app.js attaches it to the existing map, submits preferences, protects against stale responses and handles empty results; frontend/results.js displays the backend access distance.
 
-Verified on 2026-10-15: 109 Python tests, 21 frontend DOM tests, isolated real HTTP smoke with all 12 catalog routes, and Chrome desktop/mobile browser checks passed. API tests exercise both endpoints with actual catalog geometry, strict filtering and deterministic repeated requests. DOM tests cover GPS errors, unsupported browsers, stale callbacks, map/marker events, presets, clear, personalized refresh persistence and request races. Chrome checks use synthetic responses/offline tiles, native geolocation permission overrides and mobile touch emulation; they do not establish real-device GPS accuracy, live tile availability or field usability.
-
-Screenshots (synthetic fixtures): [desktop selection](screenshots/sprint2-1/location-desktop.png), [mobile controls](screenshots/sprint2-1/location-mobile.png), [mobile map marker](screenshots/sprint2-1/location-map-mobile.png). See [frontend verification](FRONTEND_VERIFICATION.md) for reproducible commands.
+Regression coverage includes map click/drag/replacement, route-event isolation, presets, geolocation success/failure, stale-response rejection, strict access limits, anonymous/authenticated requests and mobile layout. See [verification commands and results](FINAL_INTEGRATION.md).

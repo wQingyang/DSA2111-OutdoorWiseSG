@@ -68,6 +68,8 @@ def parse_route_request(user_text: str) -> ParsedRouteRequest:
         max_tokens=1200,
     )
 
+    if not response.choices:
+        raise ValueError("LLM returned no choices.")
     content = response.choices[0].message.content
 
     if not content:

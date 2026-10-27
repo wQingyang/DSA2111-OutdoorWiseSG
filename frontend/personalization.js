@@ -103,7 +103,7 @@
     document.querySelectorAll('[data-personalization-route]').forEach(card => {
       const routeId = card.dataset.personalizationRoute; const route = window.outdoorwiseRoutes.find(item => item.route_id === routeId); if (!route) return;
       card.querySelector('.favourite-button')?.addEventListener('click', e => toggleFavourite(routeId, e.currentTarget));
-      card.querySelector('.completed-run-button')?.addEventListener('click', () => openRunForm(route));
+      if (!card.querySelector('.completed-run-button')?.disabled) card.querySelector('.completed-run-button')?.addEventListener('click', () => openRunForm(route));
     }); updateCards();
   }
   document.addEventListener('outdoorwise:routes-rendered', bindCards);

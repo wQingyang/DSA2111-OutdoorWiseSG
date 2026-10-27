@@ -253,3 +253,12 @@ All CSV I/O remains in the repository. Thread RLock and cross-process flock seri
 ## Operational Files
 
 collection_worker.json stores the last worker report, not observations. csv_storage_metadata.json declares the timestamp convention and table mapping. predictions_latest.json remains separate from observations. Internal JSON snapshots and HTTP responses retain timezone-aware timestamps. The worker lease is separate from the short CSV writer lock; source cooldowns are recovered from ingestion logs.
+
+## Final integration HTTP metadata
+
+`RouteMetric` HTTP responses may additionally contain `sample_count`,
+`matched_sample_count`, and `sample_provenance` for dynamic geometry. These optional
+fields are not columns in `route_environment_latest.csv`. The repository excludes
+them when initializing or writing CSV tables, preserving schema v3 without a
+migration. Per-sample provenance remains request output; catalog CSV views retain
+the documented columns above.

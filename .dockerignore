@@ -5,3 +5,11 @@ __pycache__
 data/runtime
 .pytest_cache
 *.zip
+node_modules
+.agents
+.codex
+.aws
+.env.*
+!.env.example
+**/__pycache__
+**/*.pyc

@@ -1,4 +1,8 @@
-"""Only this service matches sources to routes. Repository is injected by its port."""
+"""Match catalog route starts to available station observations and curated regions.
+
+One availability-filtered repository snapshot supplies all metrics. Start-point
+matching is a catalog design choice, not evidence of conditions along a whole
+route; dynamic along-route sampling lives in routing/environment.py."""
 from datetime import datetime
 from outdoorwise.contracts.models import Coordinate
 from outdoorwise.contracts.geo import distance_km
@@ -6,7 +10,7 @@ from outdoorwise.contracts.environment import (METRIC_SPECS,RouteMetric,RouteEnv
 class StartPointStrategy:
     def representative(self,route):
         lon,lat=route.geometry.coordinates[0];return Coordinate(lon=lon,lat=lat)
-    # Extension seam: replace with evenly-spaced GeoJSON sampling + per-segment aggregation.
+    # Catalog matching intentionally keeps the configured start-point semantics.
 class RouteEnvironmentService:
     def __init__(self,repository,config,source_kind,geometry_strategy=None):
         self.repository=repository;self.config=config;self.source_kind=source_kind

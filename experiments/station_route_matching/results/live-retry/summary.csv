@@ -1,0 +1,289 @@
+route_id,route_name,method,metric,metric_class,sample_count,matched_count,coverage_ratio,fresh_matched_count,stale_matched_count,fresh_coverage_ratio,distinct_location_count,mean_distance_km,max_distance_km,mean_numeric_value,max_numeric_value
+marina_bay,Marina Bay waterfront loop,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,1.252836,1.252836,0.0,0.0
+marina_bay,Marina Bay waterfront loop,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,1.926141,1.926141,1.389,1.389
+marina_bay,Marina Bay waterfront loop,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,1.926141,1.926141,311.0,311.0
+marina_bay,Marina Bay waterfront loop,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,3.309027,3.309027,27.2,27.2
+marina_bay,Marina Bay waterfront loop,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.309027,3.309027,92.2,92.2
+marina_bay,Marina Bay waterfront loop,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,0.832015,0.832015,26.2,26.2
+marina_bay,Marina Bay waterfront loop,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,0.832015,0.832015,,
+marina_bay,Marina Bay waterfront loop,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,1.252836,1.252836,0.0,0.0
+marina_bay,Marina Bay waterfront loop,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,1.926141,1.926141,1.389,1.389
+marina_bay,Marina Bay waterfront loop,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,1.926141,1.926141,311.0,311.0
+marina_bay,Marina Bay waterfront loop,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,3.309027,3.309027,27.2,27.2
+marina_bay,Marina Bay waterfront loop,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.309027,3.309027,92.2,92.2
+marina_bay,Marina Bay waterfront loop,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,0.832015,0.832015,26.2,26.2
+marina_bay,Marina Bay waterfront loop,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,0.832015,0.832015,,
+marina_bay,Marina Bay waterfront loop,along_route_500m,rainfall,station,9,9,1.0,9,0,1.0,2,1.205787,1.780326,0.0,0.0
+marina_bay,Marina Bay waterfront loop,along_route_500m,wind_speed,station,9,9,1.0,9,0,1.0,1,1.706079,1.926141,1.389,1.389
+marina_bay,Marina Bay waterfront loop,along_route_500m,wind_direction,station,9,9,1.0,9,0,1.0,1,1.706079,1.926141,311.0,311.0
+marina_bay,Marina Bay waterfront loop,along_route_500m,air_temperature,station,9,9,1.0,9,0,1.0,1,3.54814,3.926224,27.2,27.2
+marina_bay,Marina Bay waterfront loop,along_route_500m,relative_humidity,station,9,9,1.0,9,0,1.0,1,3.54814,3.926224,92.2,92.2
+marina_bay,Marina Bay waterfront loop,along_route_500m,wbgt,station,9,9,1.0,9,0,1.0,2,1.072506,1.434792,26.066667,26.2
+marina_bay,Marina Bay waterfront loop,along_route_500m,heat_stress_level,station,9,9,1.0,9,0,1.0,2,1.072506,1.434792,,
+marina_bay,Marina Bay waterfront loop,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,87.0,87.0
+marina_bay,Marina Bay waterfront loop,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,61.0,61.0
+marina_bay,Marina Bay waterfront loop,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,108.0,108.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,0.0,0.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,1.286111,1.286111
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,252.0,252.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,27.6,27.6
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,88.2,88.2
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,1.982344,1.982344,25.8,25.8
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.982344,1.982344,,
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,0.0,0.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,1.286111,1.286111
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,252.0,252.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,27.6,27.6
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.166093,1.166093,88.2,88.2
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,1.982344,1.982344,25.8,25.8
+woodlands_waterfront,Woodlands Waterfront out-and-back,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.982344,1.982344,,
+woodlands_waterfront,Woodlands Waterfront out-and-back,along_route_500m,rainfall,station,4,4,1.0,4,0,1.0,1,1.152985,1.166093,0.0,0.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,along_route_500m,wind_speed,station,4,4,1.0,4,0,1.0,1,1.152985,1.166093,1.286111,1.286111
+woodlands_waterfront,Woodlands Waterfront out-and-back,along_route_500m,wind_direction,station,4,4,1.0,4,0,1.0,1,1.152985,1.166093,252.0,252.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,along_route_500m,air_temperature,station,4,4,1.0,4,0,1.0,1,1.152985,1.166093,27.6,27.6
+woodlands_waterfront,Woodlands Waterfront out-and-back,along_route_500m,relative_humidity,station,4,4,1.0,4,0,1.0,1,1.152985,1.166093,88.2,88.2
+woodlands_waterfront,Woodlands Waterfront out-and-back,along_route_500m,wbgt,station,4,4,1.0,4,0,1.0,1,2.065767,2.150844,25.8,25.8
+woodlands_waterfront,Woodlands Waterfront out-and-back,along_route_500m,heat_stress_level,station,4,4,1.0,4,0,1.0,1,2.065767,2.150844,,
+woodlands_waterfront,Woodlands Waterfront out-and-back,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,96.0,96.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,69.0,69.0
+woodlands_waterfront,Woodlands Waterfront out-and-back,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,113.0,113.0
+west_coast,West Coast Park out-and-back,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,0.641283,0.641283,0.0,0.0
+west_coast,West Coast Park out-and-back,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,1.816377,1.816377,2.623667,2.623667
+west_coast,West Coast Park out-and-back,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,4.186612,4.186612,315.0,315.0
+west_coast,West Coast Park out-and-back,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,1.816377,1.816377,28.5,28.5
+west_coast,West Coast Park out-and-back,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.816377,1.816377,84.5,84.5
+west_coast,West Coast Park out-and-back,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,4.802517,4.802517,26.0,26.0
+west_coast,West Coast Park out-and-back,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,4.802517,4.802517,,
+west_coast,West Coast Park out-and-back,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,0.641283,0.641283,0.0,0.0
+west_coast,West Coast Park out-and-back,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,1.816377,1.816377,2.623667,2.623667
+west_coast,West Coast Park out-and-back,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,4.186612,4.186612,315.0,315.0
+west_coast,West Coast Park out-and-back,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,1.816377,1.816377,28.5,28.5
+west_coast,West Coast Park out-and-back,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.816377,1.816377,84.5,84.5
+west_coast,West Coast Park out-and-back,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,4.802517,4.802517,26.0,26.0
+west_coast,West Coast Park out-and-back,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,4.802517,4.802517,,
+west_coast,West Coast Park out-and-back,along_route_500m,rainfall,station,10,10,1.0,10,0,1.0,2,0.502584,0.801838,0.0,0.0
+west_coast,West Coast Park out-and-back,along_route_500m,wind_speed,station,10,10,1.0,10,0,1.0,1,1.825059,2.278976,2.623667,2.623667
+west_coast,West Coast Park out-and-back,along_route_500m,wind_direction,station,10,10,1.0,10,0,1.0,1,4.413854,4.598743,315.0,315.0
+west_coast,West Coast Park out-and-back,along_route_500m,air_temperature,station,10,10,1.0,10,0,1.0,1,1.825059,2.278976,28.5,28.5
+west_coast,West Coast Park out-and-back,along_route_500m,relative_humidity,station,10,10,1.0,10,0,1.0,1,1.825059,2.278976,84.5,84.5
+west_coast,West Coast Park out-and-back,along_route_500m,wbgt,station,10,10,1.0,10,0,1.0,1,4.288444,4.802517,26.0,26.0
+west_coast,West Coast Park out-and-back,along_route_500m,heat_stress_level,station,10,10,1.0,10,0,1.0,1,4.288444,4.802517,,
+west_coast,West Coast Park out-and-back,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,119.0,119.0
+west_coast,West Coast Park out-and-back,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,93.0,93.0
+west_coast,West Coast Park out-and-back,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,152.0,152.0
+east_coast,East Coast Park out-and-back,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,0.507216,0.507216,0.0,0.0
+east_coast,East Coast Park out-and-back,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,1.028889,1.028889
+east_coast,East Coast Park out-and-back,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,356.0,356.0
+east_coast,East Coast Park out-and-back,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,28.3,28.3
+east_coast,East Coast Park out-and-back,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,86.6,86.6
+east_coast,East Coast Park out-and-back,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,3.832426,3.832426,26.5,26.5
+east_coast,East Coast Park out-and-back,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,3.832426,3.832426,,
+east_coast,East Coast Park out-and-back,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,0.507216,0.507216,0.0,0.0
+east_coast,East Coast Park out-and-back,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,1.028889,1.028889
+east_coast,East Coast Park out-and-back,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,356.0,356.0
+east_coast,East Coast Park out-and-back,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,28.3,28.3
+east_coast,East Coast Park out-and-back,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,5.193473,5.193473,86.6,86.6
+east_coast,East Coast Park out-and-back,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,3.832426,3.832426,26.5,26.5
+east_coast,East Coast Park out-and-back,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,3.832426,3.832426,,
+east_coast,East Coast Park out-and-back,along_route_500m,rainfall,station,16,16,1.0,16,0,1.0,2,1.41708,2.341238,0.0,0.0
+east_coast,East Coast Park out-and-back,along_route_500m,wind_speed,station,16,16,1.0,16,0,1.0,2,4.132234,5.241132,0.861694,1.028889
+east_coast,East Coast Park out-and-back,along_route_500m,wind_direction,station,16,16,1.0,16,0,1.0,2,4.132234,5.241132,318.625,356.0
+east_coast,East Coast Park out-and-back,along_route_500m,air_temperature,station,16,16,1.0,16,0,1.0,2,4.132234,5.241132,27.8125,28.3
+east_coast,East Coast Park out-and-back,along_route_500m,relative_humidity,station,16,16,1.0,16,0,1.0,2,4.132234,5.241132,90.5,91.4
+east_coast,East Coast Park out-and-back,along_route_500m,wbgt,station,16,16,1.0,16,0,1.0,3,2.924371,3.861429,26.33125,26.5
+east_coast,East Coast Park out-and-back,along_route_500m,heat_stress_level,station,16,16,1.0,16,0,1.0,3,2.924371,3.861429,,
+east_coast,East Coast Park out-and-back,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,100.0,100.0
+east_coast,East Coast Park out-and-back,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,66.0,66.0
+east_coast,East Coast Park out-and-back,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,113.0,113.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,0.731765,0.731765,0.0,0.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,0.926,0.926
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,282.0,282.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,27.9,27.9
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,88.3,88.3
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,0.981821,0.981821,25.6,25.6
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,0.981821,0.981821,,
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,0.731765,0.731765,0.0,0.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,0.926,0.926
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,282.0,282.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,27.9,27.9
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.957217,1.957217,88.3,88.3
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,0.981821,0.981821,25.6,25.6
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,0.981821,0.981821,,
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,along_route_500m,rainfall,station,11,11,1.0,11,0,1.0,2,0.920771,1.356417,0.0,0.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,along_route_500m,wind_speed,station,11,11,1.0,11,0,1.0,1,1.476027,1.957217,0.926,0.926
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,along_route_500m,wind_direction,station,11,11,1.0,11,0,1.0,1,1.476027,1.957217,282.0,282.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,along_route_500m,air_temperature,station,11,11,1.0,11,0,1.0,1,1.476027,1.957217,27.9,27.9
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,along_route_500m,relative_humidity,station,11,11,1.0,11,0,1.0,1,1.476027,1.957217,88.3,88.3
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,along_route_500m,wbgt,station,11,11,1.0,11,0,1.0,2,1.271558,1.703231,25.672727,25.8
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,along_route_500m,heat_stress_level,station,11,11,1.0,11,0,1.0,2,1.271558,1.703231,,
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,96.0,96.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,79.0,79.0
+bishan_ang_mo_kio,Bishan–Ang Mo Kio Park river loop,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,120.0,120.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,0.227895,0.227895,0.0,0.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,1.337556,1.337556
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,244.0,244.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,27.2,27.2
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,92.2,92.2
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,1.614793,1.614793,25.6,25.6
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.614793,1.614793,,
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,0.227895,0.227895,0.0,0.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,1.337556,1.337556
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,244.0,244.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,27.2,27.2
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,2.208568,2.208568,92.2,92.2
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,1.614793,1.614793,25.6,25.6
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.614793,1.614793,,
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,along_route_500m,rainfall,station,13,13,1.0,13,0,1.0,2,0.418527,0.747279,0.0,0.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,along_route_500m,wind_speed,station,13,13,1.0,13,0,1.0,1,2.183547,2.661198,1.337556,1.337556
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,along_route_500m,wind_direction,station,13,13,1.0,13,0,1.0,1,2.183547,2.661198,244.0,244.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,along_route_500m,air_temperature,station,13,13,1.0,13,0,1.0,1,2.183547,2.661198,27.2,27.2
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,along_route_500m,relative_humidity,station,13,13,1.0,13,0,1.0,1,2.183547,2.661198,92.2,92.2
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,along_route_500m,wbgt,station,13,13,1.0,13,0,1.0,1,1.080132,1.614793,25.6,25.6
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,along_route_500m,heat_stress_level,station,13,13,1.0,13,0,1.0,1,1.080132,1.614793,,
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,96.0,96.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,79.0,79.0
+singapore_botanic_gardens,Singapore Botanic Gardens garden loop,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,120.0,120.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,0.531939,0.531939,0.0,0.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,1.337556,1.337556
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,244.0,244.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,27.2,27.2
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,92.2,92.2
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,0.533286,0.533286,25.5,25.5
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,0.533286,0.533286,,
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,0.531939,0.531939,0.0,0.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,1.337556,1.337556
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,244.0,244.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,27.2,27.2
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.591196,3.591196,92.2,92.2
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,0.533286,0.533286,25.5,25.5
+macritchie_reservoir,MacRitchie Reservoir forest loop,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,0.533286,0.533286,,
+macritchie_reservoir,MacRitchie Reservoir forest loop,along_route_500m,rainfall,station,18,18,1.0,18,0,1.0,1,0.774932,1.529896,0.0,0.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,along_route_500m,wind_speed,station,18,18,1.0,18,0,1.0,2,3.691672,3.992015,1.108914,1.337556
+macritchie_reservoir,MacRitchie Reservoir forest loop,along_route_500m,wind_direction,station,18,18,1.0,18,0,1.0,2,3.691672,3.992015,265.111111,282.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,along_route_500m,air_temperature,station,18,18,1.0,18,0,1.0,2,3.691672,3.992015,27.588889,27.9
+macritchie_reservoir,MacRitchie Reservoir forest loop,along_route_500m,relative_humidity,station,18,18,1.0,18,0,1.0,2,3.691672,3.992015,90.033333,92.2
+macritchie_reservoir,MacRitchie Reservoir forest loop,along_route_500m,wbgt,station,18,18,1.0,18,0,1.0,1,0.774056,1.529158,25.5,25.5
+macritchie_reservoir,MacRitchie Reservoir forest loop,along_route_500m,heat_stress_level,station,18,18,1.0,18,0,1.0,1,0.774056,1.529158,,
+macritchie_reservoir,MacRitchie Reservoir forest loop,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,96.0,96.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,79.0,79.0
+macritchie_reservoir,MacRitchie Reservoir forest loop,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,120.0,120.0
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,0.662245,0.662245,0.0,0.0
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,0.977444,0.977444
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,10.0,10.0
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,27.0,27.0
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,87.8,87.8
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,1.350251,1.350251,25.8,25.8
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.350251,1.350251,,
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,0.662245,0.662245,0.0,0.0
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,0.977444,0.977444
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,10.0,10.0
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,27.0,27.0
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.400811,3.400811,87.8,87.8
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,1.350251,1.350251,25.8,25.8
+pasir_ris_park,Pasir Ris Park coastal loop,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.350251,1.350251,,
+pasir_ris_park,Pasir Ris Park coastal loop,along_route_500m,rainfall,station,12,12,1.0,12,0,1.0,2,1.108712,1.528792,0.0,0.0
+pasir_ris_park,Pasir Ris Park coastal loop,along_route_500m,wind_speed,station,12,12,1.0,12,0,1.0,1,3.512561,4.082607,0.977444,0.977444
+pasir_ris_park,Pasir Ris Park coastal loop,along_route_500m,wind_direction,station,12,12,1.0,12,0,1.0,1,3.512561,4.082607,10.0,10.0
+pasir_ris_park,Pasir Ris Park coastal loop,along_route_500m,air_temperature,station,12,12,1.0,12,0,1.0,1,3.512561,4.082607,27.0,27.0
+pasir_ris_park,Pasir Ris Park coastal loop,along_route_500m,relative_humidity,station,12,12,1.0,12,0,1.0,1,3.512561,4.082607,87.8,87.8
+pasir_ris_park,Pasir Ris Park coastal loop,along_route_500m,wbgt,station,12,12,1.0,12,0,1.0,1,1.517987,2.096057,25.8,25.8
+pasir_ris_park,Pasir Ris Park coastal loop,along_route_500m,heat_stress_level,station,12,12,1.0,12,0,1.0,1,1.517987,2.096057,,
+pasir_ris_park,Pasir Ris Park coastal loop,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,100.0,100.0
+pasir_ris_park,Pasir Ris Park coastal loop,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,66.0,66.0
+pasir_ris_park,Pasir Ris Park coastal loop,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,113.0,113.0
+bedok_reservoir,Bedok Reservoir Park loop,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,1.3757,1.3757,0.0,0.0
+bedok_reservoir,Bedok Reservoir Park loop,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,0.771667,0.771667
+bedok_reservoir,Bedok Reservoir Park loop,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,44.0,44.0
+bedok_reservoir,Bedok Reservoir Park loop,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,27.1,27.1
+bedok_reservoir,Bedok Reservoir Park loop,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,95.7,95.7
+bedok_reservoir,Bedok Reservoir Park loop,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,1.627571,1.627571,26.4,26.4
+bedok_reservoir,Bedok Reservoir Park loop,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.627571,1.627571,,
+bedok_reservoir,Bedok Reservoir Park loop,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,1.3757,1.3757,0.0,0.0
+bedok_reservoir,Bedok Reservoir Park loop,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,0.771667,0.771667
+bedok_reservoir,Bedok Reservoir Park loop,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,44.0,44.0
+bedok_reservoir,Bedok Reservoir Park loop,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,27.1,27.1
+bedok_reservoir,Bedok Reservoir Park loop,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,3.694217,3.694217,95.7,95.7
+bedok_reservoir,Bedok Reservoir Park loop,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,1.627571,1.627571,26.4,26.4
+bedok_reservoir,Bedok Reservoir Park loop,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.627571,1.627571,,
+bedok_reservoir,Bedok Reservoir Park loop,along_route_500m,rainfall,station,20,20,1.0,20,0,1.0,3,0.870831,1.452904,0.0,0.0
+bedok_reservoir,Bedok Reservoir Park loop,along_route_500m,wind_speed,station,20,20,1.0,20,0,1.0,2,3.111849,4.023122,0.774239,0.823111
+bedok_reservoir,Bedok Reservoir Park loop,along_route_500m,wind_direction,station,20,20,1.0,20,0,1.0,2,3.111849,4.023122,57.3,310.0
+bedok_reservoir,Bedok Reservoir Park loop,along_route_500m,air_temperature,station,20,20,1.0,20,0,1.0,2,3.111849,4.023122,27.13,27.7
+bedok_reservoir,Bedok Reservoir Park loop,along_route_500m,relative_humidity,station,20,20,1.0,20,0,1.0,2,3.111849,4.023122,95.485,95.7
+bedok_reservoir,Bedok Reservoir Park loop,along_route_500m,wbgt,station,20,20,1.0,20,0,1.0,2,1.880589,2.500512,26.05,26.4
+bedok_reservoir,Bedok Reservoir Park loop,along_route_500m,heat_stress_level,station,20,20,1.0,20,0,1.0,2,1.880589,2.500512,,
+bedok_reservoir,Bedok Reservoir Park loop,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,100.0,100.0
+bedok_reservoir,Bedok Reservoir Park loop,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,66.0,66.0
+bedok_reservoir,Bedok Reservoir Park loop,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,113.0,113.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,1.221043,1.221043,0.0,0.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,0.308667,0.308667
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,1.0,1.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,26.8,26.8
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,94.6,94.6
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,1.220761,1.220761,25.6,25.6
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.220761,1.220761,,
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,1.221043,1.221043,0.0,0.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,0.308667,0.308667
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,1.0,1.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,26.8,26.8
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,4.786009,4.786009,94.6,94.6
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,1.220761,1.220761,25.6,25.6
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.220761,1.220761,,
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,along_route_500m,rainfall,station,14,14,1.0,14,0,1.0,2,1.228887,1.846141,0.0,0.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,along_route_500m,wind_speed,station,14,14,1.0,14,0,1.0,1,4.32016,4.786009,0.308667,0.308667
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,along_route_500m,wind_direction,station,14,14,1.0,14,0,1.0,1,4.32016,4.786009,1.0,1.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,along_route_500m,air_temperature,station,14,14,1.0,14,0,1.0,1,4.32016,4.786009,26.8,26.8
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,along_route_500m,relative_humidity,station,14,14,1.0,14,0,1.0,1,4.32016,4.786009,94.6,94.6
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,along_route_500m,wbgt,station,14,14,1.0,14,0,1.0,2,1.224168,1.842677,25.642857,25.9
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,along_route_500m,heat_stress_level,station,14,14,1.0,14,0,1.0,2,1.224168,1.842677,,
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,119.0,119.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,93.0,93.0
+jurong_lake_gardens,Jurong Lake Gardens lakeside loop,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,152.0,152.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,1.019082,1.019082,0.0,0.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,0.874556,0.874556
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,315.0,315.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,27.7,27.7
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,89.7,89.7
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,2.793808,2.793808,25.8,25.8
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,2.793808,2.793808,,
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,1.019082,1.019082,0.0,0.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,0.874556,0.874556
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,315.0,315.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,27.7,27.7
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,1.13483,1.13483,89.7,89.7
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,2.793808,2.793808,25.8,25.8
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,2.793808,2.793808,,
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,along_route_500m,rainfall,station,17,17,1.0,17,0,1.0,3,0.832801,1.081467,0.0,0.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,along_route_500m,wind_speed,station,17,17,1.0,17,0,1.0,1,1.00391,1.342336,0.874556,0.874556
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,along_route_500m,wind_direction,station,17,17,1.0,17,0,1.0,1,1.00391,1.342336,315.0,315.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,along_route_500m,air_temperature,station,17,17,1.0,17,0,1.0,1,1.00391,1.342336,27.7,27.7
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,along_route_500m,relative_humidity,station,17,17,1.0,17,0,1.0,1,1.00391,1.342336,89.7,89.7
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,along_route_500m,wbgt,station,17,17,1.0,17,0,1.0,1,2.542552,2.912214,25.8,25.8
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,along_route_500m,heat_stress_level,station,17,17,1.0,17,0,1.0,1,2.542552,2.912214,,
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,96.0,96.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,79.0,79.0
+rail_corridor_bukit_timah,Bukit Timah Rail Corridor out-and-back,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,120.0,120.0
+punggol_waterway,Punggol Waterway out-and-back,nearest_start,rainfall,station,1,1,1.0,1,0,1.0,1,0.881887,0.881887,0.0,0.0
+punggol_waterway,Punggol Waterway out-and-back,nearest_start,wind_speed,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,0.771667,0.771667
+punggol_waterway,Punggol Waterway out-and-back,nearest_start,wind_direction,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,44.0,44.0
+punggol_waterway,Punggol Waterway out-and-back,nearest_start,air_temperature,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,27.1,27.1
+punggol_waterway,Punggol Waterway out-and-back,nearest_start,relative_humidity,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,95.7,95.7
+punggol_waterway,Punggol Waterway out-and-back,nearest_start,wbgt,station,1,1,1.0,1,0,1.0,1,1.481003,1.481003,25.6,25.6
+punggol_waterway,Punggol Waterway out-and-back,nearest_start,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.481003,1.481003,,
+punggol_waterway,Punggol Waterway out-and-back,nearest_end,rainfall,station,1,1,1.0,1,0,1.0,1,0.881887,0.881887,0.0,0.0
+punggol_waterway,Punggol Waterway out-and-back,nearest_end,wind_speed,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,0.771667,0.771667
+punggol_waterway,Punggol Waterway out-and-back,nearest_end,wind_direction,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,44.0,44.0
+punggol_waterway,Punggol Waterway out-and-back,nearest_end,air_temperature,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,27.1,27.1
+punggol_waterway,Punggol Waterway out-and-back,nearest_end,relative_humidity,station,1,1,1.0,1,0,1.0,1,4.469297,4.469297,95.7,95.7
+punggol_waterway,Punggol Waterway out-and-back,nearest_end,wbgt,station,1,1,1.0,1,0,1.0,1,1.481003,1.481003,25.6,25.6
+punggol_waterway,Punggol Waterway out-and-back,nearest_end,heat_stress_level,station,1,1,1.0,1,0,1.0,1,1.481003,1.481003,,
+punggol_waterway,Punggol Waterway out-and-back,along_route_500m,rainfall,station,15,15,1.0,15,0,1.0,1,0.591985,1.199911,0.0,0.0
+punggol_waterway,Punggol Waterway out-and-back,along_route_500m,wind_speed,station,15,15,1.0,15,0,1.0,2,5.141072,5.830933,0.689356,0.771667
+punggol_waterway,Punggol Waterway out-and-back,along_route_500m,wind_direction,station,15,15,1.0,15,0,1.0,2,5.141072,5.830933,53.6,92.0
+punggol_waterway,Punggol Waterway out-and-back,along_route_500m,air_temperature,station,15,15,1.0,15,0,1.0,2,5.141072,5.830933,26.92,27.1
+punggol_waterway,Punggol Waterway out-and-back,along_route_500m,relative_humidity,station,15,15,1.0,15,0,1.0,2,5.141072,5.830933,96.48,99.6
+punggol_waterway,Punggol Waterway out-and-back,along_route_500m,wbgt,station,15,15,1.0,15,0,1.0,1,1.224251,1.481003,25.6,25.6
+punggol_waterway,Punggol Waterway out-and-back,along_route_500m,heat_stress_level,station,15,15,1.0,15,0,1.0,1,1.224251,1.481003,,
+punggol_waterway,Punggol Waterway out-and-back,regional_configured_assignment,pm10,region,1,1,1.0,1,0,1.0,1,,,96.0,96.0
+punggol_waterway,Punggol Waterway out-and-back,regional_configured_assignment,pm25,region,1,1,1.0,1,0,1.0,1,,,69.0,69.0
+punggol_waterway,Punggol Waterway out-and-back,regional_configured_assignment,psi,region,1,1,1.0,1,0,1.0,1,,,113.0,113.0

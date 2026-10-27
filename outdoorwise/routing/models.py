@@ -5,7 +5,7 @@ from pydantic import AwareDatetime, Field
 
 from outdoorwise.contracts.core import Contract, Coordinate
 from outdoorwise.contracts.models import LineString
-from outdoorwise.contracts.environment import RouteEnvironment
+from outdoorwise.contracts.environment import RouteEnvironment, EnvironmentRisk
 from outdoorwise.difficulty.models import GenericDifficultyPrediction
 
 
@@ -47,6 +47,8 @@ class RouteGenerationResponse(Contract):
     rejection_reasons: dict[str, int] = Field(default_factory=dict)
     assessments: list["GeneratedRouteAssessment"] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
+    excluded_route_ids: list[str] = Field(default_factory=list)
+    blocked_assessments: list["GeneratedRouteAssessment"] = Field(default_factory=list)
 
 
 class GeneratedRouteAssessment(Contract):
@@ -54,6 +56,12 @@ class GeneratedRouteAssessment(Contract):
     rank: int = Field(ge=1)
     score: float
     environment: RouteEnvironment
+    environmental_risk: EnvironmentRisk | None = None
+    recommendation_score: float | None = None
+    recommendation_components: dict[str, float] = Field(default_factory=dict)
+    ranking_method: str = 'legacy_non_environmental'
+    ranking_reasons: list[str] = Field(default_factory=list)
+    pipeline_rank: int | None = None
     generic_difficulty: GenericDifficultyPrediction
     personalized_difficulty: dict | None = None
 

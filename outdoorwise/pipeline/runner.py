@@ -1,3 +1,9 @@
+"""Coordinate explicit collection and observation-based catalog recommendation runs.
+
+Collectors return typed batches; repositories own persistence and revisions.
+Recommendation runs consume stored data, preserve blocked/unknown distinctions,
+and never infer continuous future exposure from current observations.
+"""
 from datetime import datetime,timezone
 from uuid import uuid4
 import time

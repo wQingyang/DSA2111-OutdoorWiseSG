@@ -148,3 +148,58 @@ def test_geometry_sampling_includes_intermediate_points():
     assert len(points) >= 5
     assert points[0].lon == 103.77
     assert points[-1].lon == 103.79
+
+
+def test_dynamic_risk_reuses_policy_and_partial_coverage_is_unknown():
+    from test_environmental_risk import environment, NOW
+    from outdoorwise.modules.risk import EnvironmentalRiskAssessor
+    from outdoorwise.config import load_environment_config
+    config = load_environment_config(ROOT / 'config/environment.toml')
+    original = environment()
+    along = original.model_copy(update={'metrics': [metric.model_copy(update={
+        'match_method': 'along_route_sampling_500m_v1', 'sample_count': 4, 'matched_sample_count': 4})
+        for metric in original.metrics]})
+    assessor = EnvironmentalRiskAssessor(config)
+    reference = assessor.assess([original], NOW)[0]
+    result = assessor.assess([along], NOW)[0]
+    assert result.risk_score == reference.risk_score and result.eligibility == reference.eligibility
+    assert any('along-route samples' in warning for warning in result.risk_warnings)
+    partial = along.model_copy(deep=True)
+    partial.metrics[0].matched_sample_count = 3
+    unknown = assessor.assess([partial], NOW)[0]
+    assert unknown.risk_score is None and unknown.eligibility == 'unknown'
+
+
+def test_dynamic_explicit_policy_blocks_and_invalid_session_rejected(tmp_path):
+    from outdoorwise.contracts.risk import BlockingRule
+    shutil.copytree(ROOT / 'data/catalog', tmp_path / 'catalog')
+    app = create_app(Settings(data_root=tmp_path, data_mode='demo'))
+    app.state.dynamic_routes = DynamicRouteService(StubRoutingClient(), app.state.generated_route_repository)
+    app.state.pipeline.config.risk.blocking_rules = [BlockingRule(enabled=True, metric='rainfall',
+        threshold=0, policy_source='Synthetic regression fixture only', reason='Test explicit block',
+        allow_approximate_estimates=True)]
+    with TestClient(app) as client:
+        response = client.post('/api/generated-routes', json=generation_request().model_dump(mode='json'))
+        assert response.status_code == 200
+        data = response.json()
+        assert data['candidates'] == [] and data['assessments'] == []
+        assert len(data['excluded_route_ids']) == 2
+        assert all(row['environmental_risk']['eligibility'] == 'blocked' for row in data['blocked_assessments'])
+        client.cookies.set('outdoorwise_session', 'invalid')
+        assert client.post('/api/generated-routes', json=generation_request().model_dump(mode='json')).status_code == 401
+
+
+def test_dynamic_environment_changes_shared_rank_without_changing_base_score(tmp_path, monkeypatch):
+    from test_environmental_risk import environment
+    shutil.copytree(ROOT / 'data/catalog', tmp_path / 'catalog')
+    app = create_app(Settings(data_root=tmp_path, data_mode='demo'))
+    app.state.dynamic_routes = DynamicRouteService(StubRoutingClient(), app.state.generated_route_repository)
+    def evaluate(route, as_of=None):
+        return environment(route.route_id, rainfall=10 if route.seed == 1 else 0, observed_at=as_of)
+    monkeypatch.setattr(app.state.dynamic_route_environment, 'evaluate', evaluate)
+    with TestClient(app) as client:
+        data = client.post('/api/generated-routes', json=generation_request().model_dump(mode='json')).json()
+    assert data['candidates'][0]['seed'] == 2  # Greater distance mismatch, but lower shared environmental risk.
+    assert data['assessments'][0]['environmental_risk']['risk_score'] < data['assessments'][1]['environmental_risk']['risk_score']
+    assert all(row['ranking_method'] == 'risk_weighted_v1' for row in data['assessments'])
+    assert all(row['recommendation_score'] is not None and 'environment' in row['recommendation_components'] for row in data['assessments'])

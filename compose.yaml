@@ -2,15 +2,24 @@ services:
   app:
     build: .
     ports: ["8000:8000"]
+    restart: unless-stopped
     environment:
+      OUTDOORWISE_APP_MODE: ${OUTDOORWISE_APP_MODE:-live}
       OUTDOORWISE_DATA_MODE: ${OUTDOORWISE_DATA_MODE:-live}
-      OUTDOORWISE_AGENT_MODE: ${OUTDOORWISE_AGENT_MODE:-demo}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.openai.com/v1}
-      LLM_MODEL: ${LLM_MODEL:-}
-      LLM_API_KEY: ${LLM_API_KEY:-}
+      OUTDOORWISE_DATA_ROOT: /app/data
+      ORS_API_KEY: ${ORS_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
       DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
+      OUTDOORWISE_SECURE_COOKIES: ${OUTDOORWISE_SECURE_COOKIES:-0}
     volumes:
-      - ./data/runtime:/app/data/runtime
+      - outdoorwise-runtime:/app/data/runtime
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   collector:
     build: .
@@ -19,7 +28,10 @@ services:
     stop_grace_period: 3m
     environment:
       OUTDOORWISE_DATA_MODE: live
-      OUTDOORWISE_AGENT_MODE: demo
+      OUTDOORWISE_DATA_ROOT: /app/data
       DATA_GOV_API_KEY: ${DATA_GOV_API_KEY:-}
     volumes:
-      - ./data/runtime:/app/data/runtime
+      - outdoorwise-runtime:/app/data/runtime
+
+volumes:
+  outdoorwise-runtime:

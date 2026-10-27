@@ -8,3 +8,7 @@ data/runtime/*
 .DS_Store
 
 node_modules/
+
+# Local credentials
+.env.*
+!.env.example

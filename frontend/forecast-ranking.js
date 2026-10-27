@@ -1,305 +1,91 @@
-/* One catalog comparison flow using the historical forecast endpoint. */
+/* Replay response adapter and evidence only; shared cards/maps live in results/app. */
 (() => {
-  const byId = id => document.getElementById(id);
-  const form = byId('preferences');
-  const cards = byId('cards');
-  const delay = byId('start-delay');
-  const duration = byId('duration');
-  const access = byId('access');
-  if (!form || !cards || !delay || !duration || !access) return;
-  const launcher = byId('forecast-launcher');
-  const forecastStatus = byId('forecast-status');
-
-  access.placeholder = 'Clear for no limit';
-  const accessHint = document.createElement('small');
-  accessHint.id = 'forecast-access-hint';
-  access.closest('label').append(accessHint);
-  const timing = byId('time-selection-summary') || document.createElement('p');
-  timing.id = 'time-selection-summary';
-  timing.className = 'forecast-replay-label';
-  timing.textContent = 'Historical demo · 15 Oct 2026, 19:15 SGT';
-  delay.closest('label').after(timing);
-  const toggle = document.createElement('button');
-  toggle.type = 'button';
-  toggle.className = 'secondary';
-  toggle.id = 'toggle-all-routes';
-  toggle.setAttribute('aria-controls', 'cards');
-  toggle.hidden = true;
-  cards.after(toggle);
-
-  let current = null;
-  let activeContext = 'current';
-  const showAllByContext = {current: false, historical: false};
-  let version = 0;
-  let controller;
-  let active = false;
-
-  function el(tag, text, className) {
-    const node = document.createElement(tag);
-    if (text !== undefined) node.textContent = text;
-    if (className) node.className = className;
-    return node;
-  }
-
-  function modeLabels() {
-    byId('mode').textContent = 'Catalog: historical demo';
-    byId('context-indicator').textContent = 'Historical snapshot';
-    byId('warnings').textContent = '';
-    byId('warnings').hidden = true;
-    byId('ingestion').textContent = '';
-    byId('blocked-routes').replaceChildren();
-    const refresh = byId('refresh');
-    if (refresh) refresh.hidden = true;
-  }
-
-  function distanceHint() {
-    const anywhere = byId('location-mode').value === 'anywhere';
-    accessHint.textContent = anywhere
-      ? 'Anywhere allows routes across Singapore. Select a starting point to apply a distance limit.'
-      : access.value
-        ? `Only routes within ${access.value} km straight-line distance of your starting point are eligible.`
-        : 'No maximum distance: far routes may still rank highly. Enter a limit to exclude them.';
-  }
-
-  function input() {
-    duration.setCustomValidity('');
-    const start = Number(delay.value);
-    const minutes = Number(duration.value);
-    if (![0, 30, 60, 120].includes(start) || !Number.isInteger(minutes) || minutes <= 0) {
-      throw Error('Enter a valid starting time and whole-number duration.');
+  const el = (tag, text) => Object.assign(document.createElement(tag), {textContent: text});
+  function adapt(result) {
+    const origin = new Map([...(result.origin_risks || []), ...(result.departure_risks || [])].map(row => [row.route_id, row]));
+    const risks = result.recommendations.map(row => row.departure_assessment?.risk || ({
+      route_id: row.route_id, assessed_at: result.as_of, eligibility: row.eligibility,
+      risk_score: row.forecast_risk_score, risk_level: 'unknown', risk_status: row.forecast_risk_score == null ? 'incomplete' : 'complete',
+      risk_components: Object.fromEntries(Object.entries(row.risk_components).map(([name, item]) => [name, {...item, freshness: item.score == null ? 'missing' : 'fresh'}])),
+      risk_data_quality: {confidence: 'very_low'}, risk_warnings: ['Experimental predictions; continuous run-window coverage is not established.'],
+    }));
+    for (const id of result.excluded_route_ids || []) {
+      if (origin.has(id)) risks.push({...origin.get(id), risk_score: null, risk_status: 'incomplete', risk_components: {}, risk_data_quality: {confidence: 'very_low'}, risk_warnings: ['Excluded by observation policy at the historical reference time. Forecast eligibility is unverified.']});
     }
-    if (start + minutes > 180) {
-      duration.setCustomValidity('Start delay plus duration must not exceed 180 minutes.');
-      throw Error('Start delay plus duration must not exceed 180 minutes.');
+    return {...result, recommendations: result.recommendations.map(row => ({...row, final_rank: row.pipeline_rank ?? row.final_rank})), risks, environment: (result.environment || []).map(env => ({...env, historical_origin: true})), predictions: []};
+  }
+  function decorate(card, id, result) {
+    const row = result.recommendations.find(item => item.route_id === id);
+    if (row?.departure_assessment) {
+      const departure = row.departure_assessment;
+      card.querySelector('.risk-score .score-title').textContent = 'Departure-time risk';
+      card.querySelector('.data-quality').textContent = `${departure.assessment_type === 'historical_observation' ? 'Historical observations' : 'Experimental native forecasts'} · ${departure.risk.risk_data_quality.confidence} confidence`;
+      const basis = {historical_observation_risk: 'Historical observation-based risk', forecast_departure_risk: 'Valid forecast-based departure risk', unknown_risk_fallback: 'Existing unknown-risk fallback ordering'};
+      const coverage = el('p', `Full-run coverage: ${row.full_run_assessment.status}. Full-run risk: ${row.full_run_assessment.risk_score ?? 'Unknown'}. Departure assessment does not cover the subsequent run.`);
+      coverage.className = 'full-run-coverage';
+      const ranking = el('p', `Recommendation basis: ${basis[row.recommendation_basis]}.`); ranking.className = 'recommendation-basis';
+      card.insertBefore(coverage, card.querySelector('.card-actions'));
+      card.insertBefore(ranking, card.querySelector('.card-actions'));
     }
-    if (!form.reportValidity()) throw Error('Check the highlighted inputs.');
-    return {...preferences(), start_delay_min: start};
-  }
-
-  function shortTime(value) {
-    return new Date(value).toLocaleString('en-GB', {
-      timeZone: 'Asia/Singapore', day: 'numeric', month: 'short',
-      hour: '2-digit', minute: '2-digit', hour12: false,
-    });
-  }
-
-  function invalidate() {
-    if (!active) return;
-    version += 1;
-    controller?.abort();
-    current = null;
-    cards.replaceChildren(el('p', 'Preferences changed. Select Compare routes to update your results.', 'empty-results'));
-    toggle.hidden = true;
-    byId('results-summary').textContent = 'Results need updating';
-    byId('status').textContent = 'Compare routes to apply your preferences.';
-    modeLabels();
-    distanceHint();
-  }
-
-  function updateVisible() {
-    if (!current || activeContext !== 'historical') return;
-    const list = [...cards.querySelectorAll('.unified-route-card')];
-    const showAll = showAllByContext.historical;
-    list.forEach((card, index) => { card.hidden = !showAll && index >= 3; });
-    toggle.hidden = list.length <= 3;
-    toggle.setAttribute('aria-expanded', String(showAll));
-    toggle.textContent = showAll ? 'Show top 3' : `View all routes (${list.length})`;
-    const count = showAll ? list.length : Math.min(3, list.length);
-    byId('results-summary').textContent = `Showing ${count} of ${list.length} routes · ${current.personalized ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
-    const routeById = new Map(current.routes.map(route => [route.route_id, route]));
-    const visible = current.recommendations.slice(0, showAll ? list.length : 3);
-    window.draw(visible.map(row => routeById.get(row.route_id)).filter(Boolean));
-  }
-
-  function applySharedVisibility(personalized) {
-    activeContext = 'current';
-    current = null;
-    showAllByContext.current = false;
-    const list = [...cards.querySelectorAll('.route-summary')];
-    list.forEach((card, index) => { card.hidden = index >= 3; });
-    toggle.hidden = list.length <= 3;
-    toggle.setAttribute('aria-expanded', 'false');
-    toggle.textContent = `View all routes (${list.length})`;
-    const summary = byId('results-summary');
-    if (summary && list.length) summary.textContent = `Showing ${Math.min(3, list.length)} of ${list.length} routes · ${personalized ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
-  }
-
-  function forecastDetails(row, result) {
-    const details = el('details', undefined, 'unified-forecast-details');
-    details.append(el('summary', 'Forecast & scoring details'));
-    const labels = {wbgt: 'WBGT', pm25: 'PM2.5', rain_probability: 'Rain probability'};
-    for (const [name, metric] of Object.entries(row.forecast_metrics || {})) {
-      details.append(el('strong', labels[name] || name));
-      for (const block of metric.blocks) {
-        let value = 'Insufficient data';
-        if (block.method === 'unsupported_horizon') value = 'Not supported';
-        else if (typeof block.value === 'number' && Number.isFinite(block.value)) {
-          value = name === 'rain_probability' ? `${(block.value*100).toFixed(2)}%` : `${block.value.toFixed(1)} ${name === 'wbgt' ? '°C' : 'µg/m³'}`;
-        }
-        details.append(el('p', `${shortTime(block.valid_from)} – ${shortTime(block.valid_to)}: ${value}`));
+    if (row) {
+      card.append(el('p', `Generic difficulty at replay origin: ${row.generic_difficulty.toFixed(1)} / 5. Future effort is not predicted.`));
+    }
+    const forecast = result.prediction_details?.[id];
+    if (!forecast) return;
+    const estimates = el('ul', ''); estimates.className = 'environment-estimates';
+    const names = {wbgt: 'WBGT', pm25: 'PM2.5', rain_probability: 'Rain probability'};
+    for (const [name, metric] of Object.entries(forecast.metrics || {})) {
+      const available = metric.blocks?.filter(block => block.value != null) || [];
+      estimates.append(el('li', `${names[name] || name}: ${available.length ? available.map(block => `${block.value.toFixed(1)} ${metric.unit} at ${window.outdoorwiseResults.formatTime(block.target_timestamp)} (${block.method})`).join('; ') : 'Unavailable for this window'}. Continuous exposure coverage unverified.`));
+    }
+    card.insertBefore(estimates, card.querySelector('.card-actions'));
+    const details = document.createElement('details'); details.className = 'prediction-details';
+    details.append(el('summary', 'Prediction Details'));
+    details.append(el('p', `Forecast origin: ${forecast.as_of}. Inputs come from the frozen snapshot; ground truth is evaluation only.`));
+    if (row?.departure_assessment) {
+      details.append(el('h4', 'Departure-time input evidence'));
+      details.append(el('p', `Departure: ${row.departure_assessment.assessment_time}. Scope: departure only.`));
+      for (const name of ['rainfall', 'wbgt', 'pm25', 'wind_speed']) {
+        const input = row.departure_assessment.inputs[name];
+        if (!input) continue;
+        details.append(el('p', `${name}: ${input.value ?? 'Unavailable'} ${input.unit} · ${input.method} · ${input.location_id || 'No source'} · input observed ${input.observed_at || 'unavailable'} · forecast origin ${input.forecast_origin || 'not applicable'} · target ${input.target_timestamp || 'not applicable'}. ${input.reason}`));
       }
-      if (!metric.covers_entire_run) details.append(el('p', 'Forecast does not cover the entire run.'));
     }
-    details.append(el('p', 'Rain risk uses a rainfall-amount persistence baseline, not the displayed rain probability. Wind scoring is neutral under the current configuration but still requires usable input.'));
-    details.append(el('p', 'Component scores: ' + Object.entries(row.risk_components).map(([name, item]) => `${name}: ${item.score ?? 'N/A'}/100`).join(' · ')));
-    details.append(el('p', `Historical observation reference rank: ${row.reference_rank}.`));
-    details.append(el('p', 'Recommendation weights: ' + Object.entries(result.ranking_weights).map(([name, weight]) => `${name} ${(weight*100).toFixed(0)}%`).join(' · ')));
-    result.warnings.forEach(text => details.append(el('p', text)));
-    return details;
-  }
+    for (const [name, metric] of Object.entries(forecast.metrics || {})) {
+      details.append(el('h4', `${name} · ${metric.unit}`));
+      details.append(el('p', `${metric.coverage_status || 'Coverage unverified'} Full run covered: ${metric.covers_entire_run ? 'yes' : 'no'}. Model origin: ${metric.model_origin}`));
+      for (const block of metric.blocks || []) {
+        details.append(el('p', `${block.horizon_min} min · target ${block.target_timestamp} · predicted ${block.value ?? 'Unavailable'} ${metric.unit} · method: ${block.method}. ${block.target_semantics}`));
+        details.append(el('p', `Ground truth: ${block.ground_truth?.value ?? 'Unavailable'} ${metric.unit} · signed error (prediction minus observation): ${block.forecast_error ?? 'Unavailable'}. ${block.evaluation_status}`));
+        const provenance = el('pre', JSON.stringify({source: block.input_source, input_provenance: block.input_provenance, ground_truth: block.ground_truth, model_version: block.model_version, training_cutoff: block.training_cutoff}, null, 2));
+        provenance.style.whiteSpace = 'pre-wrap'; provenance.style.overflowWrap = 'anywhere';
+        const sourceDetails = document.createElement('details'); sourceDetails.append(el('summary', 'Input, target and model provenance'), provenance); details.append(sourceDetails);
+      }
+    }
+    for (const [name, item] of Object.entries(forecast.forecast_risk?.components || {})) {
+      details.append(el('p', `${name} origin input: ${item.input_value ?? 'Unavailable'} ${item.unit || ''} · ${item.methods?.join(', ') || 'Unavailable'} · coverage fraction ${item.coverage_fraction} · ${item.reason || item.assumption || ''} · input observed ${item.input_observed_at || 'unavailable'} · available ${item.input_available_at || 'unavailable'} · valid ${item.valid_from || 'unavailable'} – ${item.valid_to || 'unavailable'}`));
+    }
+    const evaluation = result.offline_evaluation;
+    if (evaluation) {
+      details.append(el('h4', 'Offline pooled evaluation — not this route’s forecast error'));
+      for (const item of evaluation.pm25 || []) {
+        details.append(el('p', `PM2.5 ${item.horizon_min} min · ${item.n} samples · frozen MAE/RMSE ${item.frozen.mae_ug_m3.toFixed(3)}/${item.frozen.rmse_ug_m3.toFixed(3)} µg/m³ · persistence MAE/RMSE ${item.persistence.mae_ug_m3.toFixed(3)}/${item.persistence.rmse_ug_m3.toFixed(3)} µg/m³.`));
+      }
+      details.append(el('p', 'The 60-minute frozen model underperformed persistence. Short, gapped holdouts do not validate continuous exposure forecasts.'));
 
-  function render(result) {
-    current = result;
-    activeContext = 'historical';
-    showAllByContext.historical = false;
-    modeLabels();
-    byId('context-indicator').textContent = `Historical snapshot · ${shortTime(result.as_of)}`;
-    distanceHint();
-    cards.replaceChildren();
-    byId('ingestion').textContent = `Historical demo · Run: ${shortTime(result.run_start)} – ${shortTime(result.run_end)} SGT · Experimental estimates`;
-    const routeById = new Map(result.routes.map(route => [route.route_id, route]));
-    for (const row of result.recommendations) {
-      const route = routeById.get(row.route_id);
-      const card = el('article', undefined, 'card unified-route-card');
-      card.dataset.personalizationRoute = row.route_id;
-      card.append(el('small', `Your difficulty-match rank #${row.personalized_rank ?? row.pipeline_rank ?? row.final_rank}`, 'unified-rank'));
-      card.append(el('small', `Shared rank #${row.pipeline_rank ?? row.reference_rank ?? row.final_rank}`, 'shared-rank-label'));
-      card.append(el('h3', row.route_name));
-      const lengthLine = el('p', undefined, 'unified-route-meta');
-      lengthLine.append(
-        el('strong', 'Route length: ', 'unified-info-label'),
-        el('span', `${row.distance_km.toFixed(2)} km`)
-      );
-      card.append(lengthLine);
-      const target = result.preferences.target_distance_km;
-      const difference = row.distance_km - target;
-      const absoluteDifference = Math.abs(difference);
-      const percent = target > 0 ? absoluteDifference / target * 100 : 0;
-      const match = absoluteDifference < 0.005
-        ? `Matches your ${target} km target`
-        : `${absoluteDifference.toFixed(2)} km ${difference > 0 ? 'longer' : 'shorter'} than your ${target} km target (${percent.toFixed(0)}% difference)`;
-      card.append(el('p', match, 'unified-distance-match' + (row.distance_match_warning ? ' unified-distance-warning' : '')));
-      const accessLine = el('p', undefined, 'unified-route-meta');
-      accessLine.append(
-        el('strong', 'Distance from your start: ', 'unified-info-label'),
-        el('span', row.access_distance_km === null
-          ? 'Not set'
-          : `${row.access_distance_km.toFixed(2)} km · straight-line`)
-      );
-      card.append(accessLine);
-      const scores = el('div', undefined, 'unified-score-grid');
-      for (const [label, value] of [['Recommendation Score', row.recommendation_score], ['Environmental Risk', row.forecast_risk_score]]) {
-        const box = el('div');
-        box.append(el('small', label), el('strong', value === null ? 'Unavailable' : `${value.toFixed(2)} / 100`));
-        scores.append(box);
-      }
-      card.append(scores);
-      const components = el('div', undefined, 'unified-risk-components');
-      for (const [key, label] of [['rainfall', 'Rain risk'], ['heat', 'Heat risk'], ['air_quality', 'Air-quality risk'], ['wind', 'Wind risk']]) {
-        const component = row.risk_components?.[key];
-        const cell = el('div');
-        const score = component?.score;
-        cell.append(el('small', label), el('strong', typeof score === 'number' && Number.isFinite(score) ? `${score.toFixed(1)} / 100` : 'Unavailable'));
-        components.append(cell);
-      }
-      card.append(components);
-      card.append(el('p', 'Historical forecast · Includes baseline assumptions', 'unified-muted'));
-      card.append(el('p', `Generic difficulty: ${(row.generic_difficulty ?? row.difficulty).toFixed(1)} / 5`));
-      if (result.personalized && typeof row.personalized_difficulty === 'number') {
-        card.append(el('p', `Predicted difficulty for you: ${row.personalized_difficulty.toFixed(1)} / 5`));
-        card.append(el('p', `Your target: ${row.target_difficulty} / 5 · Difficulty difference: ${row.difficulty_mismatch.toFixed(1)}.`));
-      }
-      if (row.distance_match_warning) card.append(el('p', 'Route length is unchanged; the route is not shortened or extended to match your target.', 'unified-muted'));
-      if (row.forecast_risk_score === null) card.append(el('p', 'Incomplete environmental estimate; fallback ranking is used.'));
-      const actions = el('div', undefined, 'card-actions');
-      const view = el('button', 'View route');
-      view.type = 'button';
-      view.onclick = () => window.draw([route]);
-      const favourite = el('button', 'Favourite', 'favourite-button');
-      favourite.type = 'button';
-      const completed = el('button', 'Completed Run', 'completed-run-button');
-      completed.type = 'button';
-      actions.append(view, favourite, completed);
-      card.append(actions, forecastDetails(row, result));
-      cards.append(card);
-    }
-    if (!result.recommendations.length) {
-      const limit = result.preferences.max_access_distance_km;
-      cards.append(el('p', result.preferences.location && limit !== null
-        ? `No routes meet the ${limit} km straight-line access limit and policy constraints. Increase the limit or choose another starting point. The limit has not been relaxed.`
-        : 'No routes meet your preferences and policy constraints.', 'empty-results'));
-    }
-    updateVisible();
-    // Keep favourite/export/run-entry handlers; do not save replay difficulty as today's prediction.
-    document.dispatchEvent(new CustomEvent('outdoorwise:routes-rendered', {detail: {
-      routes: result.routes, recommendations: result.recommendations,
-      authenticated: result.personalized, historical_replay: true,
-    }}));
+    } else details.append(el('p', 'Saved evaluation evidence unavailable.'));
+    card.append(details);
   }
-
-  async function fetchRecommendations() {
-    active = true;
-    const body = input();
-    const signature = JSON.stringify(body);
-    const myVersion = ++version;
-    controller?.abort();
-    controller = new AbortController();
-    const signal = controller.signal;
-    if (forecastStatus) forecastStatus.textContent = 'Loading historical forecast comparison…';
-    try {
-      const session = await fetch('/api/auth/me', {signal});
-      if (session.status === 401) window.outdoorwiseSession = null;
-      else if (session.ok) window.outdoorwiseSession = await session.json();
-      else throw Error('Could not check your sign-in status.');
-      window.personalizedRanking = null;
-      const response = await fetch('/api/experimental/recommendations', {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: signature, signal,
-      });
-      const data = await response.json();
-      if (!response.ok) throw Error(typeof data.detail === 'string' ? data.detail : 'Check the selected inputs.');
-      if (myVersion !== version || signature !== JSON.stringify(input())) throw Error('Preferences changed. Compare routes again.');
-      if (forecastStatus) forecastStatus.textContent = 'Historical forecast comparison loaded.';
-      return data;
-    } catch (error) {
-      if (myVersion === version) {
-        if (forecastStatus) forecastStatus.textContent = error.name === 'AbortError' ? 'Preferences changed. Compare routes again.' : `Historical forecast unavailable: ${error.message}`;
-      }
-      throw error;
-    }
+  const toggle = el('button', 'View all routes'); toggle.type = 'button'; toggle.id = 'toggle-all-routes'; toggle.hidden = true;
+  document.getElementById('cards')?.after(toggle);
+  let all = false;
+  function visibility() {
+    const cards = [...document.querySelectorAll('#cards .route-summary')];
+    cards.forEach((card, index) => card.hidden = !all && index >= 3);
+    toggle.hidden = cards.length <= 3; toggle.textContent = all ? 'Show top 3' : `View all routes (${cards.length})`;
+    toggle.setAttribute('aria-expanded', String(all));
   }
-
-  toggle.onclick = () => {
-    if (activeContext === 'current') {
-      const list = [...cards.querySelectorAll('.route-summary')];
-      const showAll = !showAllByContext.current;
-      showAllByContext.current = showAll;
-      list.forEach((card, index) => { card.hidden = !showAll && index >= 3; });
-      toggle.setAttribute('aria-expanded', String(showAll));
-      toggle.textContent = showAll ? 'Show top 3' : `View all routes (${list.length})`;
-      const summary = byId('results-summary');
-      if (summary) summary.textContent = `Showing ${showAll ? list.length : Math.min(3, list.length)} of ${list.length} routes · ${window.personalizedRanking ? 'Personal difficulty match based on your running profile' : 'Matched to your preferences'}`;
-      return;
-    }
-    showAllByContext.historical = !showAllByContext.historical;
-    updateVisible();
-  };
-  launcher?.addEventListener('click', async () => {
-    active = true;
-    launcher.disabled = true;
-    try {
-      const result = await fetchRecommendations();
-      render(result);
-    } catch (_) {
-      // The normal recommendation cards remain untouched on forecast failure.
-    } finally {
-      launcher.disabled = false;
-    }
-  });
-  form.addEventListener('input', invalidate);
-  form.addEventListener('change', invalidate);
-  document.addEventListener('outdoorwise:location-changed', invalidate);
-  window.outdoorwiseForecastUI = {fetchRecommendations, render};
-  window.outdoorwiseRouteVisibility = {apply: applySharedVisibility};
-  distanceHint();
+  toggle.onclick = () => { all = !all; visibility(); };
+  window.outdoorwiseReplay = {adapt, decorate};
+  window.outdoorwiseRouteVisibility = {apply() {all = false; visibility();}};
 })();

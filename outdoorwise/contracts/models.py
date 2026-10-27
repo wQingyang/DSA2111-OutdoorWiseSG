@@ -71,16 +71,3 @@ class Run(Contract):
     warnings: list[str]
     environment: list["RouteEnvironment"] = Field(default_factory=list)
     risks: list["EnvironmentRisk"] = Field(default_factory=list)
-class ChatRequest(Contract):
-    message: str = Field(min_length=1, max_length=2000)
-    preferences: Preferences = Field(default_factory=Preferences)
-class Trace(Contract):
-    tool: str
-    arguments: dict
-    result: dict
-class ChatResponse(Contract):
-    message: str
-    agent_mode: Literal["demo", "llm"]
-    trace: list[Trace]
-    recommended_route_ids: list[str]
-    run: Run | None

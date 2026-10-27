@@ -1,4 +1,4 @@
-"""Isolated historical forecast ranking; original recommendation APIs stay unchanged."""
+"""Historical replay orchestration for unified and compatibility recommendation APIs."""
 import csv
 from datetime import timedelta
 from functools import lru_cache
@@ -23,6 +23,8 @@ from outdoorwise.personalization.ranking import rank_candidates
 from outdoorwise.services.route_environment import RouteEnvironmentService
 from outdoorwise.storage.repository import typed
 from .time_selection import REPLAY_TIME, historical_forecast
+from outdoorwise.api.historical_evidence import offline_evaluation
+from outdoorwise.api.historical_departure import assess_departure, full_run_coverage
 
 router = APIRouter(prefix="/api/experimental", tags=["Experimental forecast ranking"])
 
@@ -73,7 +75,7 @@ def load_snapshot(root, replay_time):
     return locations, list(latest.values())
 
 
-def rank_historical(data, pipeline, user=None, personal_service=None):
+def rank_historical(data, pipeline, user=None, personal_service=None, conservative_coverage=False):
     """Reuse candidate filtering and weighting at one consistent replay time."""
     from outdoorwise.contracts.environment import timestamp
     as_of = timestamp(REPLAY_TIME)
@@ -133,14 +135,29 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
     for route in routes:
         generic_difficulties[route.route_id] = pipeline.difficulty.predict(
             route, env_by_id[route.route_id]).predicted_difficulty
-    forecasts, proxy_risks = {}, []
+    forecasts, proxy_risks, departures = {}, [], {}
     for candidate in candidates:
         forecast = historical_forecast(candidate.route_id, data.start_delay_min, data.duration_min)
+        if conservative_coverage:
+            # Existing research selection excludes a block ending at run_start.
+            # Request the prefix through departure to retrieve that native
+            # endpoint, without changing its origin, horizon or target meaning.
+            native = (historical_forecast(candidate.route_id, 0, data.start_delay_min)
+                      if data.start_delay_min else forecast)
+            departures[candidate.route_id] = assess_departure(env_by_id[candidate.route_id],
+                observation_by_id[candidate.route_id], native, pipeline.config, as_of, data.start_delay_min)
+            from outdoorwise.api.historical_evidence import describe_forecast
+            forecast = describe_forecast(forecast)
         forecasts[candidate.route_id] = forecast
         if "forecast_risk" not in forecast:
             raise ValueError("The forecast API must import predict from predict_route_risk.")
         assessment = forecast["forecast_risk"]
         score = assessment["risk_score"]
+        if conservative_coverage:
+            departure_risk = departures[candidate.route_id]['risk']
+            proxy_risks.append(SimpleNamespace(**{**departure_risk,
+                'risk_data_quality': SimpleNamespace(**departure_risk['risk_data_quality'])}))
+            continue
         proxy_risks.append(SimpleNamespace(route_id=candidate.route_id, risk_score=score,
             risk_level="unknown", risk_status="complete" if score is not None else "incomplete",
             risk_assessment_mode="experimental_historical_forecast",
@@ -148,6 +165,9 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
             eligibility="caution" if score is not None else "unknown"))
     shared_ranked = ranker.rank(candidates, proxy_risks, routes, preferences,
                                 generic_difficulties, personalized=False)
+    if conservative_coverage:
+        excluded.extend(row.route_id for row in shared_ranked if row.eligibility == 'blocked' and row.route_id not in excluded)
+        shared_ranked = [row for row in shared_ranked if row.eligibility != 'blocked']
     if user is not None:
         predictions_by_id = {item["route_id"]: item for item in personal_predictions}
         ranked = rank_candidates(shared_ranked,
@@ -161,8 +181,10 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
     # one representation and cannot mix attribute and mapping access.
     ranked = [row if isinstance(row, dict) else row.model_dump(mode="json") for row in ranked]
     route_by_id = {route.route_id: route for route in routes}
+    shared_by_id = {row.route_id: row for row in shared_ranked}
     rows = []
     for rec in ranked:
+        rec = {**shared_by_id[rec["route_id"]].model_dump(mode="json"), **rec}
         route_id = rec["route_id"]
         route = route_by_id[route_id]
         personal = next((item for item in personal_predictions if item["route_id"] == route_id), None)
@@ -175,7 +197,8 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
         access_distance = rec.get("access_distance_km")
         distance_warning = rec.get("distance_match_warning")
         eligibility = rec.get("eligibility")
-        rows.append(dict(route_id=route_id, route_name=route.name, distance_km=route.distance_km,
+        row = dict(rec)
+        row.update(route_id=route_id, route_name=route.name, distance_km=route.distance_km,
             context="historical", pipeline_rank=pipeline_rank,
             personalized_rank=personalized_rank, final_rank=personalized_rank or pipeline_rank,
             reference_rank=reference_positions[route_id], recommendation_score=recommendation_score,
@@ -189,17 +212,36 @@ def rank_historical(data, pipeline, user=None, personal_service=None):
             difficulty_mismatch=rec.get("difficulty_mismatch"),
             personal_confidence=personal["confidence"] if personal else None,
             eligibility=eligibility, distance_match_warning=distance_warning,
-            risk_components=forecasts[route_id]["forecast_risk"]["components"],
-            forecast_metrics=forecasts[route_id]["metrics"]))
+            risk_components=(departures[route_id]['risk']['risk_components'] if conservative_coverage
+                             else forecasts[route_id]["forecast_risk"]["components"]),
+            forecast_metrics=forecasts[route_id]["metrics"])
+        if conservative_coverage:
+            row.update(departure_assessment=departures[route_id],
+                full_run_assessment=full_run_coverage(forecasts[route_id]),
+                recommendation_basis=('unknown_risk_fallback' if risk_score is None else
+                    'historical_observation_risk' if data.start_delay_min == 0 else 'forecast_departure_risk'))
+            # This legacy field remains full-run forecast evidence; the new
+            # departure field identifies the score used by unified ranking.
+            row['forecast_risk_score'] = forecasts[route_id]['forecast_risk']['risk_score']
+        rows.append(row)
     return dict(mode="experimental_historical_forecast_ranking", as_of=REPLAY_TIME,
         personalized=user is not None, preferences=data.model_dump(mode="json"),
         run_start=(as_of+timedelta(minutes=data.start_delay_min)).isoformat(),
         run_end=(as_of+timedelta(minutes=data.start_delay_min+data.duration_min)).isoformat(),
+        environment=[item.model_dump(mode="json") for item in environments],
+        origin_risks=[item.model_dump(mode="json") for item in observation_risks],
+        departure_risks=[item["risk"] for item in departures.values()],
+        prediction_details=forecasts,
+        offline_evaluation=(offline_evaluation() if conservative_coverage else None),
         routes=[route.model_dump(mode="json") for route in routes],
         recommendations=rows, excluded_route_ids=excluded,
         ranking_weights=pipeline.config.ranking.weights,
+        recommendation_basis=(('historical_observation_risk' if data.start_delay_min == 0 else 'forecast_departure_risk')
+            if any(row['risk_score'] is not None for row in rows) else 'unknown_risk_fallback') if conservative_coverage else 'legacy_experimental',
+        assessment_scope='departure_only' if conservative_coverage else 'legacy_run_window',
+        departure_time=(as_of+timedelta(minutes=data.start_delay_min)).isoformat(),
         warnings=["Historical experimental comparison, not current weather or a safety recommendation.",
-                  "Reference ranks use observation risk at the SAME historical time, not the current homepage demo scores.",
+                  "Shared reference ranks use the experimental assessment; origin-time observation blocks remain exclusions.",
                   "Rain and wind use persistence baselines; forecast skill is not established.",
                   "Missing-risk candidates use the existing fallback group, never a zero risk score.",
                   "Difficulty uses observations at the replay time; future difficulty is not predicted.",

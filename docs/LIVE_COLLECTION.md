@@ -1,80 +1,70 @@
-# Continuous Live CSV Collection
+# Environmental collection and operational storage
 
-This extends the existing demo. The existing collectors, routes, observation schema, revision history, repository, and frontend remain in use. The worker adds scheduling; it does not generate simulated data or future forecasts.
+The existing eight collectors normalize official data into the CSV v3 repository.
+The API consumes stored snapshots; it does not start a worker or collect on each
+recommendation. Ordinary Live recommendations never invoke historical inference.
 
-## Start Building the History
+## Collection commands
 
-From the existing project directory, install dependencies and start the collector:
-
-```bash
-python -m pip install -e '.[dev]'
-OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli watch
-```
-
-The collector runs immediately and then checks for due sources every 30 seconds. Source intervals come from config/environment.toml: 300 seconds for rainfall, wind speed, wind direction, temperature, and humidity; 900 seconds for PM2.5, PSI/PM10, and WBGT/heat stress. The check interval is not the observation sampling interval. API requests are sequential and their duration adds scheduling delay.
-
-Keep this process and its host running. Closing the terminal or allowing a laptop to sleep stops or suspends collection. This package is not a remotely hosted collection service.
-
-Use a separate terminal for the existing frontend:
+After the [local setup](../README.md#local-startup), start one collector against
+the same `OUTDOORWISE_DATA_ROOT` as the API:
 
 ```bash
-OUTDOORWISE_DATA_MODE=live python -m uvicorn outdoorwise.api.app:app --port 8000
-```
-
-The web server and collector share data/runtime. The web server does not need to remain open for the worker to collect. The frontend reads the latest stored observations when route comparisons or refreshes are requested; this change does not add automatic browser polling.
-
-## Inspect the Database
-
-```bash
+OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli watch --tick-seconds 30
 OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli status
+# Optional single manual due-source collection:
+OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli collect --due
 ```
 
-The status report includes live observation counts, oldest and latest observation timestamps per source, the last collection attempt, route-summary counts, and the worker's last persisted state. collection_worker.json records the PID, start time, heartbeat timestamp, completed cycles, and last collection report.
+The worker checks immediately, then at the tick interval. TOML source intervals,
+not worker ticks or aggregation windows, determine due requests: station sources
+poll at 300 seconds; PM2.5, PSI/PM10 and WBGT/heat stress at 900 seconds. Requests
+are sequential, with bounded timeout/retry/backoff and spacing. See
+[API source semantics](API_CONFIG.md) for units and response contracts.
 
-A worker state of running is a persisted report, not proof that the process is still alive. Inspect updated_at and the process or container status, especially after a forced kill or host failure. Do not edit or delete lock files while a worker is running.
+Keep the process and host running. Host sleep interrupts collection; it does not
+backfill missed observations. An explicit Live frontend refresh can also collect.
+Historical Tab 1 exposes no refresh control. Application mode does not change the
+collector's source-kind setting; live failures never substitute synthetic values.
 
-## Stop and Resume
+## Availability, failure and recovery
 
-Press Ctrl+C in the collector terminal. SIGTERM is also supported. Shutdown waits for the current bounded API request/retry sequence, stops before starting another source, and persists stopped state. A single retry sequence can take approximately 120 seconds with the current timeouts and backoff settings.
+Observations preserve observation time, first-fetch availability, optional source
+update, revision and provenance. A snapshot admits only revisions available by
+its query time. CSV timestamps are Singapore local seconds without a timezone
+suffix; HTTP timestamps remain aware. See [CSV schema](CSV_SCHEMA.md).
 
-Run the same watch command to resume. The existing CSV rows remain. The worker uses persisted attempt timestamps to determine which sources are due. It does not clear history or reinsert duplicate observations.
+A source failure is logged and other sources continue. Existing observations
+remain; the environment service reports stale/missing/cache states. Failed attempts
+still respect source cooldowns. Missing is never converted to zero. Storage errors
+stop the worker rather than claiming successful collection.
 
-Only one continuous worker can own a data/runtime directory. A second worker exits with a clear error. The lifetime worker lease is separate from the short CSV writer lock, allowing the web server to read and update summaries. Manual collect and the frontend refresh button remain available; they can cause additional fetches, but the repository still deduplicates observations.
+Only one continuous worker may own a runtime directory. Its lifetime lease is
+separate from the short CSV writer lock, so API reads/summary updates remain
+possible. Do not delete locks while a process runs. SIGINT/SIGTERM waits for the
+current bounded request sequence, stops before the next source and records stopped
+state. Restart reuses attempt timestamps and revision/deduplication semantics.
 
-## Failures and Recovery
+`runtime/collection_worker.json` contains the last persisted heartbeat/state,
+not proof of a currently running process or fresh upstream data. Inspect its time,
+process/container status and `cli status`. The collector probe allows 30 minutes
+between completed cycles because all eight sources can exhaust retries. API
+readiness tests local catalog/storage access; freshness stays in route responses.
 
-A source failure is logged in ingestion_runs.csv. Other sources continue, and retained observations are labelled appropriately by the existing environment service. The worker waits for that source's configured interval after a failed attempt before trying again, rather than retrying on every 30-second check. The collector's existing bounded HTTP retries still apply within each attempt.
+Collection extends the three observation/history categories and refreshes route
+mapping views. It never trains a model or writes forecasts into observation
+history. CSV rewrites and snapshots grow with history size; monitor disk usage and
+cycle duration. Scaling/storage redesign requires a separate decision, not deletion
+of collected records.
 
-Storage errors stop the worker with a nonzero exit code. Its last status is marked failed when possible. The existing repository replays an interrupted CSV transaction journal on restart. Investigate disk failures rather than treating an empty or stale report as successful ingestion.
+## Deployment and evidence
 
-## Docker Compose
+Compose mounts the named `outdoorwise-runtime` volume at `/app/data/runtime` in
+both services. It does not migrate host runtime users/history automatically. Plain
+`docker compose down` retains that volume. Kubernetes keeps one API worker/replica
+and one collector sharing durable storage; see [deployment](../deploy/README.md)
+for secrets, leases, permissions, probes and future acceptance checks.
 
-```bash
-docker compose up -d --build
-# Inspect ongoing collection.
-docker compose logs -f collector
-# Stop only the collector; the frontend can remain running.
-docker compose stop collector
-# Resume collection.
-docker compose start collector
-```
-
-The app and collector services share the existing ./data/runtime bind mount. collector uses restart: unless-stopped and a three-minute graceful shutdown window. Docker builds and deployment have not been verified in this execution environment.
-
-## Finite Verification Run
-
-```bash
-OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli watch --tick-seconds 1 --max-cycles 2
-```
-
-This performs two scheduling checks and exits cleanly. After a successful first collection, the second check should skip sources whose configured intervals have not elapsed. A one-second tick does not request all APIs every second.
-
-## Historical Data and Training
-
-New timestamps extend weather_observations.csv, air_quality_observations.csv, and heat_stress_observations.csv. Upstream corrections update the corresponding current observation; each category has its own observation_versions.csv file retaining earlier revisions. All CSV timestamps use Singapore local time at second precision without an offset suffix. Each worker cycle also refreshes route_source_mapping.csv and route_environment_latest.csv.
-
-This accumulates data from the periods when the worker is running. It does not backfill dates before startup or automatically recover observations missed while the host was offline. Historical backfill should be added separately using verified official historical endpoints and the same ingestion contract.
-
-The two-route demo still ingests available stations and regions across the source responses, retaining useful spatial features for future models. A training dataset and future-rain labels are separate deliverables; the route summaries are not a labelled forecast training set.
-
-The current CSV adapter reads and atomically rewrites history files. Cost and runtime grow with history size. Monitor disk usage and collection duration; partitioned storage or the planned PostgreSQL adapter will be needed as the dataset grows. Do not delete older records merely to make the latest route table smaller.
+[Dated collection evidence](evidence/collection/README.md) preserves earlier real
+API request records. Current automated tests use recorded payloads, provider mocks
+and temporary storage; they do not establish present external API availability.

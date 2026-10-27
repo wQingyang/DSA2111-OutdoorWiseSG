@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: outdoorwise-app
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: outdoorwise-app
+  template:
+    metadata:
+      labels:
+        app: outdoorwise-app
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        runAsNonRoot: true
+      containers:
+        - name: app
+          image: outdoorwise:submission
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: outdoorwise-config
+            - secretRef:
+                name: outdoorwise-secrets
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: 8000
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            periodSeconds: 30
+          volumeMounts:
+            - name: runtime
+              mountPath: /app/data/runtime
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: outdoorwise-runtime
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: outdoorwise
+spec:
+  selector:
+    app: outdoorwise-app
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: ClusterIP

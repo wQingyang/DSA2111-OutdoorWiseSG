@@ -26,7 +26,7 @@
     if (risk?.assessed_at) details.append(element('p', `Assessment: ${formatTime(risk.assessed_at)}`), technicalTime(risk.assessed_at));
     const wrap = element('div', undefined, 'environment-scroll');
     const table = element('table', undefined, 'environment');
-    table.append(element('caption', 'Environmental observations and source information'));
+    table.append(element('caption', env?.historical_origin ? 'Historical forecast-origin observations — not future conditions' : 'Environmental observations and source information'));
     const head = element('thead'); const headings = element('tr');
     for (const title of ['Metric / window', 'Measured value', 'Source / station or region', 'Station distance', 'Observed', 'Fetched', 'Freshness / delivery', 'Mapping / confidence']) {
       const th = element('th', title); th.scope = 'col'; headings.append(th);
@@ -64,7 +64,7 @@
     if (prediction) details.append(element('p', `Prediction status: ${prediction.prediction_status} · Source: ${prediction.source} · Simulated: ${prediction.is_mock ? 'yes' : 'no'}`));
     return details;
   }
-  function card(route, rec, risk, env, prediction, preferences, personal, index, viewRoute) {
+  function card(route, rec, risk, env, prediction, preferences, personal, index, viewRoute, historical = false) {
     const card = element('article', undefined, 'card route-summary');
     card.dataset.personalizationRoute = route.route_id;
     const blocked = risk?.eligibility === 'blocked' || rec?.eligibility === 'blocked';
@@ -89,7 +89,7 @@
       match.append(element('strong', `${rec.recommendation_score.toFixed(1)} / 100`), element('small', 'Higher = better match'));
     } else match.append(element('strong', blocked ? 'Not recommended' : 'Unavailable'));
     const environmental = element('div', undefined, 'score-block risk-score');
-    environmental.append(element('span', 'Environmental Risk', 'score-title'));
+    environmental.append(element('span', historical ? 'Predicted Environmental Risk (experimental)' : 'Environmental Risk', 'score-title'));
     if (complete) environmental.append(element('strong', `${risk.risk_score.toFixed(1)} / 100`), element('small', `${labels[risk.risk_level] || 'Unknown'} risk · Higher = greater risk`));
     else environmental.append(element('strong', 'Unknown'), element('small', 'Incomplete environmental information'));
     scores.append(match, environmental); card.append(scores);
@@ -101,8 +101,17 @@
       risks.append(item);
     }
     card.append(risks);
+    if (!historical) {
+      const measurements = element('ul', undefined, 'environment-measurements');
+      for (const name of ['rainfall', 'wbgt', 'pm25', 'wind_speed']) {
+        const metric = env?.metrics?.find(item => item.metric === name);
+        const value = metric?.state === 'fresh' && number(metric.value) ? `${metric.value.toFixed(1)} ${metric.unit}` : 'Unavailable';
+        measurements.append(element('li', `${metricNames[name]}: ${value} · observed ${formatTime(metric?.observed_at)} · ${metric?.state || 'missing'}`));
+      }
+      card.append(measurements);
+    }
     const confidence = risk?.risk_data_quality?.confidence || rec?.risk_confidence || 'unknown';
-    const freshness = outdated ? 'Outdated observations' : future ? 'Not available at assessment time' : labels[risk?.risk_data_quality?.observation_freshness] || 'Observations unavailable';
+    const freshness = historical ? 'Experimental forecast · Incomplete run-window coverage' : outdated ? 'Outdated observations' : future ? 'Not available at assessment time' : labels[risk?.risk_data_quality?.observation_freshness] || 'Observations unavailable';
     card.append(element('p', `${freshness} · ${labels[confidence] || 'Unknown'} confidence`, 'data-quality'));
     if (risk?.assessed_at) card.append(element('p', `Assessed ${formatTime(risk.assessed_at)}`, 'assessment-time'));
     if (risk?.risk_data_quality?.simulated) card.append(element('p', 'Synthetic demo observations', 'important-warning'));
@@ -135,12 +144,13 @@
     if (approximate.length) warnings.append(element('li', `A selected weather station is ${Math.max(...approximate.map(c => c.station_distance_km)).toFixed(2)} km from the route start. This is an approximate estimate, not measurements along the full route.`));
     else if (['low', 'very_low'].includes(confidence)) warnings.append(element('li', 'Weather coverage near the route start is limited; conditions can vary along the route.'));
     if (route.status === 'candidate_requires_visual_review') warnings.append(element('li', 'Route geometry needs visual review before navigation.'));
-    if (!prediction || prediction.prediction_status !== 'forecast_available' || prediction.is_mock) warnings.append(element('li', `Current observations only. Forecast unavailable for the requested ${preferences.horizon_min}-minute window.`));
+    if (!historical && (!prediction || prediction.prediction_status !== 'forecast_available' || prediction.is_mock)) warnings.append(element('li', 'Current observations assess departure now. Conditions may change during your run.'));
     card.append(warnings);
     const actions = element('div', undefined, 'card-actions');
     const view = element('button', 'View Route', 'view-route-button'); view.type = 'button'; view.onclick = () => viewRoute(route);
     const favourite = element('button', 'Favourite', 'favourite-button'); favourite.type = 'button';
     const completed = element('button', 'Completed Run', 'completed-run-button'); completed.type = 'button';
+    if (historical) { completed.disabled = true; completed.title = 'Historical simulations cannot be saved as completed runs.'; }
     actions.append(view, favourite, completed); card.append(actions, environmentalDetails(env, risk, rec, prediction));
     return card;
   }
