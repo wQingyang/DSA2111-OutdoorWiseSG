@@ -21,9 +21,9 @@ startup; macOS/Linux commands below (Windows: WSL or Docker).
 
 ### Configure API keys (both options)
 
-Create `.env` in the repository root. If `.env.example` is present, copy it with
-`cp .env.example .env`; otherwise create `.env` manually. Populate the keys you
-need, and **never commit `.env` or paste secrets into logs**:
+Create `.env` in the repository root. Copy `.env.example` with
+`cp .env.example .env`; or create `.env` manually. Populate the keys you
+need:
 
 ```dotenv
 # Tab 2: ORS creates route geometry
