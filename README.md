@@ -11,15 +11,15 @@ ordering, Leaflet maps and GPX export are supported.
 Risk and difficulty are provisional engineering estimates. Source freshness,
 coverage, unavailable values and geometry-review limitations remain visible.
 
-## Startup options: local Python or Docker Compose
+## Startup options: Local Python, Docker Compose or Local Kubernetes
 
-Both options run the same application: **Tab 1** recommends existing routes using
+All three options run the same application: **Tab 1** recommends existing routes using
 current environmental observations; **Tab 2** parses natural-language preferences
 through OpenRouter and generates routes through OpenRouteService (ORS). Choose
 **one** option at a time to avoid duplicate collectors. Use Python 3.11+ for local
 startup; macOS/Linux commands below (Windows: WSL or Docker).
 
-### Configure API keys (both options)
+### Configure API keys (Local Python and Docker Compose)
 
 Create `.env` in the repository root. Copy `.env.example` with
 `cp .env.example .env`; or create `.env` manually. Populate the keys you
@@ -129,6 +129,25 @@ To choose Tab 1 Historical Mode in Compose, set
 `docker compose up -d --force-recreate app`; return it to `live` for the normal
 live workflow. The collector continues collecting live data independently.
 
+### Option C — Local Kubernetes (Docker Desktop kind)
+
+The accepted setup uses Docker Desktop kind, one Linux ARM64 node, one app and
+one collector, with a shared 2 GiB PVC. Follow the [local Kubernetes setup guide](deploy/README.md#local-kubernetes-fresh-machine-setup)
+to enable the containerd image store, verify context/storage, stop Compose, build
+the image and create `outdoorwise-secrets` using hidden prompts. Kubernetes does
+not load `.env`. After those prerequisites:
+
+```bash
+kubectl --context docker-desktop apply -k deploy/k8s
+kubectl --context docker-desktop -n outdoorwise rollout status deployment/outdoorwise-app --timeout=180s
+kubectl --context docker-desktop -n outdoorwise rollout status deployment/outdoorwise-collector --timeout=300s
+kubectl --context docker-desktop -n outdoorwise port-forward --address 127.0.0.1 service/outdoorwise 8000:80
+```
+
+Open **http://127.0.0.1:8000** while port-forward runs. The guide covers image
+availability, validation, port conflicts, safe restarts and storage preservation.
+Do not delete the PVC or namespace to stop the application.
+
 ### Runtime and data modes
 
 `OUTDOORWISE_APP_MODE` selects Tab 1 (`live` by default, or `historical`);
@@ -197,8 +216,9 @@ establish real provider access or deployment success. Current results are record
 in [FINAL_INTEGRATION.md](docs/FINAL_INTEGRATION.md).
 
 Docker and Kubernetes configurations are prepared, with one API worker/replica and
-one collector sharing persistent runtime storage. Actual image/container and cluster
-acceptance remains future work; follow [deployment instructions](deploy/README.md).
+one collector sharing persistent runtime storage. Local Docker Desktop Kubernetes
+acceptance passed; see the [acceptance report](deploy/LOCAL_KUBERNETES_ACCEPTANCE.md)
+and [deployment instructions](deploy/README.md). Cloud acceptance remains future work.
 Never ship local credentials or operational user files as image contents.
 
 Technical references: [CSV v3](docs/CSV_SCHEMA.md), [source semantics](docs/API_CONFIG.md),
