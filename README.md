@@ -188,12 +188,19 @@ and [current verification/limitations](docs/FINAL_INTEGRATION.md).
 | `accounts/`, `personalization/`, `difficulty/`, `export/` | Identity, user adaptation, effort estimates and GPX |
 | `llm/`, `frontend/` | OpenRouter interpretation and shared browser interface |
 | `prediction/`, `scripts/evaluate_frozen_forecasts.py` | Protected research training/inference/artifacts and offline evaluation |
-| `experiments/station_route_matching/` | Independent spatial matching methods, scripts, results and figures |
+| `analysis/station_matching/` | Independent spatial matching methods, scripts, results and figures |
 | `tests/`, `docs/`, `deploy/` | Regression checks, technical references and deployment preparation |
 
 Package areas in the table are under `outdoorwise/` unless shown at repository root.
 Environmental observations use CSV; account/session records use SQLite; personalization
 uses atomic per-user JSON. These stores are intentionally distinct.
+
+## Report analyses
+
+[`analysis/`](analysis/README.md) contains supporting experiments and evaluations
+for the DSA2111 final report and presentation, including data freshness and
+V1 versus V2 station matching. See the index for reproduction instructions and
+guidance on adding independent analyses.
 
 ## Validation and deployment
 
@@ -224,5 +231,5 @@ Never ship local credentials or operational user files as image contents.
 Technical references: [CSV v3](docs/CSV_SCHEMA.md), [source semantics](docs/API_CONFIG.md),
 [collection](docs/LIVE_COLLECTION.md), [risk policy](docs/ENVIRONMENTAL_RISK.md),
 [personalization](docs/PERSONALIZATION.md), [location/access](docs/STARTING_LOCATION.md),
-[station-matching experiment](experiments/station_route_matching/README.md),
+[station-matching experiment](analysis/station_matching/README.md),
 [cleanup audit](docs/REPOSITORY_CLEANUP.md).

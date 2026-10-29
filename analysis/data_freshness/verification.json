@@ -1,0 +1,1384 @@
+{
+  "input_sha256": {
+    "data/runtime/air_quality_observation_versions.csv": "311a3a24f6c8d353b577b101cb4d1f6df0992af3475f366a25154343b1dad2fc",
+    "data/runtime/air_quality_observations.csv": "7e4bba570bdcc3fda7ed2bb0ae4e6f11a001d078503ef91cdfd1a9c36cdc13b0",
+    "data/runtime/heat_stress_observation_versions.csv": "307c8a5a45c854e279461a17dde5ab94d1cf28609244dfaace53aaa10ca6a15d",
+    "data/runtime/heat_stress_observations.csv": "26652aa307988a0b323720e6f643b7c6d01419350df05cf054675869233eeeb8",
+    "data/runtime/weather_observation_versions.csv": "7bdd04385ecf8595726aaa892ac33a097274ce53873b95b53218d4b3f9e5aa54",
+    "data/runtime/weather_observations.csv": "4b93ca696b85c54308f91e671755775b9730fad1e8ca6a5f217958a1169caa9a"
+  },
+  "input_hashes_unchanged": true,
+  "supporting_input_sha256": {
+    "config/environment.toml": "2995e9037c19c19105b0d1a285ce1234216a3a14bc39f609520cc5ccb9cd494c",
+    "data/runtime/ingestion_runs.csv": "2b990ba25fe4abd74960e42c07c1f14000b120693aa256d26dc4ef4876966474"
+  },
+  "official_documentation_review_date": "2026-10-29",
+  "cadence_interval_exclusion": "Exclude intervals >120 minutes for typical cadence only; retain all ages and plot points",
+  "operational_bound_assumptions": [
+    "All first-acquisition groups uniquely associate with source run intervals",
+    "First introductions reconcile with every successful run's insertion counters",
+    "Observation keys include observed_at and revision history is retained",
+    "Run start/finish and CSV times use consistent Singapore-local clock semantics",
+    "Bounds and run counts do not identify independent outages or API SLA failures"
+  ],
+  "python_version": "3.13.5",
+  "matplotlib_version": "3.11.2",
+  "p90_method": "linear interpolation at (n-1)*0.9",
+  "statistics_unit": "one median observation age per source/fetched_at group",
+  "sources": {
+    "Rainfall": {
+      "first_collection": {
+        "valid_records": 145782,
+        "fetch_timestamp_groups": 1643,
+        "observation_start": "2026-10-05T11:30:00+08:00",
+        "observation_end": "2026-10-27T22:10:00+08:00",
+        "collection_start": "2026-10-05T11:38:28+08:00",
+        "collection_end": "2026-10-27T22:20:09+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 0,
+        "revisions": {
+          "1": 145782
+        },
+        "minimum_group_records": 1,
+        "maximum_group_records": 90
+      },
+      "latest_retained_fetch": {
+        "valid_records": 145782,
+        "fetch_timestamp_groups": 1638,
+        "observation_start": "2026-10-05T11:30:00+08:00",
+        "observation_end": "2026-10-27T22:10:00+08:00",
+        "collection_start": "2026-10-05T11:38:28+08:00",
+        "collection_end": "2026-10-27T22:20:09+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 15412,
+        "revisions": {
+          "1": 145782
+        },
+        "minimum_group_records": 87,
+        "maximum_group_records": 90
+      },
+      "matches_previous_audit_to_two_decimals": true,
+      "history_diagnostics": {
+        "all_revision_records": 145782,
+        "first_records": 145782,
+        "missing_provider_update_all_records": 145782,
+        "missing_provider_update_first_records": 145782,
+        "negative_provider_delay_first_records": 0,
+        "provider_update_before_observation_first_records": 0,
+        "revision_transitions": 0,
+        "update_only_revision_transitions": 0,
+        "measurement_changed_revision_transitions": 0,
+        "backwards_provider_update_revision_transitions": 0,
+        "cadence": {
+          "observed_at": {
+            "unique_timestamps": 1638,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 1637,
+              "median": 5.0,
+              "mean": 19.743433109346366,
+              "p90": 10.0,
+              "maximum": 16380.0,
+              "mode": [
+                5.0
+              ],
+              "mode_count": 1292
+            },
+            "typical_intervals": {
+              "n": 1630,
+              "median": 5.0,
+              "mean": 7.171779141104294,
+              "p90": 10.0,
+              "maximum": 120.0,
+              "mode": [
+                5.0
+              ],
+              "mode_count": 1292
+            },
+            "excluded_intervals": 7,
+            "histogram_seconds": {
+              "300.0": 1292,
+              "600.0": 259,
+              "900.0": 34,
+              "1200.0": 9,
+              "1500.0": 5,
+              "1800.0": 8,
+              "2100.0": 1,
+              "2400.0": 1,
+              "2700.0": 1,
+              "3000.0": 6,
+              "3300.0": 2,
+              "3600.0": 2,
+              "3900.0": 1,
+              "4200.0": 2,
+              "4800.0": 1,
+              "5700.0": 1,
+              "6000.0": 2,
+              "6900.0": 1,
+              "7200.0": 2,
+              "7500.0": 1,
+              "8400.0": 1,
+              "8700.0": 1,
+              "9300.0": 1,
+              "25800.0": 1,
+              "195300.0": 1,
+              "982800.0": 1
+            }
+          },
+          "source_updated_at": {
+            "unique_timestamps": 0,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 0,
+              "median": null,
+              "mean": null,
+              "mode": [],
+              "mode_count": 0,
+              "p90": null,
+              "maximum": null
+            },
+            "typical_intervals": {
+              "n": 0,
+              "median": null,
+              "mean": null,
+              "mode": [],
+              "mode_count": 0,
+              "p90": null,
+              "maximum": null
+            },
+            "excluded_intervals": 0,
+            "histogram_seconds": {}
+          }
+        },
+        "observation_grid_minutes": 5,
+        "observation_grid_aligned_timestamps": 1638,
+        "provider_updates_linked_to_multiple_observation_times": 0,
+        "provider_delay_rows": {
+          "n": 0,
+          "median": null,
+          "mean": null,
+          "mode": [],
+          "mode_count": 0,
+          "p90": null,
+          "maximum": null
+        },
+        "provider_delay_groups": {
+          "n": 0,
+          "median": null,
+          "mean": null,
+          "mode": [],
+          "mode_count": 0,
+          "p90": null,
+          "maximum": null
+        },
+        "first_observation_age_rows": {
+          "n": 145782,
+          "median": 9.1,
+          "mean": 9.372729486493531,
+          "p90": 11.15,
+          "maximum": 379.03333333333336,
+          "mode": [
+            6.7
+          ],
+          "mode_count": 1248
+        },
+        "cutoff_sensitivity": {
+          "60": {
+            "observed_at": {
+              "n": 1620,
+              "median": 5.0,
+              "mean": 6.638888888888889,
+              "p90": 10.0,
+              "maximum": 60.0,
+              "mode": [
+                5.0
+              ],
+              "mode_count": 1292
+            },
+            "source_updated_at": {
+              "n": 0,
+              "median": null,
+              "mean": null,
+              "mode": [],
+              "mode_count": 0,
+              "p90": null,
+              "maximum": null
+            }
+          },
+          "120": {
+            "observed_at": {
+              "n": 1630,
+              "median": 5.0,
+              "mean": 7.171779141104294,
+              "p90": 10.0,
+              "maximum": 120.0,
+              "mode": [
+                5.0
+              ],
+              "mode_count": 1292
+            },
+            "source_updated_at": {
+              "n": 0,
+              "median": null,
+              "mean": null,
+              "mode": [],
+              "mode_count": 0,
+              "p90": null,
+              "maximum": null
+            }
+          },
+          "180": {
+            "observed_at": {
+              "n": 1634,
+              "median": 5.0,
+              "mean": 7.5,
+              "p90": 10.0,
+              "maximum": 155.0,
+              "mode": [
+                5.0
+              ],
+              "mode_count": 1292
+            },
+            "source_updated_at": {
+              "n": 0,
+              "median": null,
+              "mean": null,
+              "mode": [],
+              "mode_count": 0,
+              "p90": null,
+              "maximum": null
+            }
+          }
+        },
+        "provider_delay_interpretation": "unavailable: provider timestamp missing"
+      },
+      "session_audit": {
+        "unique_interval_matches": 1643,
+        "matched_first_records": 145782,
+        "ambiguous_or_unmatched_first_fetch_groups": 0,
+        "insertion_counter_mismatches": 0,
+        "polling_minutes": 5.0,
+        "regular_gap_limit_minutes": 10.5,
+        "extended_gap_limit_minutes": 20.5,
+        "maximum_run_duration_minutes": 2.525,
+        "run_state_counts": {
+          "initial_first": 1,
+          "post_gap_first": 47,
+          "other_irregular_or_warmup": 48,
+          "active": 1755,
+          "failed": 20
+        },
+        "session_segments": 53
+      },
+      "operational_freshness": {
+        "source": "Rainfall",
+        "qualifying_active_successful_runs": 1755,
+        "runs_demonstrably_over_60_minutes": 16,
+        "maximum_demonstrated_age_lower_bound_minutes": 144.01666666666668,
+        "official_observation_cadence_minutes": 5,
+        "official_dataset_update_minutes": 5,
+        "diagnostic_threshold_minutes": 60,
+        "evidence_kind": "inferred lower bounds; not exact retained response payloads",
+        "interpretation": "conditional run counts, not independent outage events or an API SLA"
+      },
+      "matches_inactivity_audit": true
+    },
+    "WBGT": {
+      "first_collection": {
+        "valid_records": 19080,
+        "fetch_timestamp_groups": 636,
+        "observation_start": "2026-10-05T11:15:00+08:00",
+        "observation_end": "2026-10-27T22:00:00+08:00",
+        "collection_start": "2026-10-05T11:39:52+08:00",
+        "collection_end": "2026-10-27T22:16:48+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 0,
+        "revisions": {
+          "1": 19080
+        },
+        "minimum_group_records": 30,
+        "maximum_group_records": 30
+      },
+      "latest_retained_fetch": {
+        "valid_records": 19080,
+        "fetch_timestamp_groups": 636,
+        "observation_start": "2026-10-05T11:15:00+08:00",
+        "observation_end": "2026-10-27T22:00:00+08:00",
+        "collection_start": "2026-10-05T11:39:52+08:00",
+        "collection_end": "2026-10-27T22:16:48+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 120,
+        "revisions": {
+          "1": 19080
+        },
+        "minimum_group_records": 30,
+        "maximum_group_records": 30
+      },
+      "matches_previous_audit_to_two_decimals": true,
+      "history_diagnostics": {
+        "all_revision_records": 19080,
+        "first_records": 19080,
+        "missing_provider_update_all_records": 0,
+        "missing_provider_update_first_records": 0,
+        "negative_provider_delay_first_records": 0,
+        "provider_update_before_observation_first_records": 0,
+        "revision_transitions": 0,
+        "update_only_revision_transitions": 0,
+        "measurement_changed_revision_transitions": 0,
+        "backwards_provider_update_revision_transitions": 0,
+        "cadence": {
+          "observed_at": {
+            "unique_timestamps": 636,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 635,
+              "median": 15.0,
+              "mean": 50.90551181102362,
+              "p90": 30.0,
+              "maximum": 16380.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 545
+            },
+            "typical_intervals": {
+              "n": 628,
+              "median": 15.0,
+              "mean": 18.893312101910826,
+              "p90": 30.0,
+              "maximum": 120.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 545
+            },
+            "excluded_intervals": 7,
+            "histogram_seconds": {
+              "900.0": 545,
+              "1800.0": 49,
+              "2700.0": 13,
+              "3600.0": 10,
+              "4500.0": 3,
+              "5400.0": 3,
+              "6300.0": 4,
+              "7200.0": 1,
+              "8100.0": 2,
+              "9000.0": 1,
+              "10800.0": 1,
+              "12600.0": 1,
+              "196200.0": 1,
+              "982800.0": 1
+            }
+          },
+          "source_updated_at": {
+            "unique_timestamps": 636,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 635,
+              "median": 15.0,
+              "mean": 50.90522309711286,
+              "p90": 30.0,
+              "maximum": 16380.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 267
+            },
+            "typical_intervals": {
+              "n": 628,
+              "median": 15.0,
+              "mean": 18.89288747346072,
+              "p90": 30.0,
+              "maximum": 119.98333333333333,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 267
+            },
+            "excluded_intervals": 7,
+            "histogram_seconds": {
+              "839.0": 3,
+              "840.0": 4,
+              "841.0": 5,
+              "887.0": 1,
+              "891.0": 1,
+              "894.0": 1,
+              "895.0": 1,
+              "896.0": 1,
+              "898.0": 15,
+              "899.0": 109,
+              "900.0": 267,
+              "901.0": 104,
+              "902.0": 15,
+              "905.0": 2,
+              "908.0": 1,
+              "959.0": 2,
+              "960.0": 8,
+              "961.0": 5,
+              "1739.0": 1,
+              "1740.0": 1,
+              "1741.0": 1,
+              "1798.0": 1,
+              "1799.0": 5,
+              "1800.0": 30,
+              "1801.0": 6,
+              "1802.0": 1,
+              "1805.0": 1,
+              "1859.0": 1,
+              "1861.0": 1,
+              "2640.0": 1,
+              "2641.0": 1,
+              "2698.0": 1,
+              "2699.0": 3,
+              "2700.0": 3,
+              "2701.0": 4,
+              "3539.0": 1,
+              "3595.0": 1,
+              "3599.0": 3,
+              "3600.0": 3,
+              "3601.0": 2,
+              "4499.0": 1,
+              "4506.0": 1,
+              "4561.0": 1,
+              "5400.0": 2,
+              "5401.0": 1,
+              "6299.0": 2,
+              "6300.0": 2,
+              "7199.0": 1,
+              "8041.0": 1,
+              "8099.0": 1,
+              "9000.0": 1,
+              "10801.0": 1,
+              "12661.0": 1,
+              "196203.0": 1,
+              "982800.0": 1
+            }
+          }
+        },
+        "observation_grid_minutes": 15,
+        "observation_grid_aligned_timestamps": 636,
+        "provider_updates_linked_to_multiple_observation_times": 0,
+        "provider_delay_rows": {
+          "n": 19080,
+          "median": 6.95,
+          "mean": 7.3344863731656185,
+          "p90": 13.783333333333333,
+          "maximum": 15.35,
+          "mode": [
+            1.25,
+            2.6166666666666667,
+            5.25
+          ],
+          "mode_count": 120
+        },
+        "provider_delay_groups": {
+          "n": 636,
+          "median": 6.95,
+          "mean": 7.3344863731656185,
+          "p90": 13.775,
+          "maximum": 15.35,
+          "mode": [
+            1.25,
+            2.6166666666666667,
+            5.25
+          ],
+          "mode_count": 4
+        },
+        "first_observation_age_rows": {
+          "n": 19080,
+          "median": 17.0,
+          "mean": 17.376729559748426,
+          "p90": 23.816666666666666,
+          "maximum": 25.216666666666665,
+          "mode": [
+            12.15,
+            13.1
+          ],
+          "mode_count": 120
+        },
+        "cutoff_sensitivity": {
+          "60": {
+            "observed_at": {
+              "n": 617,
+              "median": 15.0,
+              "mean": 17.55267423014587,
+              "p90": 30.0,
+              "maximum": 60.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 545
+            },
+            "source_updated_at": {
+              "n": 615,
+              "median": 15.0,
+              "mean": 17.41241192411924,
+              "p90": 29.983333333333334,
+              "maximum": 60.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 267
+            }
+          },
+          "120": {
+            "observed_at": {
+              "n": 628,
+              "median": 15.0,
+              "mean": 18.893312101910826,
+              "p90": 30.0,
+              "maximum": 120.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 545
+            },
+            "source_updated_at": {
+              "n": 628,
+              "median": 15.0,
+              "mean": 18.89288747346072,
+              "p90": 30.0,
+              "maximum": 119.98333333333333,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 267
+            }
+          },
+          "180": {
+            "observed_at": {
+              "n": 632,
+              "median": 15.0,
+              "mean": 19.723101265822784,
+              "p90": 30.0,
+              "maximum": 180.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 545
+            },
+            "source_updated_at": {
+              "n": 631,
+              "median": 15.0,
+              "mean": 19.467089276281037,
+              "p90": 30.0,
+              "maximum": 150.0,
+              "mode": [
+                15.0
+              ],
+              "mode_count": 267
+            }
+          }
+        },
+        "provider_delay_interpretation": "descriptive returned-record metadata offset; publication/version semantics not independently verified"
+      },
+      "session_audit": {
+        "unique_interval_matches": 636,
+        "matched_first_records": 19080,
+        "ambiguous_or_unmatched_first_fetch_groups": 0,
+        "insertion_counter_mismatches": 0,
+        "polling_minutes": 15.0,
+        "regular_gap_limit_minutes": 30.5,
+        "extended_gap_limit_minutes": 60.5,
+        "maximum_run_duration_minutes": 2.525,
+        "run_state_counts": {
+          "initial_first": 1,
+          "post_gap_first": 18,
+          "other_irregular_or_warmup": 61,
+          "active": 558,
+          "failed": 25,
+          "long_running": 2
+        },
+        "session_segments": 20
+      },
+      "operational_freshness": {
+        "source": "WBGT",
+        "qualifying_active_successful_runs": 558,
+        "runs_demonstrably_over_60_minutes": 0,
+        "maximum_demonstrated_age_lower_bound_minutes": 25.183333333333334,
+        "official_observation_cadence_minutes": 15,
+        "official_dataset_update_minutes": 15,
+        "diagnostic_threshold_minutes": 60,
+        "evidence_kind": "inferred lower bounds; not exact retained response payloads",
+        "interpretation": "conditional run counts, not independent outage events or an API SLA"
+      },
+      "matches_inactivity_audit": true
+    },
+    "PM2.5": {
+      "first_collection": {
+        "valid_records": 990,
+        "fetch_timestamp_groups": 198,
+        "observation_start": "2026-10-05T11:00:00+08:00",
+        "observation_end": "2026-10-27T22:00:00+08:00",
+        "collection_start": "2026-10-05T11:39:30+08:00",
+        "collection_end": "2026-10-27T22:00:38+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 0,
+        "revisions": {
+          "1": 990
+        },
+        "minimum_group_records": 5,
+        "maximum_group_records": 5
+      },
+      "latest_retained_fetch": {
+        "valid_records": 990,
+        "fetch_timestamp_groups": 198,
+        "observation_start": "2026-10-05T11:00:00+08:00",
+        "observation_end": "2026-10-27T22:00:00+08:00",
+        "collection_start": "2026-10-05T11:39:30+08:00",
+        "collection_end": "2026-10-27T22:16:15+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 15,
+        "revisions": {
+          "1": 120,
+          "2": 85,
+          "3": 195,
+          "4": 590
+        },
+        "minimum_group_records": 5,
+        "maximum_group_records": 5
+      },
+      "matches_previous_audit_to_two_decimals": true,
+      "history_diagnostics": {
+        "all_revision_records": 3235,
+        "first_records": 990,
+        "missing_provider_update_all_records": 0,
+        "missing_provider_update_first_records": 0,
+        "negative_provider_delay_first_records": 0,
+        "provider_update_before_observation_first_records": 0,
+        "revision_transitions": 2245,
+        "update_only_revision_transitions": 2245,
+        "measurement_changed_revision_transitions": 0,
+        "backwards_provider_update_revision_transitions": 0,
+        "cadence": {
+          "observed_at": {
+            "unique_timestamps": 198,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 197,
+              "median": 60.0,
+              "mean": 164.16243654822335,
+              "p90": 60.0,
+              "maximum": 16380.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "typical_intervals": {
+              "n": 191,
+              "median": 60.0,
+              "mean": 61.57068062827225,
+              "p90": 60.0,
+              "maximum": 120.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "excluded_intervals": 6,
+            "histogram_seconds": {
+              "3600.0": 186,
+              "7200.0": 5,
+              "10800.0": 2,
+              "14400.0": 1,
+              "21600.0": 1,
+              "194400.0": 1,
+              "982800.0": 1
+            }
+          },
+          "source_updated_at": {
+            "unique_timestamps": 647,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 646,
+              "median": 15.0,
+              "mean": 50.03823529411765,
+              "p90": 29.95,
+              "maximum": 16395.016666666666,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 112
+            },
+            "typical_intervals": {
+              "n": 637,
+              "median": 15.0,
+              "mean": 17.73194662480377,
+              "p90": 29.796666666666663,
+              "maximum": 105.26666666666667,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 112
+            },
+            "excluded_intervals": 9,
+            "histogram_seconds": {
+              "716.0": 1,
+              "722.0": 1,
+              "757.0": 1,
+              "777.0": 1,
+              "844.0": 1,
+              "858.0": 1,
+              "861.0": 1,
+              "877.0": 3,
+              "878.0": 1,
+              "879.0": 6,
+              "880.0": 2,
+              "881.0": 7,
+              "882.0": 6,
+              "883.0": 2,
+              "884.0": 4,
+              "885.0": 4,
+              "886.0": 2,
+              "887.0": 1,
+              "888.0": 1,
+              "896.0": 5,
+              "897.0": 35,
+              "898.0": 104,
+              "899.0": 112,
+              "900.0": 67,
+              "901.0": 46,
+              "902.0": 28,
+              "903.0": 28,
+              "904.0": 8,
+              "905.0": 16,
+              "906.0": 11,
+              "907.0": 9,
+              "908.0": 7,
+              "912.0": 1,
+              "916.0": 2,
+              "917.0": 4,
+              "918.0": 23,
+              "919.0": 3,
+              "920.0": 4,
+              "921.0": 1,
+              "925.0": 1,
+              "927.0": 1,
+              "940.0": 1,
+              "943.0": 1,
+              "944.0": 1,
+              "958.0": 1,
+              "1024.0": 1,
+              "1040.0": 1,
+              "1080.0": 1,
+              "1086.0": 1,
+              "1759.0": 1,
+              "1782.0": 1,
+              "1783.0": 1,
+              "1795.0": 2,
+              "1796.0": 5,
+              "1797.0": 3,
+              "1798.0": 2,
+              "1799.0": 6,
+              "1800.0": 7,
+              "1801.0": 5,
+              "1802.0": 4,
+              "1803.0": 3,
+              "1804.0": 2,
+              "1806.0": 1,
+              "1807.0": 1,
+              "1821.0": 1,
+              "2684.0": 1,
+              "2696.0": 1,
+              "2698.0": 3,
+              "2701.0": 2,
+              "2705.0": 1,
+              "3592.0": 1,
+              "3594.0": 1,
+              "3598.0": 2,
+              "3599.0": 1,
+              "3602.0": 1,
+              "4496.0": 1,
+              "4499.0": 1,
+              "4500.0": 1,
+              "4502.0": 1,
+              "4503.0": 1,
+              "5383.0": 1,
+              "6298.0": 1,
+              "6316.0": 1,
+              "7202.0": 2,
+              "8990.0": 1,
+              "9901.0": 1,
+              "10802.0": 1,
+              "15300.0": 1,
+              "23367.0": 1,
+              "195302.0": 1,
+              "983701.0": 1
+            }
+          }
+        },
+        "observation_grid_minutes": 60,
+        "observation_grid_aligned_timestamps": 198,
+        "provider_updates_linked_to_multiple_observation_times": 0,
+        "provider_delay_rows": {
+          "n": 990,
+          "median": 8.141666666666666,
+          "mean": 7.643518518518518,
+          "p90": 13.5,
+          "maximum": 14.983333333333333,
+          "mode": [
+            11.433333333333334
+          ],
+          "mode_count": 15
+        },
+        "provider_delay_groups": {
+          "n": 198,
+          "median": 8.141666666666666,
+          "mean": 7.643518518518519,
+          "p90": 13.465,
+          "maximum": 14.983333333333333,
+          "mode": [
+            11.433333333333334
+          ],
+          "mode_count": 3
+        },
+        "first_observation_age_rows": {
+          "n": 990,
+          "median": 10.399999999999999,
+          "mean": 12.27070707070707,
+          "p90": 25.25,
+          "maximum": 58.666666666666664,
+          "mode": [
+            0.95,
+            0.9666666666666667,
+            2.683333333333333,
+            4.416666666666667,
+            4.783333333333333,
+            7.666666666666667,
+            7.966666666666667,
+            8.55,
+            8.85,
+            10.316666666666666,
+            10.833333333333334,
+            14.016666666666667,
+            14.316666666666666,
+            14.916666666666666,
+            15.316666666666666
+          ],
+          "mode_count": 10
+        },
+        "cutoff_sensitivity": {
+          "60": {
+            "observed_at": {
+              "n": 186,
+              "median": 60.0,
+              "mean": 60.0,
+              "p90": 60.0,
+              "maximum": 60.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "source_updated_at": {
+              "n": 628,
+              "median": 15.0,
+              "mean": 16.815711252653927,
+              "p90": 15.803333333333349,
+              "maximum": 59.983333333333334,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 112
+            }
+          },
+          "120": {
+            "observed_at": {
+              "n": 191,
+              "median": 60.0,
+              "mean": 61.57068062827225,
+              "p90": 60.0,
+              "maximum": 120.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "source_updated_at": {
+              "n": 637,
+              "median": 15.0,
+              "mean": 17.73194662480377,
+              "p90": 29.796666666666663,
+              "maximum": 105.26666666666667,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 112
+            }
+          },
+          "180": {
+            "observed_at": {
+              "n": 193,
+              "median": 60.0,
+              "mean": 62.7979274611399,
+              "p90": 60.0,
+              "maximum": 180.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "source_updated_at": {
+              "n": 641,
+              "median": 15.0,
+              "mean": 18.486999479979197,
+              "p90": 29.933333333333334,
+              "maximum": 165.01666666666668,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 112
+            }
+          }
+        },
+        "provider_delay_interpretation": "descriptive returned-record metadata offset; publication/version semantics not independently verified"
+      },
+      "session_audit": {
+        "unique_interval_matches": 198,
+        "matched_first_records": 990,
+        "ambiguous_or_unmatched_first_fetch_groups": 0,
+        "insertion_counter_mismatches": 0,
+        "polling_minutes": 15.0,
+        "regular_gap_limit_minutes": 30.5,
+        "extended_gap_limit_minutes": 60.5,
+        "maximum_run_duration_minutes": 2.525,
+        "run_state_counts": {
+          "initial_first": 1,
+          "post_gap_first": 17,
+          "other_irregular_or_warmup": 43,
+          "active": 598,
+          "failed": 10,
+          "long_running": 2
+        },
+        "session_segments": 20
+      },
+      "operational_freshness": {
+        "source": "PM2.5",
+        "qualifying_active_successful_runs": 598,
+        "runs_demonstrably_over_60_minutes": 13,
+        "maximum_demonstrated_age_lower_bound_minutes": 135.8,
+        "official_observation_cadence_minutes": 60,
+        "official_dataset_update_minutes": 15,
+        "diagnostic_threshold_minutes": 60,
+        "evidence_kind": "inferred lower bounds; not exact retained response payloads",
+        "interpretation": "conditional run counts, not independent outage events or an API SLA"
+      },
+      "matches_inactivity_audit": true
+    },
+    "PSI": {
+      "first_collection": {
+        "valid_records": 990,
+        "fetch_timestamp_groups": 198,
+        "observation_start": "2026-10-05T11:00:00+08:00",
+        "observation_end": "2026-10-27T22:00:00+08:00",
+        "collection_start": "2026-10-05T11:39:42+08:00",
+        "collection_end": "2026-10-27T22:00:54+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 0,
+        "revisions": {
+          "1": 990
+        },
+        "minimum_group_records": 5,
+        "maximum_group_records": 5
+      },
+      "latest_retained_fetch": {
+        "valid_records": 990,
+        "fetch_timestamp_groups": 198,
+        "observation_start": "2026-10-05T11:00:00+08:00",
+        "observation_end": "2026-10-27T22:00:00+08:00",
+        "collection_start": "2026-10-05T11:39:42+08:00",
+        "collection_end": "2026-10-27T22:16:31+08:00",
+        "negative_ages": 0,
+        "invalid_ages": 0,
+        "duplicate_keys": 0,
+        "fetched_differs_from_first_fetched_records": 15,
+        "revisions": {
+          "1": 110,
+          "2": 100,
+          "3": 205,
+          "4": 575
+        },
+        "minimum_group_records": 5,
+        "maximum_group_records": 5
+      },
+      "matches_previous_audit_to_two_decimals": true,
+      "history_diagnostics": {
+        "all_revision_records": 3225,
+        "first_records": 990,
+        "missing_provider_update_all_records": 0,
+        "missing_provider_update_first_records": 0,
+        "negative_provider_delay_first_records": 0,
+        "provider_update_before_observation_first_records": 0,
+        "revision_transitions": 2235,
+        "update_only_revision_transitions": 2235,
+        "measurement_changed_revision_transitions": 0,
+        "backwards_provider_update_revision_transitions": 0,
+        "cadence": {
+          "observed_at": {
+            "unique_timestamps": 198,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 197,
+              "median": 60.0,
+              "mean": 164.16243654822335,
+              "p90": 60.0,
+              "maximum": 16380.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "typical_intervals": {
+              "n": 191,
+              "median": 60.0,
+              "mean": 61.57068062827225,
+              "p90": 60.0,
+              "maximum": 120.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "excluded_intervals": 6,
+            "histogram_seconds": {
+              "3600.0": 186,
+              "7200.0": 5,
+              "10800.0": 2,
+              "18000.0": 2,
+              "194400.0": 1,
+              "982800.0": 1
+            }
+          },
+          "source_updated_at": {
+            "unique_timestamps": 645,
+            "cutoff_minutes": 120,
+            "all_intervals": {
+              "n": 644,
+              "median": 15.0,
+              "mean": 50.19363354037267,
+              "p90": 29.961666666666666,
+              "maximum": 16395.0,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 106
+            },
+            "typical_intervals": {
+              "n": 636,
+              "median": 15.0,
+              "mean": 17.99554507337526,
+              "p90": 29.933333333333334,
+              "maximum": 119.85,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 106
+            },
+            "excluded_intervals": 8,
+            "histogram_seconds": {
+              "716.0": 1,
+              "722.0": 1,
+              "758.0": 1,
+              "778.0": 1,
+              "844.0": 1,
+              "857.0": 1,
+              "861.0": 1,
+              "877.0": 2,
+              "878.0": 1,
+              "879.0": 8,
+              "881.0": 5,
+              "882.0": 5,
+              "883.0": 8,
+              "884.0": 4,
+              "886.0": 1,
+              "887.0": 3,
+              "889.0": 1,
+              "896.0": 7,
+              "897.0": 38,
+              "898.0": 105,
+              "899.0": 106,
+              "900.0": 67,
+              "901.0": 47,
+              "902.0": 28,
+              "903.0": 21,
+              "904.0": 12,
+              "905.0": 16,
+              "906.0": 7,
+              "907.0": 9,
+              "908.0": 4,
+              "909.0": 1,
+              "911.0": 1,
+              "916.0": 2,
+              "917.0": 7,
+              "918.0": 20,
+              "919.0": 5,
+              "920.0": 6,
+              "925.0": 1,
+              "927.0": 1,
+              "940.0": 1,
+              "943.0": 1,
+              "944.0": 1,
+              "958.0": 1,
+              "1024.0": 1,
+              "1039.0": 1,
+              "1080.0": 1,
+              "1086.0": 1,
+              "1759.0": 1,
+              "1782.0": 1,
+              "1783.0": 2,
+              "1785.0": 1,
+              "1795.0": 1,
+              "1796.0": 6,
+              "1797.0": 3,
+              "1798.0": 7,
+              "1799.0": 5,
+              "1800.0": 3,
+              "1801.0": 6,
+              "1802.0": 3,
+              "1803.0": 4,
+              "1804.0": 1,
+              "1806.0": 1,
+              "1821.0": 1,
+              "2693.0": 1,
+              "2696.0": 1,
+              "2697.0": 2,
+              "2698.0": 1,
+              "2699.0": 1,
+              "2701.0": 1,
+              "2705.0": 1,
+              "2706.0": 1,
+              "3585.0": 1,
+              "3594.0": 1,
+              "3598.0": 3,
+              "3602.0": 3,
+              "3605.0": 1,
+              "3607.0": 1,
+              "3619.0": 1,
+              "4482.0": 1,
+              "4499.0": 2,
+              "5413.0": 1,
+              "6298.0": 1,
+              "7191.0": 1,
+              "7201.0": 1,
+              "8090.0": 1,
+              "8103.0": 1,
+              "12597.0": 1,
+              "17104.0": 1,
+              "20674.0": 1,
+              "195303.0": 1,
+              "983700.0": 1
+            }
+          }
+        },
+        "observation_grid_minutes": 60,
+        "observation_grid_aligned_timestamps": 198,
+        "provider_updates_linked_to_multiple_observation_times": 0,
+        "provider_delay_rows": {
+          "n": 990,
+          "median": 8.008333333333333,
+          "mean": 7.62449494949495,
+          "p90": 13.8,
+          "maximum": 14.933333333333334,
+          "mode": [
+            0.31666666666666665,
+            1.4666666666666666,
+            2.85,
+            4.316666666666666,
+            4.866666666666666,
+            5.183333333333334,
+            6.933333333333334,
+            7.016666666666667,
+            7.166666666666667,
+            7.233333333333333,
+            7.833333333333333,
+            8.283333333333333,
+            8.566666666666666,
+            8.816666666666666,
+            9.416666666666666,
+            10.35,
+            10.616666666666667,
+            12.5,
+            13.25,
+            13.75,
+            14.35
+          ],
+          "mode_count": 10
+        },
+        "provider_delay_groups": {
+          "n": 198,
+          "median": 8.008333333333333,
+          "mean": 7.62449494949495,
+          "p90": 13.765,
+          "maximum": 14.933333333333334,
+          "mode": [
+            0.31666666666666665,
+            1.4666666666666666,
+            2.85,
+            4.316666666666666,
+            4.866666666666666,
+            5.183333333333334,
+            6.933333333333334,
+            7.016666666666667,
+            7.166666666666667,
+            7.233333333333333,
+            7.833333333333333,
+            8.283333333333333,
+            8.566666666666666,
+            8.816666666666666,
+            9.416666666666666,
+            10.35,
+            10.616666666666667,
+            12.5,
+            13.25,
+            13.75,
+            14.35
+          ],
+          "mode_count": 2
+        },
+        "first_observation_age_rows": {
+          "n": 990,
+          "median": 10.216666666666667,
+          "mean": 12.406144781144782,
+          "p90": 27.316666666666666,
+          "maximum": 56.43333333333333,
+          "mode": [
+            1.0,
+            1.2833333333333334,
+            2.316666666666667,
+            4.033333333333333,
+            7.95,
+            9.533333333333333,
+            10.916666666666666,
+            11.583333333333334,
+            12.066666666666666,
+            12.116666666666667,
+            12.583333333333334,
+            16.266666666666666
+          ],
+          "mode_count": 10
+        },
+        "cutoff_sensitivity": {
+          "60": {
+            "observed_at": {
+              "n": 186,
+              "median": 60.0,
+              "mean": 60.0,
+              "p90": 60.0,
+              "maximum": 60.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "source_updated_at": {
+              "n": 624,
+              "median": 15.0,
+              "mean": 16.89879807692308,
+              "p90": 17.241666666666678,
+              "maximum": 59.96666666666667,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 106
+            }
+          },
+          "120": {
+            "observed_at": {
+              "n": 191,
+              "median": 60.0,
+              "mean": 61.57068062827225,
+              "p90": 60.0,
+              "maximum": 120.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "source_updated_at": {
+              "n": 636,
+              "median": 15.0,
+              "mean": 17.99554507337526,
+              "p90": 29.933333333333334,
+              "maximum": 119.85,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 106
+            }
+          },
+          "180": {
+            "observed_at": {
+              "n": 193,
+              "median": 60.0,
+              "mean": 62.7979274611399,
+              "p90": 60.0,
+              "maximum": 180.0,
+              "mode": [
+                60.0
+              ],
+              "mode_count": 186
+            },
+            "source_updated_at": {
+              "n": 639,
+              "median": 15.0,
+              "mean": 18.521231090245177,
+              "p90": 29.933333333333334,
+              "maximum": 135.05,
+              "mode": [
+                14.983333333333333
+              ],
+              "mode_count": 106
+            }
+          }
+        },
+        "provider_delay_interpretation": "descriptive returned-record metadata offset; publication/version semantics not independently verified"
+      },
+      "session_audit": {
+        "unique_interval_matches": 198,
+        "matched_first_records": 990,
+        "ambiguous_or_unmatched_first_fetch_groups": 0,
+        "insertion_counter_mismatches": 0,
+        "polling_minutes": 15.0,
+        "regular_gap_limit_minutes": 30.5,
+        "extended_gap_limit_minutes": 60.5,
+        "maximum_run_duration_minutes": 2.525,
+        "run_state_counts": {
+          "initial_first": 1,
+          "post_gap_first": 18,
+          "other_irregular_or_warmup": 44,
+          "active": 594,
+          "failed": 10,
+          "long_running": 1
+        },
+        "session_segments": 21
+      },
+      "operational_freshness": {
+        "source": "PSI",
+        "qualifying_active_successful_runs": 594,
+        "runs_demonstrably_over_60_minutes": 12,
+        "maximum_demonstrated_age_lower_bound_minutes": 136.26666666666668,
+        "official_observation_cadence_minutes": 60,
+        "official_dataset_update_minutes": 15,
+        "diagnostic_threshold_minutes": 60,
+        "evidence_kind": "inferred lower bounds; not exact retained response payloads",
+        "interpretation": "conditional run counts, not independent outage events or an API SLA"
+      },
+      "matches_inactivity_audit": true
+    }
+  }
+}

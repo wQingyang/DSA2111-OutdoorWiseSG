@@ -85,8 +85,19 @@ outdoorwise-main/
 │   ├── contracts.schema.json
 │   ├── csv.schema.json
 │   └── forecast_evaluation.json
-├── experiments/
-│   └── station_route_matching/
+├── analysis/
+│   ├── README.md
+│   ├── data_freshness/
+│   │   ├── README.md
+│   │   ├── analyze.py
+│   │   ├── figures/
+│   │   │   ├── figure_1_observation_age_over_collection_time.pdf
+│   │   │   ├── figure_1_observation_age_over_collection_time.png
+│   │   │   ├── figure_2_first_collection_vs_latest_retained_fetch.pdf
+│   │   │   └── figure_2_first_collection_vs_latest_retained_fetch.png
+│   │   ├── summary.csv
+│   │   └── verification.json
+│   └── station_matching/
 │       ├── archive/
 │       │   ├── demo-script.md
 │       │   └── work-log.md

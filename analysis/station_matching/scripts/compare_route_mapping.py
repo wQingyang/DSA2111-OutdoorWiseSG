@@ -195,7 +195,7 @@ def main(argv=None):
     parser.add_argument("--config", type=Path, default=ROOT / "config/environment.toml")
     parser.add_argument("--data-mode", choices=("demo", "live"), default="demo")
     parser.add_argument("--as-of", required=True, help="Timezone-aware ISO-8601 assessment time")
-    parser.add_argument("--output-dir", type=Path, default=ROOT / "experiments/station_route_matching/results/demo")
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "analysis/station_matching/results/demo")
     args = parser.parse_args(argv)
     as_of = datetime.fromisoformat(args.as_of.replace("Z", "+00:00"))
     if as_of.tzinfo is None or as_of.utcoffset() is None:

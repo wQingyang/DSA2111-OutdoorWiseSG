@@ -13,7 +13,7 @@ Preserve existing local changes; do not treat Git HEAD or historical reports as 
 - `accounts/`, `personalization/`, `difficulty/` and `export/` provide identity, user adaptation, effort estimates and GPX.
 - `llm/` interprets Tab 2 preferences through OpenRouter; `routing/` validates ORS geometry and current-environment assessments.
 - `prediction/` is protected offline research and historical inference. API adapters handle application compatibility.
-- `experiments/station_route_matching/` is independent spatial-method evidence, never an application startup dependency.
+- `analysis/station_matching/` is independent spatial-method evidence, never an application startup dependency.
 - `frontend/`, `tests/` and `deploy/` contain presentation, regression checks and deployment preparation.
 
 ## Preserve behavior and evidence

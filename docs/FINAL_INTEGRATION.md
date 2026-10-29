@@ -114,7 +114,7 @@ Tab 2 controls. Tiles/CDN assets are replaced with local fixtures; these checks 
 not establish external provider availability. Set `CHROME_PATH` for an installed
 Chrome/Chromium and `SCREENSHOT_DIR` for temporary screenshots.
 
-The station experiment has separate [reproduction instructions](../experiments/station_route_matching/README.md).
+The station experiment has separate [reproduction instructions](../analysis/station_matching/README.md).
 Dated real collection evidence is [archived](evidence/collection/README.md), not a claim
 that current inputs are fresh.
 

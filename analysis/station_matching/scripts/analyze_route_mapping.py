@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[3]
-RESULTS = ROOT / "experiments/station_route_matching/results/demo"
-FIGURES = ROOT / "experiments/station_route_matching/figures"
+RESULTS = ROOT / "analysis/station_matching/results/demo"
+FIGURES = ROOT / "analysis/station_matching/figures"
 STATION_METHODS = ("nearest_start", "nearest_end", "along_route_500m")
 STATION_METRICS = ("rainfall", "wind_speed", "wind_direction", "air_temperature",
                    "relative_humidity", "wbgt", "heat_stress_level")
@@ -420,7 +420,7 @@ def main():
     make_freshness_figure(summary, assessment_time,
                           args.figures_dir / f"{figure_prefix}-fresh-coverage.png", data_mode_label)
     reproduction_command = (
-        f"MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python experiments/station_route_matching/scripts/analyze_route_mapping.py "
+        f"MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python analysis/station_matching/scripts/analyze_route_mapping.py "
         f"--input-dir {args.input_dir} --output-dir {output_dir} --figures-dir {args.figures_dir} "
         f"--data-mode-label \"{data_mode_label}\" --figure-prefix {figure_prefix}"
     )

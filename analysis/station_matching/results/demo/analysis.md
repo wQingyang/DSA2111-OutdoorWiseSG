@@ -11,7 +11,7 @@ The assessment time is **2026-10-24T22:40:30+08:00**. All observations are synth
 From the repository root, regenerate this analysis and its figures using the saved CSVs:
 
 ```bash
-MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python experiments/station_route_matching/scripts/analyze_route_mapping.py
+MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python analysis/station_matching/scripts/analyze_route_mapping.py
 ```
 
 ## Routes and metrics matching multiple stations

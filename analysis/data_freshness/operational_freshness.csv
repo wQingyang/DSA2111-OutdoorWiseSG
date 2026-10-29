@@ -1,0 +1,5 @@
+source,qualifying_active_successful_runs,runs_demonstrably_over_60_minutes,maximum_demonstrated_age_lower_bound_minutes,official_observation_cadence_minutes,official_dataset_update_minutes,diagnostic_threshold_minutes,evidence_kind,interpretation
+Rainfall,1755,16,144.016666667,5,5,60,inferred lower bounds; not exact retained response payloads,"conditional run counts, not independent outage events or an API SLA"
+WBGT,558,0,25.183333333,15,15,60,inferred lower bounds; not exact retained response payloads,"conditional run counts, not independent outage events or an API SLA"
+PM2.5,598,13,135.800000000,60,15,60,inferred lower bounds; not exact retained response payloads,"conditional run counts, not independent outage events or an API SLA"
+PSI,594,12,136.266666667,60,15,60,inferred lower bounds; not exact retained response payloads,"conditional run counts, not independent outage events or an API SLA"

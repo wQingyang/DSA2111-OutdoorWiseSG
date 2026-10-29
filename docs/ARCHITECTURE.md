@@ -45,7 +45,7 @@ flowchart TD
 | `accounts/`, `personalization/` | Server-side identity and isolated user history; personalization only reorders approved candidates. |
 | `llm/`, `routing/` | Tab 2 language interpretation and deterministic ORS geometry/assessment. The LLM does not invent weather, geometry or tool results. |
 | `prediction/` | Read-only research feature/training code, native historical inference and frozen coefficients. |
-| `experiments/station_route_matching/` | Independent offline spatial comparison; no runtime imports from the application. |
+| `analysis/station_matching/` | Independent offline spatial comparison; no runtime imports from the application. |
 
 ## Tab 1 request flow
 
@@ -76,7 +76,7 @@ use samples at a target 500 m spacing, capped at 30 points, conservative compone
 maxima and nearest pollution-region centroids. Partial sample coverage makes the
 affected risk component unavailable. Regional centroids are not polygon containment;
 station distance does not establish measurement accuracy along the route. The
-[independent experiment](../experiments/station_route_matching/README.md) measures
+[independent experiment](../analysis/station_matching/README.md) measures
 spatial matching proxies separately from production risk semantics.
 
 The configured `EnvironmentalRiskAssessor`, `RiskPolicy` and `RiskAwareRanking` own

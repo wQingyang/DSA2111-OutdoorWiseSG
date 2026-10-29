@@ -177,8 +177,8 @@ Assessment time: 24 Oct 2026, 23:09:41 SGT.
 
 Completed materials:
 
-- Independent comparison script: `experiments/station_route_matching/scripts/compare_route_mapping.py`
-- Analysis and plotting script: `experiments/station_route_matching/scripts/analyze_route_mapping.py`
+- Independent comparison script: `analysis/station_matching/scripts/compare_route_mapping.py`
+- Analysis and plotting script: `analysis/station_matching/scripts/analyze_route_mapping.py`
 - Experiment tests: `tests/test_route_mapping_experiment.py`
 - [Mapping study](../results/study.md)
 - Saved experiment CSVs and analyses under `mapping-results/`

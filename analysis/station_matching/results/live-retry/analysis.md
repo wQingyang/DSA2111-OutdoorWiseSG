@@ -11,7 +11,7 @@ Dataset label: **Live-retry observations** (`source_kind=live`). The assessment 
 From the repository root, regenerate this analysis and its figures using the saved CSVs:
 
 ```bash
-MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python experiments/station_route_matching/scripts/analyze_route_mapping.py --input-dir experiments/station_route_matching/results/live-retry --output-dir experiments/station_route_matching/results/live-retry --figures-dir experiments/station_route_matching/figures --data-mode-label "Live-retry observations" --figure-prefix live
+MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python analysis/station_matching/scripts/analyze_route_mapping.py --input-dir analysis/station_matching/results/live-retry --output-dir analysis/station_matching/results/live-retry --figures-dir analysis/station_matching/figures --data-mode-label "Live-retry observations" --figure-prefix live
 ```
 
 ## Routes and metrics matching multiple stations

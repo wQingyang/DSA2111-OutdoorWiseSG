@@ -21,13 +21,13 @@ PM2.5, PSI and PM10 use curated route-to-region assignments in the existing conf
 Run from the repository root with the project virtual environment:
 
 ```bash
-.venv/bin/python experiments/station_route_matching/scripts/compare_route_mapping.py --data-mode demo --as-of 2026-10-24T22:40:30+08:00
+.venv/bin/python analysis/station_matching/scripts/compare_route_mapping.py --data-mode demo --as-of 2026-10-24T22:40:30+08:00
 ```
 
 The assessment time is **2026-10-24 22:40:30 Asia/Singapore** (`2026-10-24T14:40:30+00:00`). The source commit is **`79dc7f01d586341d9b451c75d123e1f89a61befa`** (`haoyun/mapping-demo-validation`). The input data mode is **demo (synthetic observations)**. The script reads `data/runtime` and writes only these outputs:
 
-- `experiments/station_route_matching/results/demo/per_sample.csv`
-- `experiments/station_route_matching/results/demo/summary.csv`
+- `analysis/station_matching/results/demo/per_sample.csv`
+- `analysis/station_matching/results/demo/summary.csv`
 
 `per_sample.csv` has one row per tested sample and metric (plus the separate regional assignment rows), including coordinates, matched location ID and coordinates, distance, observed numeric/category value, observation time and freshness. `summary.csv` has sample and match counts, total and fresh coverage ratios, fresh/stale counts, distinct matched location count, mean/maximum distance, and mean/maximum numeric observation value. An empty numeric summary means no numeric values were matched (for example, a category metric or entirely missing values), not zero.
 
@@ -60,7 +60,7 @@ The saved CSV totals were checked against their grouped per-sample records. Alon
 See [the detailed analysis](demo/analysis.md) and its reproducible figures: [rainfall matching map](../figures/demo-rainfall-matching-map.png), [station-distance comparison](../figures/demo-rainfall-station-distance.png), and [along-route fresh coverage](../figures/demo-fresh-coverage.png). Regenerate them from the saved CSVs with:
 
 ```bash
-MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python experiments/station_route_matching/scripts/analyze_route_mapping.py
+MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python analysis/station_matching/scripts/analyze_route_mapping.py
 ```
 
 ## Live-retry results
@@ -70,7 +70,7 @@ The saved live-retry records contain 1,317 sample rows and 288 summaries across 
 See [live-retry analysis](live-retry/analysis.md) and the [rainfall matching map](../figures/live-rainfall-matching-map.png), [station-distance comparison](../figures/live-rainfall-station-distance.png), and [fresh coverage figure](../figures/live-fresh-coverage.png). Reproduce the analysis from the saved CSVs with:
 
 ```bash
-MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python experiments/station_route_matching/scripts/analyze_route_mapping.py --input-dir experiments/station_route_matching/results/live-retry --output-dir experiments/station_route_matching/results/live-retry --figures-dir experiments/station_route_matching/figures --data-mode-label "Live-retry observations" --figure-prefix live
+MPLCONFIGDIR=/tmp/outdoorwise-mpl-config MPLBACKEND=Agg .venv/bin/python analysis/station_matching/scripts/analyze_route_mapping.py --input-dir analysis/station_matching/results/live-retry --output-dir analysis/station_matching/results/live-retry --figures-dir analysis/station_matching/figures --data-mode-label "Live-retry observations" --figure-prefix live
 ```
 
 ## Final conclusion

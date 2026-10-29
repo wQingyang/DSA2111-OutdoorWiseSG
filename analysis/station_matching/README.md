@@ -50,8 +50,8 @@ into a new temporary directory (no provider access, training or collection):
 
 ```bash
 MPLCONFIGDIR=/tmp/outdoorwise-mpl MPLBACKEND=Agg .venv/bin/python \
-  experiments/station_route_matching/scripts/analyze_route_mapping.py \
-  --input-dir experiments/station_route_matching/results/live-retry \
+  analysis/station_matching/scripts/analyze_route_mapping.py \
+  --input-dir analysis/station_matching/results/live-retry \
   --output-dir /tmp/outdoorwise-matching-analysis \
   --figures-dir /tmp/outdoorwise-matching-analysis/figures \
   --data-mode-label "Live-retry observations" --figure-prefix live
@@ -62,7 +62,7 @@ and `runtime/` with the desired observations. The repository adapter can initial
 missing metadata, so do not point this command at protected operational data:
 
 ```bash
-.venv/bin/python experiments/station_route_matching/scripts/compare_route_mapping.py \
+.venv/bin/python analysis/station_matching/scripts/compare_route_mapping.py \
   --data-root /tmp/outdoorwise-matching-data --data-mode live \
   --as-of 2026-10-24T23:09:41.280461+08:00 \
   --output-dir /tmp/outdoorwise-matching-comparison

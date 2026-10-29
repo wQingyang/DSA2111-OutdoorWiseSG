@@ -58,13 +58,13 @@ after current contracts, behavior and remaining limitations were retained elsewh
 
 | Original file | Action | New location | Reason |
 |---|---|---|---|
-| `scripts/compare_route_mapping.py` | Moved | `experiments/station_route_matching/scripts/compare_route_mapping.py` | Independent offline spatial matching experiment; no startup dependency |
-| `scripts/analyze_route_mapping.py` | Moved | `experiments/station_route_matching/scripts/analyze_route_mapping.py` | Analysis and plotting for saved experiment CSVs |
-| `docs/haoyun/mapping-results` | Moved | `experiments/station_route_matching/results` | Preserve all saved CSV results and analysis |
-| `docs/haoyun/figures` | Moved | `experiments/station_route_matching/figures` | Preserve research figures and recorded demo screenshots |
-| `docs/haoyun/mapping-study.md` | Moved | `experiments/station_route_matching/results/study.md` | Preserve methodological findings under subject-based organization |
-| `docs/haoyun/work-log.md` | Moved | `experiments/station_route_matching/archive/work-log.md` | Historical experimental provenance, not current application instructions |
-| `docs/haoyun/demo-script.md` | Moved | `experiments/station_route_matching/archive/demo-script.md` | Historical demo evidence; obsolete controls explicitly labeled |
+| `scripts/compare_route_mapping.py` | Moved | `analysis/station_matching/scripts/compare_route_mapping.py` | Independent offline spatial matching experiment; no startup dependency |
+| `scripts/analyze_route_mapping.py` | Moved | `analysis/station_matching/scripts/analyze_route_mapping.py` | Analysis and plotting for saved experiment CSVs |
+| `docs/haoyun/mapping-results` | Moved | `analysis/station_matching/results` | Preserve all saved CSV results and analysis |
+| `docs/haoyun/figures` | Moved | `analysis/station_matching/figures` | Preserve research figures and recorded demo screenshots |
+| `docs/haoyun/mapping-study.md` | Moved | `analysis/station_matching/results/study.md` | Preserve methodological findings under subject-based organization |
+| `docs/haoyun/work-log.md` | Moved | `analysis/station_matching/archive/work-log.md` | Historical experimental provenance, not current application instructions |
+| `docs/haoyun/demo-script.md` | Moved | `analysis/station_matching/archive/demo-script.md` | Historical demo evidence; obsolete controls explicitly labeled |
 | `docs/verification.json` | Moved | `docs/evidence/collection/verification.json` | Dated collection/source evidence; not a current API contract |
 | `docs/collection_verification.json` | Moved | `docs/evidence/collection/collection_verification.json` | Dated collection/source evidence; not a current API contract |
 | `docs/continuous_collection_verification.json` | Moved | `docs/evidence/collection/continuous_collection_verification.json` | Dated collection/source evidence; not a current API contract |
@@ -116,8 +116,9 @@ outdoorwise-main/
 │   ├── llm/, evaluation/
 ├── frontend/
 ├── prediction/
-├── experiments/station_route_matching/
-│   ├── README.md, scripts/, results/, figures/, archive/
+├── analysis/
+│   ├── README.md, data_freshness/
+│   └── station_matching/ (README.md, scripts/, results/, figures/, archive/)
 ├── data/catalog/, datasets/, runtime/
 ├── scripts/, tests/, docs/
 └── deploy/README.md, k8s/
@@ -152,7 +153,7 @@ The relocated comparator ran against a temporary copy of environmental CSVs/cata
 producing **1,317 sample rows and 288 summaries**. Analysis reproduced the saved live-retry
 CSV grouping checks and three figures into `/tmp/outdoorwise-cleanup-matching`, without
 overwriting any original result. The experiment's root imports and --help entry point
-work; production startup does not depend on experiments/.
+work; production startup does not depend on analysis/.
 
 CLI collect/status/run passed using isolated synthetic storage and retained 12 routes.
 No live official collection, external OpenRouter/ORS call, training, evaluation artifact

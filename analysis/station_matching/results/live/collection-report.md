@@ -26,7 +26,7 @@ The last source finished at **2026-10-24T15:03:56.177928Z**. That timezone-aware
 Comparison command:
 
 ```bash
-.venv/bin/python experiments/station_route_matching/scripts/compare_route_mapping.py --data-mode live --as-of 2026-10-24T15:03:56.177928Z --output-dir experiments/station_route_matching/results/live
+.venv/bin/python analysis/station_matching/scripts/compare_route_mapping.py --data-mode live --as-of 2026-10-24T15:03:56.177928Z --output-dir analysis/station_matching/results/live
 ```
 
 ## Comparison status
