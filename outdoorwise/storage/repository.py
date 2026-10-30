@@ -219,10 +219,12 @@ class FileRepository:
         for source in sorted({o.source for o in observations}|{l.source for l in logs}):
             rows=[o for o in observations if o.source==source]
             attempts=[l for l in logs if l.source==source]
-            last=max(attempts,key=lambda l:l.finished_at) if attempts else None
+            # CSV timestamps have second precision; append order resolves ties.
+            attempts=[l for _,l in sorted(enumerate(attempts),key=lambda item:(item[1].finished_at,item[0]),reverse=True)]
+            last=attempts[0] if attempts else None
             successful=[l for l in attempts if l.status=='success']
             failures=0
-            for attempt in sorted(attempts,key=lambda l:l.finished_at,reverse=True):
+            for attempt in attempts:
                 if attempt.status=='skipped':continue
                 if attempt.status!='failed':break
                 failures+=1

@@ -1,5 +1,6 @@
 """Collector diagnostics/recovery with temporary CSVs and no provider requests."""
 import hashlib
+from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
@@ -30,7 +31,14 @@ def test_launchd_configuration_is_foreground_supervised_and_secret_free(tmp_path
     assert not (tmp_path/'logs').exists()  # Rendering is inert.
 
 
-def test_failure_isolation_recovery_and_additive_diagnostics(tmp_path, monkeypatch):
+@pytest.mark.parametrize('same_second', [False, True])
+def test_failure_isolation_recovery_and_additive_diagnostics(tmp_path, monkeypatch, same_second):
+    if same_second:
+        # Exercise real CSV precision ties without changing provider observation times.
+        now = datetime(2026, 10, 30, 10, 0, 0, 100000, tzinfo=timezone.utc)
+        for module in (__name__, 'outdoorwise.pipeline.runner', 'outdoorwise.pipeline.worker',
+                       'outdoorwise.services.route_environment'):
+            monkeypatch.setattr(f'{module}.utc_now', lambda: now)
     shutil.copytree(ROOT/'data/catalog', tmp_path/'catalog')
     pipe = build_pipeline(Settings(data_root=tmp_path, data_mode='live'))
     names = ['rainfall', 'wind-speed', 'wind-direction', 'air-temperature', 'relative-humidity', 'pm25', 'psi', 'wbgt']
@@ -69,6 +77,7 @@ def test_failure_isolation_recovery_and_additive_diagnostics(tmp_path, monkeypat
         started_at=now, finished_at=now, status='failed', error='HTTP 503'))
     source = pipe.repository.database_status()['sources']['nea_rainfall']
     assert source['consecutive_failures'] == 1 and source['last_error_category'] == 'http_503'
+    assert source['last_attempt']['run_id'] == 'diagnostic-failure'
     assert source['last_successful_run_finished_at']
     assert collection_error_category('ConnectError: secret-token') == 'transport'
     assert collection_error_category('unknown secret-token') == 'unclassified'
