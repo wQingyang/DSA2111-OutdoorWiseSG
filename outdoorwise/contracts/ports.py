@@ -28,3 +28,21 @@ class Recommender(Protocol):
 
 class CollectionFailure(Exception):
     def __init__(self,message,attempts): super().__init__(message);self.attempts=attempts
+
+
+def collection_error_category(error):
+    """Bounded diagnostic label; never copy provider payloads, URLs or credentials."""
+    text = str(error or '')
+    if not text:
+        return None
+    if text.startswith('HTTP '):
+        code = text[5:].split(' ', 1)[0]
+        if code.isdigit() and 100 <= int(code) <= 599:
+            return 'http_' + code
+    if 'Timeout' in text:
+        return 'timeout'
+    if any(name in text for name in ('ConnectError', 'NetworkError', 'ReadError', 'WriteError', 'RemoteProtocolError')):
+        return 'transport'
+    if text.startswith('Parser/schema error:'):
+        return 'parser_or_schema'
+    return 'unclassified'

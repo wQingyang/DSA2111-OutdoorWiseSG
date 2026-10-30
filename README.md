@@ -89,6 +89,10 @@ with `OUTDOORWISE_APP_MODE=historical` (other arguments unchanged). Historical
 mode does not change Tab 2. You can inspect the collector without starting a
 second collector using `OUTDOORWISE_DATA_MODE=live python -m outdoorwise.cli status`.
 
+For collection independent of Terminal, optional [macOS launchd setup](docs/LOCAL_COLLECTOR_MACOS.md)
+supervises the same worker and preserves host CSV history. It is not installed
+automatically and cannot collect while the Mac is asleep or powered off.
+
 ### Option B — Docker Compose (two services, one command)
 
 Install and **start Docker Desktop** (or another Docker Engine). Check
@@ -158,6 +162,14 @@ metadata from `/api/health`; there is no mode switch in the UI.
 writable `runtime/` data. Live Mode supports **Now only**. Missing or stale
 observations stay unavailable rather than being replaced by historical or
 synthetic values.
+
+```
+IMPORTANT NOTE — Live Mode startup and data freshness
+
+On the first run (or after a period without collection), the collector may need time to retrieve the required live environmental observations. Keep the collector running and allow the data to populate before evaluating routes.
+
+The risk score is shown only when sufficient required inputs are available and pass the application's freshness checks. Since sources update at different intervals, there is no fixed waiting time (but no longer than 30 min). If the risk score remains unavailable, check the collector logs and the displayed freshness indicators rather than repeatedly restarting the app.
+```
 
 ## Historical behavior
 

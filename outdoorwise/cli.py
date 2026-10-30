@@ -41,14 +41,16 @@ def main():
         stop = threading.Event()
 
         def request_stop(signum, frame):
-            stop.set()
+            worker.request_stop(signal.Signals(signum).name)
 
-        signal.signal(signal.SIGINT, request_stop)
-        signal.signal(signal.SIGTERM, request_stop)
         worker = CollectionWorker(
             pipeline, args.tick_seconds, args.max_cycles, stop,
             emit=lambda event: print(json.dumps(event, default=str), flush=True),
         )
+        signal.signal(signal.SIGINT, request_stop)
+        signal.signal(signal.SIGTERM, request_stop)
+        if hasattr(signal, 'SIGHUP'):
+            signal.signal(signal.SIGHUP, request_stop)
         try:
             worker.run()
         except (ValueError, RuntimeError) as exc:

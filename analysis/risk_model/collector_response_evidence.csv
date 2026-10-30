@@ -1,0 +1,9 @@
+source,selection,successful_runs,runs_with_direct_retained_fresh_versions,runs_with_direct_retained_stale_versions,runs_demonstrably_stale_from_acquisition_bound,active_runs_demonstrably_over_60_minutes,maximum_active_age_lower_bound_minutes,freshness_limit_minutes,observation_cadence_minutes,interpretation
+nea_rainfall,all_successful,1851,1632,11,93,16,144.01666666666668,15.0,5,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap
+nea_rainfall,active_successful,1755,1545,7,93,16,144.01666666666668,15.0,5,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap
+nea_wbgt,all_successful,640,636,0,0,0,25.183333333333334,45.0,15,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap
+nea_wbgt,active_successful,558,555,0,0,0,25.183333333333334,45.0,15,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap
+nea_pm25,all_successful,661,647,0,2,13,135.8,120.0,60,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap
+nea_pm25,active_successful,598,586,0,2,13,135.8,120.0,60,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap
+nea_psi,all_successful,658,645,0,2,12,136.26666666666668,120.0,60,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap
+nea_psi,active_successful,594,582,0,2,12,136.26666666666668,120.0,60,direct retained versions cover some responses; bounds only evaluated on qualifying active runs; categories can overlap

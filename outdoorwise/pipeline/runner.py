@@ -20,7 +20,7 @@ class Pipeline:
     def get_route_environment(self,route_id,as_of=None):
         return self.environment_service.get_route_environment(route_id,as_of)
     def refresh(self,due_only=False,should_stop=None):
-        logs=[]
+        logs=[];fetch_times={}
         for index,collector in enumerate(self.collectors):
             if should_stop and should_stop():break
             source=collector.source;start=utc_now()
@@ -33,10 +33,12 @@ class Pipeline:
             except (CollectionFailure,ValueError,KeyError) as exc:
                 log=IngestionRun(run_id=uuid4().hex,source=source,source_kind=self.mode,started_at=start,finished_at=utc_now(),status='failed',attempts=getattr(exc,'attempts',1),error=str(exc)[:250])
                 self.repository.record_failure(log);logs.append(log);continue
+            fetch_times[source]=batch.fetched_at.isoformat()
             log=IngestionRun(run_id=uuid4().hex,source=source,source_kind=self.mode,started_at=start,finished_at=utc_now(),status='success',attempts=attempts)
             logs.append(self.repository.ingest(batch,log))
         environments=self.environment_service.refresh_latest()
-        return {'status':'partial' if any(l.status=='failed' for l in logs) else 'success','sources':[l.model_dump(mode='json') for l in logs],'routes':len(environments),'metrics':sum(len(e.metrics) for e in environments)}
+        # Telemetry is additive JSON only; CSV schema and ingestion decisions are unchanged.
+        return {'status':'partial' if any(l.status=='failed' for l in logs) else 'success','sources':[dict(l.model_dump(mode='json'),fetched_at=fetch_times.get(l.source)) for l in logs],'routes':len(environments),'metrics':sum(len(e.metrics) for e in environments)}
     def ensure_demo_data_fresh(self):
         """Refresh synthetic observations once when Current demo inputs age out."""
         if self.mode != 'demo':

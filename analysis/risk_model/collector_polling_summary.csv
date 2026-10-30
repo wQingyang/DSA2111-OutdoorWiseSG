@@ -1,0 +1,9 @@
+source,poll_interval_minutes,attempts,successes,failures,active_successes,irregular_or_extended_gaps,extended_gaps,maximum_gap_minutes,independently_verified_process_outages,process_outage_interpretation
+nea_air_temperature,5.0,1863,1845,18,1753,70,49,16386.25,0,not identifiable; zero verified does not imply zero actual outages
+nea_pm25,15.0,671,661,10,598,39,19,16385.933333333334,0,not identifiable; zero verified does not imply zero actual outages
+nea_psi,15.0,668,658,10,594,38,20,16385.783333333333,0,not identifiable; zero verified does not imply zero actual outages
+nea_rainfall,5.0,1871,1851,20,1755,74,52,16381.583333333334,0,not identifiable; zero verified does not imply zero actual outages
+nea_relative_humidity,5.0,1861,1845,16,1750,69,49,16386.116666666665,0,not identifiable; zero verified does not imply zero actual outages
+nea_wbgt,15.0,665,640,25,558,39,19,16385.566666666666,0,not identifiable; zero verified does not imply zero actual outages
+nea_wind_direction,5.0,1865,1852,13,1757,73,50,16386.583333333332,0,not identifiable; zero verified does not imply zero actual outages
+nea_wind_speed,5.0,1866,1852,14,1755,72,47,16386.883333333335,0,not identifiable; zero verified does not imply zero actual outages

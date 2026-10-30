@@ -1,0 +1,13 @@
+snapshot,environment_weight,top3,shared_with_default,jaccard_with_default,same_order
+archived_2026-10-09_1200_SGT,0.3,pasir_ris_park;bishan_ang_mo_kio;singapore_botanic_gardens,2,0.5,False
+archived_2026-10-09_1200_SGT,0.45,pasir_ris_park;singapore_botanic_gardens;west_coast,3,1.0,True
+archived_2026-10-09_1200_SGT,0.6,pasir_ris_park;marina_bay;west_coast,2,0.5,False
+archived_2026-10-10_1200_SGT,0.3,pasir_ris_park;bishan_ang_mo_kio;singapore_botanic_gardens,3,1.0,False
+archived_2026-10-10_1200_SGT,0.45,pasir_ris_park;singapore_botanic_gardens;bishan_ang_mo_kio,3,1.0,True
+archived_2026-10-10_1200_SGT,0.6,pasir_ris_park;singapore_botanic_gardens;west_coast,2,0.5,False
+archived_2026-10-15_1200_SGT,0.3,pasir_ris_park;bishan_ang_mo_kio;singapore_botanic_gardens,3,1.0,True
+archived_2026-10-15_1200_SGT,0.45,pasir_ris_park;bishan_ang_mo_kio;singapore_botanic_gardens,3,1.0,True
+archived_2026-10-15_1200_SGT,0.6,pasir_ris_park;bishan_ang_mo_kio;singapore_botanic_gardens,3,1.0,True
+controlled_heterogeneous,0.3,jurong_lake_gardens;pasir_ris_park;bishan_ang_mo_kio,1,0.2,False
+controlled_heterogeneous,0.45,jurong_lake_gardens;marina_bay;east_coast,3,1.0,True
+controlled_heterogeneous,0.6,jurong_lake_gardens;marina_bay;east_coast,3,1.0,True

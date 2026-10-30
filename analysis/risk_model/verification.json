@@ -1,0 +1,380 @@
+{
+  "protected_sha256": {
+    "config/environment.toml": "2995e9037c19c19105b0d1a285ce1234216a3a14bc39f609520cc5ccb9cd494c",
+    "data/catalog/bedok_reservoir.geojson": "e2cdc1f57bc1dc9587ca4761002d00cfa09cb3ee53fafd2fa12f4f20deedf20c",
+    "data/catalog/bishan_ang_mo_kio.geojson": "42128abed6f8cc93e61248f5854cf0a305b6c024e57521871ee0942937bf9927",
+    "data/catalog/east_coast.geojson": "c30fed28a0c8a7f4b990d03c6bba09367a5c768965306a2f69170bf1750203d3",
+    "data/catalog/jurong_lake_gardens.geojson": "1e0dcb0b5425aaf47110ee9c5fe2d961cec4a8dbb8af5f8ae55bee302395624c",
+    "data/catalog/macritchie_reservoir.geojson": "90e63e605dded3054c053f8b4390a90159c262505c01a89114aac6c8fe924a29",
+    "data/catalog/marina_bay.geojson": "e4b599914eeb14a714e34cd8473c3defca8a76d26f42b597a3ec13377681e61b",
+    "data/catalog/pasir_ris_park.geojson": "e871bf58eafdc9fd6fffb01ee6fee2a66077f65c54d08da2d12adff099065a48",
+    "data/catalog/punggol_waterway.geojson": "8b3a3db925e9bab552069d563b24965ab92a1f5d95bf07ebae0c9bbc414af8ba",
+    "data/catalog/rail_corridor_bukit_timah.geojson": "2951fb48f22f55aa320ccd2e0d966f80201a8dd7b9dde782fcee9959b1fd4fea",
+    "data/catalog/routes.csv": "13f685b35d7bfa691474d9ab2d7423f33112d74e4bebc0173b2d1edad0f7a33e",
+    "data/catalog/routes.geojson": "869ca9fc7672ac5db694732777a4d1c0ed0374acd84d132388b05f5622c10d07",
+    "data/catalog/singapore_botanic_gardens.geojson": "12ebb3f1383b3490500d3c0d86feef690c2894aeec4a8da4dee31e68a54836cc",
+    "data/catalog/west_coast.geojson": "107e61309086bd4831a81e82260c02430ae2e29491912596cb4951d89f07fe7a",
+    "data/catalog/woodlands_waterfront.geojson": "ffa88453056ae8db9207faf4069db29a351f5e4f14b92118cb075a64253469b5",
+    "data/datasets/snapshot_20261015/air_quality_observations.csv": "e97ea58bb80049018217cc6e4ebc1b557256e67d997e75f41885d9aac2e0672f",
+    "data/datasets/snapshot_20261015/heat_stress_observations.csv": "cdbbccb588ebdc405187dec31e3fba16fd2f53cdc94919518db0633009c464bf",
+    "data/datasets/snapshot_20261015/locations.csv": "26cd982b15db483533f91c5bfe274971773a1e2aab70ed50b0e6236b7261d2fd",
+    "data/datasets/snapshot_20261015/weather_observations.csv": "b1f2154ca197f3585b5177063ca9b435bcfbcaa16ae9cfcbd44aef87b81af7ee",
+    "data/runtime/.pending_csv_transaction.json": "278ce59c6bbd49ceee78783487ae21a69aef7745dbb72da87f85318d14c3a229",
+    "data/runtime/air_quality_observation_versions.csv": "311a3a24f6c8d353b577b101cb4d1f6df0992af3475f366a25154343b1dad2fc",
+    "data/runtime/air_quality_observations.csv": "7e4bba570bdcc3fda7ed2bb0ae4e6f11a001d078503ef91cdfd1a9c36cdc13b0",
+    "data/runtime/collection_worker.json": "3906dd1a29dfaf2149fd5bac2de276b932e5982faca7abeaad77284f894229ae",
+    "data/runtime/csv_storage_metadata.json": "c7fa12a69bb7a85d8f55d65bcb2864004968e24ec102d347e80edd13714d252e",
+    "data/runtime/generated_routes.json": "0c90f9fcff65643796b4e6b350fc8d287a2ca615e17f678418c44de075ecbea8",
+    "data/runtime/heat_stress_observation_versions.csv": "307c8a5a45c854e279461a17dde5ab94d1cf28609244dfaace53aaa10ca6a15d",
+    "data/runtime/heat_stress_observations.csv": "26652aa307988a0b323720e6f643b7c6d01419350df05cf054675869233eeeb8",
+    "data/runtime/ingestion_runs.csv": "2b990ba25fe4abd74960e42c07c1f14000b120693aa256d26dc4ef4876966474",
+    "data/runtime/latest_run.json": "ea6928ac3da7be6d94600c7bcd2e46404aa038f0ba82bafce3dbc7d2a1e26fac",
+    "data/runtime/locations.csv": "0f2f314b6d6713e5b7a213dc7897ee0cb846908a324fe65263320241e6a166c0",
+    "data/runtime/personalization/completed_runs.json": "d32a2ef18943981f484a1cde286e4c87299c084504a0076f194ae113a3b0b4f2",
+    "data/runtime/personalization/difficulty_feedback.json": "e90d065e4a5d7d38a795b826a0683fea89267f07e93210021a50690d37f8c554",
+    "data/runtime/personalization/favourites.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "data/runtime/predictions_latest.json": "5c61880eb225b207e8a825a86ca98ca50ce49976bedf49d7968170e131bfd5e7",
+    "data/runtime/route_environment_latest.csv": "79b624188450e4b8d55ec6ec4069db41ed2948705ccea347f9b47b55a9422b27",
+    "data/runtime/route_source_mapping.csv": "d2c86f27838b3d4d444fad78a483d3ca3728799a375583793f6be51938c1da64",
+    "data/runtime/run_22318f47258e484fa2ae7f22941bcc02.json": "ea6928ac3da7be6d94600c7bcd2e46404aa038f0ba82bafce3dbc7d2a1e26fac",
+    "data/runtime/run_60e455ae4d874434b078811efe6a62c4.json": "9867bf6d4da645a4f0bbb8b22ae10b55ce175460e1741e499ccc6c7501fabee5",
+    "data/runtime/run_7335079a490c4232b5ec29403870dc92.json": "f81a5079820b2ee1586d3464e1661794c010fb96fc2840cf08da7ef168282ac4",
+    "data/runtime/run_cdaaf7a749754406a53383efc6277642.json": "553edb93b95f1c5759e41c4409dbbb316222a0cfc0d62bbc6517bdac188a50c0",
+    "data/runtime/run_d7d2dbbea93547a7b97d9875031f6924.json": "5e4efcdde159b9e26ea6e5255bf0133926f2bdf1494c8e7afc5bf4b5cd8a25da",
+    "data/runtime/weather_observation_versions.csv": "7bdd04385ecf8595726aaa892ac33a097274ce53873b95b53218d4b3f9e5aa54",
+    "data/runtime/weather_observations.csv": "4b93ca696b85c54308f91e671755775b9730fad1e8ca6a5f217958a1169caa9a",
+    "outdoorwise/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/accounts/__init__.py": "c908c479c8de4db87be1fea443dd17d8d853804454ab92ce198905c1aa6a896a",
+    "outdoorwise/accounts/models.py": "ae1e3fdd1f1bd6143e7c0eb6ec311d67996dea1f81fb029b2ad9a3c53258a464",
+    "outdoorwise/accounts/repository.py": "05fdeb1ae557049b08b6a833d9d9da29e9ddb6c4cc6ba4050059ad75bec7028d",
+    "outdoorwise/accounts/router.py": "ae0e002cb6d6df57fe09b74876f726baf2267f35c1df5ec3726e43285a2ad604",
+    "outdoorwise/accounts/security.py": "da69babc1e92805331d5d81d807924a6f5da068d663d7863b5b8333df444cb3a",
+    "outdoorwise/accounts/service.py": "819d004cff38d4ec3732d55159ce4d9dace998196b2d2135e468adb2fa902687",
+    "outdoorwise/api/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/api/app.py": "671b7cb13585e891087d5d26dcc41c5ef46073fe98078c2553c5d6eb8e47bfb2",
+    "outdoorwise/api/forecast_ranking.py": "1de81979dd69ccf9944008c6c8853cb378d5be43258e75aebd3c919fd0c9afe1",
+    "outdoorwise/api/historical_departure.py": "e42c0c706b661988752f6e0480b155b53ae41510c3b5ce9577070bcbc55f331e",
+    "outdoorwise/api/historical_evidence.py": "63039fd6dca0e87b0a9d7f8962dc701266a5e293d1caa4dbe4c94a0360f9f5a7",
+    "outdoorwise/api/recommendation_workflow.py": "c8ad6109918520d886f3b1a3b4f1c5bac2feb0e58cd76b56f0411fe6df721d36",
+    "outdoorwise/api/time_selection.py": "d33a7dce94f2a1cb09603eff844d18396bb1bb9e732a6bf5af3fe7192216d7e6",
+    "outdoorwise/bootstrap.py": "f24dbba1805481de295b13f9cbfd332ec9155ee82efd8510d986557bbdfd7d80",
+    "outdoorwise/cli.py": "7eb8925a17db8c8bf0e65b8fae3dcac281aa345c14f6c3d03504b818eaac5ad5",
+    "outdoorwise/collectors/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/collectors/base.py": "7161ad7e32f00e2a3d075d507fb14211097dafbb91d0e7d58c4346187fdedef5",
+    "outdoorwise/collectors/demo.py": "960dbfc610a24d320ba1402b5a4d3857b7f3345e5146c622ef64fab149e01d72",
+    "outdoorwise/collectors/humidity.py": "e11a8101d19eb717430a9ec8dcc86323e265b0c33d02e4938f594ca8a2f353ad",
+    "outdoorwise/collectors/pm25.py": "d01bff9c002d737a48cc7d15164e20c8fa802e9d1860c8330db47852587d4da6",
+    "outdoorwise/collectors/psi.py": "3dbd7d33fef241b852ab6f38827116f772efc7d9b49d2f5de175ae44638b95f7",
+    "outdoorwise/collectors/rainfall.py": "7bed8629f73fe265cac83004253e5bc07e5c4b30e432b72e47cde04706b411b0",
+    "outdoorwise/collectors/temperature.py": "83f900d05f68e2da7350273e4be179a5559078d7001a81bd61001502e288e363",
+    "outdoorwise/collectors/wbgt.py": "1cb428bb4e8cada118e8530bcc1e6f2808be5951e2f2351f54792c4af3b093d4",
+    "outdoorwise/collectors/wind_direction.py": "040cf73f3cada2c38a40197b419264640d02c9d00358acae307bc8bc4c3f1d01",
+    "outdoorwise/collectors/wind_speed.py": "99131de2e1332fe7c8d281eeb03366e0be8d88ad5412d555c5b77531ab12db71",
+    "outdoorwise/config.py": "387a065d605c248de8582bbdc2fe182304961b97d51b92d88df71504b527a2c6",
+    "outdoorwise/contracts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/contracts/core.py": "aadb96b9eebfcd17a46cd74520f960d8c7587dcef920ef8e70bf9b33266ec220",
+    "outdoorwise/contracts/environment.py": "b6b638df43a8bfd76f6ad42c52fb827c3f0b323955e2351c610410a58d0069c1",
+    "outdoorwise/contracts/geo.py": "8ff7825827ea2229c7ac8701d9e365d51937cfc649fb6c632f7da7bf30c242a6",
+    "outdoorwise/contracts/models.py": "8b63783625ce39e6ac20077d81d9c631413e2e5f26c0eaa0f12cc62ce8266d84",
+    "outdoorwise/contracts/ports.py": "39daa1abdfa8a2eefe24c28103dd844e1dda85f19429c17ad7fc4f7b8a64d4e2",
+    "outdoorwise/contracts/risk.py": "ebfc21bb582d15f835cf155a722db62e943fcfb93ed20ef113440f2a39d7cf41",
+    "outdoorwise/difficulty/__init__.py": "15fed22a54a962911080eec42341ac199bab4bc5ea55ad1cd57d7d8b51e0cd64",
+    "outdoorwise/difficulty/models.py": "6a4381943b26e3113d6d94f60cfa85d556024e716167cc645b72df2c76fbfd1b",
+    "outdoorwise/difficulty/router.py": "30bc72be91d2bd82638973858aa5ff6ea281ffa79723784229323bba650c721b",
+    "outdoorwise/difficulty/service.py": "c836e5a07244ecc378de0f6466209c17edcf4c11c17f900ca13a075b3027a67c",
+    "outdoorwise/evaluation/__init__.py": "ee30937637db7db40e8f7752ed3a554d41c7a9982d527c3fae1d5a6dedbf8924",
+    "outdoorwise/evaluation/personalization.py": "e39c59a34de868412e981e44519668a4c69912ca97fe3da30d09f38157f5d474",
+    "outdoorwise/evaluation/plots.py": "a0260e92cac1cec734a5a1c737e5274fdfa13de38d14ca670fb3cc3429b51012",
+    "outdoorwise/evaluation/synthetic_personalization.py": "c1267be44a12fbfa889e48d94bbe7b2deff366a28f04f3cab949c5ac894f7c54",
+    "outdoorwise/export/__init__.py": "90bfd764676b15a85422e905dd31375721a64b1937907b21640fd0b6836be376",
+    "outdoorwise/export/router.py": "e816ca0cf1378fc5664f95bf3aa38ee2ffb7bd4515e46f09e56882db48c860f2",
+    "outdoorwise/export/service.py": "6d5adff50b6d8c7db0185049da550fd1fe81d3bff791cbfd34ea3f153729c512",
+    "outdoorwise/llm/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/llm/explainer.py": "8c35f152d92d733562748e9fb1415dfcfd01c011476c7add7a6edb75a5faee05",
+    "outdoorwise/llm/models.py": "6e0ff157bf80f7a372c25a8db9dfa0523ca164020cdb8572a3ad6414b28d1aa7",
+    "outdoorwise/llm/parser.py": "72f2f0c8595e4ff708d9a441fd1ca5a080c39217998cc5829051c7ae7f65891b",
+    "outdoorwise/llm/router.py": "51536d10a387825c406ad653dba932ebe94b86815995b2b83329d315fa5b90d8",
+    "outdoorwise/modules/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/modules/predictor.py": "3e9cccc8d6a68db6a2b0fad5866e22b6692d8948b00f9c22ce7a059fad3654b4",
+    "outdoorwise/modules/recommender.py": "02378078483032b3a07464e7afa8d1cb9a605e15eef6f3d4de39b39df0a66c52",
+    "outdoorwise/modules/risk.py": "a09a5d4d92353855e9069cc48a7940a3385af5ce2fd1cd3728eec88609e9f664",
+    "outdoorwise/modules/risk_policy.py": "f2c5227c49575d64f98544d8d53e8ef5b9acc9c0fa7dfc7c5f0d28bbbc40a677",
+    "outdoorwise/modules/risk_ranking.py": "fb958e8dc5ea27d6c9f40f911819dcb77e1d2e6f7bab207d1d5f21d86f6b1d03",
+    "outdoorwise/personalization/__init__.py": "b0b3adf3d9e8d796825af36616e02bf82b02f0eedc549eaea7de0609771540dc",
+    "outdoorwise/personalization/difficulty.py": "c978b4b67fe7b4b9cf21a7ffdac2c2b49157e0fbfa3acb5e142af9269e8a2c49",
+    "outdoorwise/personalization/models.py": "f460eb25c1319770c266f268bd0f0c08e3673dbd4947018f0ba9c209bae94b10",
+    "outdoorwise/personalization/profile.py": "4a722dd3ad082be6cac20ce31a4a951837581016ac15509eebf8555880a39f24",
+    "outdoorwise/personalization/ranking.py": "3a6f8c484f0e2ef0e25d8211da92c2b2e138c808cc1044169dece861bdb4b1fe",
+    "outdoorwise/personalization/repository.py": "5067eb3fc13aa430520dea82a8416128906753bb8cf5e16dd8e36ef4e897b36b",
+    "outdoorwise/personalization/router.py": "c7411fa4bb3c5a0e1c788e3697ae038b06894b1ba1656a0ca94b87d8de860ad1",
+    "outdoorwise/personalization/service.py": "dbbf9da2882905a97dd3f889a53b7e08bfd25d4d44dad7e4f68d1dad28cf187a",
+    "outdoorwise/pipeline/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/pipeline/collector_health.py": "9d3e39e52f06a2d58cdc09c4de46f6760c07f9f90103471988b3cfb36a7ce75f",
+    "outdoorwise/pipeline/runner.py": "156ba44ed70c898fd68341b5fe7690f78ec6db12ea8984276120025ce0caef3e",
+    "outdoorwise/pipeline/worker.py": "9b1978fed0fd3c9bced4f9301d26e7447ce541b9e4ca7b68ec21c06494b5943a",
+    "outdoorwise/routing/__init__.py": "5d601d8489868c98795c1684ed58fbad8a723e5270f96dad39b6459fac044492",
+    "outdoorwise/routing/environment.py": "7a77031ae317a2e1aff3b816cc6ec6aa222059904fa725a3e502656d61e5cbd7",
+    "outdoorwise/routing/models.py": "2001df96b2b29d6b797326e8d77ac21347273d15f8260c77354fa82151de5e7c",
+    "outdoorwise/routing/ors_client.py": "a0407267f0474b4c1213fe24513c31c527586d39f5a03a3e71c77dcbc5632fcb",
+    "outdoorwise/routing/repository.py": "05abed64ca062a4cf05cf440b046004a87e0e185b288d32fa4a721894e186713",
+    "outdoorwise/routing/router.py": "c320f3b0fb314e77d149535d14a49ceeebfb3905e3d7769ba92c0e8ce0548ebe",
+    "outdoorwise/routing/service.py": "f46615117f7ee84880975218d69552981109b9354a2a1778677cc60bf5645308",
+    "outdoorwise/services/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/services/live_prediction.py": "e409799ed4f5492970f0b09cddf7f7f7a470dc71f2c7a6e1c36606b0a5ab6d1e",
+    "outdoorwise/services/route_environment.py": "6021dd2bc41ca04eb4b54665bf95eb8636dafa9529eee69aa3474d598a2c57b4",
+    "outdoorwise/storage/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "outdoorwise/storage/repository.py": "5bb7345de4a601575edfb99eb3c9379037e6b01489ee5113efb0fec3a7589915"
+  },
+  "config": {
+    "collection": {
+      "timeout_seconds": 20.0,
+      "max_retries": 2,
+      "retry_backoff_seconds": 2.0,
+      "max_retry_delay_seconds": 30.0,
+      "request_spacing_seconds": 1.5
+    },
+    "matching": {
+      "station_max_distance_km": 15.0,
+      "representative_method": "start_point_v1",
+      "route_regions": {
+        "marina_bay": "south",
+        "woodlands_waterfront": "north",
+        "west_coast": "west",
+        "east_coast": "east",
+        "bishan_ang_mo_kio": "central",
+        "singapore_botanic_gardens": "central",
+        "macritchie_reservoir": "central",
+        "pasir_ris_park": "east",
+        "bedok_reservoir": "east",
+        "jurong_lake_gardens": "west",
+        "rail_corridor_bukit_timah": "central",
+        "punggol_waterway": "north"
+      }
+    },
+    "sources": {
+      "nea_rainfall": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/rainfall",
+        "interval_seconds": 300,
+        "stale_after_seconds": 900,
+        "metrics": [
+          "rainfall"
+        ]
+      },
+      "nea_wind_speed": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/wind-speed",
+        "interval_seconds": 300,
+        "stale_after_seconds": 900,
+        "metrics": [
+          "wind_speed"
+        ]
+      },
+      "nea_wind_direction": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/wind-direction",
+        "interval_seconds": 300,
+        "stale_after_seconds": 900,
+        "metrics": [
+          "wind_direction"
+        ]
+      },
+      "nea_air_temperature": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/air-temperature",
+        "interval_seconds": 300,
+        "stale_after_seconds": 900,
+        "metrics": [
+          "air_temperature"
+        ]
+      },
+      "nea_relative_humidity": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/relative-humidity",
+        "interval_seconds": 300,
+        "stale_after_seconds": 900,
+        "metrics": [
+          "relative_humidity"
+        ]
+      },
+      "nea_pm25": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/pm25",
+        "interval_seconds": 900,
+        "stale_after_seconds": 7200,
+        "metrics": [
+          "pm25"
+        ]
+      },
+      "nea_psi": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/psi",
+        "interval_seconds": 900,
+        "stale_after_seconds": 7200,
+        "metrics": [
+          "psi",
+          "pm10"
+        ]
+      },
+      "nea_wbgt": {
+        "url": "https://api-open.data.gov.sg/v2/real-time/api/weather?api=wbgt",
+        "interval_seconds": 900,
+        "stale_after_seconds": 2700,
+        "metrics": [
+          "wbgt",
+          "heat_stress_level"
+        ]
+      }
+    },
+    "risk": {
+      "weights": {
+        "rainfall": 0.35,
+        "heat": 0.35,
+        "air_quality": 0.25,
+        "wind": 0.05
+      },
+      "rainfall": {
+        "points": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            1.0,
+            20.0
+          ],
+          [
+            5.0,
+            60.0
+          ],
+          [
+            10.0,
+            100.0
+          ]
+        ]
+      },
+      "wbgt": {
+        "points": [
+          [
+            26.0,
+            0.0
+          ],
+          [
+            31.0,
+            50.0
+          ],
+          [
+            33.0,
+            80.0
+          ],
+          [
+            35.0,
+            100.0
+          ]
+        ]
+      },
+      "pm25": {
+        "points": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            55.0,
+            25.0
+          ],
+          [
+            150.0,
+            60.0
+          ],
+          [
+            250.0,
+            85.0
+          ],
+          [
+            350.0,
+            100.0
+          ]
+        ]
+      },
+      "psi": {
+        "points": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            50.0,
+            15.0
+          ],
+          [
+            100.0,
+            35.0
+          ],
+          [
+            200.0,
+            70.0
+          ],
+          [
+            300.0,
+            90.0
+          ],
+          [
+            400.0,
+            100.0
+          ]
+        ]
+      },
+      "wind": {
+        "points": [
+          [
+            8.0,
+            0.0
+          ],
+          [
+            20.0,
+            100.0
+          ]
+        ]
+      },
+      "wind_scoring_enabled": false,
+      "heat_category_scores": {
+        "Low": 20.0,
+        "Moderate": 60.0,
+        "High": 90.0
+      },
+      "heat_category_thresholds": [
+        31.0,
+        33.0
+      ],
+      "spatial_bands_km": [
+        1.0,
+        3.0,
+        5.0
+      ],
+      "max_reliable_station_distance_km": 5.0,
+      "allow_approximate_station_estimates": true,
+      "caution_score": 40.0,
+      "high_score": 70.0,
+      "blocking_rules": []
+    },
+    "ranking": {
+      "weights": {
+        "environment": 0.45,
+        "distance": 0.25,
+        "accessibility": 0.15,
+        "difficulty": 0.15
+      },
+      "neutral_accessibility": 50.0,
+      "distance_relative_tolerance": 0.3,
+      "access_penalty_per_km": 2.0
+    }
+  },
+  "evaluation_sha256": {
+    "analysis/data_freshness/session_audit.py": "423bc2c8948e5706433f1a86aeeab293adca7066dd3e9523a5672a4f777a1645",
+    "analysis/risk_model/analyze.py": "187e0108d00fc4e3bbf36bd11e02dddd37c335c51c21d3deb1792e4fd78a7bed",
+    "analysis/risk_model/reliability_audit.py": "84adad34695fecb8345dcbb759e9db454a6a35631d7aa76941c5a6e4ee1d1e31",
+    "scripts/render_macos_collector.py": "f25baa06ef6a42e4aad1b6473961f52a1dddf4d0b08872b1209b6137e9ab8b60",
+    "scripts/run_macos_collector.zsh": "aafdd3bf9f05de50ddadedda19eac274d59f51bb02c839491d420f4dc40b35e4"
+  },
+  "boundary_cases": 75,
+  "boundary_passes": 75,
+  "original_numerical_columns": "unchanged against archive_initial_evaluation",
+  "monotonic_checks": "passed within explicitly selected branches",
+  "network": "socket.connect forbidden",
+  "matplotlib_version": "3.11.2",
+  "python_version": "3.13.5"
+}

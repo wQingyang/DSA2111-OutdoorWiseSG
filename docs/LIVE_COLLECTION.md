@@ -6,7 +6,7 @@ recommendation. Ordinary Live recommendations never invoke historical inference.
 
 ## Collection commands
 
-After the [local setup](../README.md#local-startup), start one collector against
+After the [local setup](../README.md#startup-options-local-python-docker-compose-or-local-kubernetes), start one collector against
 the same `OUTDOORWISE_DATA_ROOT` as the API:
 
 ```bash
@@ -43,13 +43,18 @@ Only one continuous worker may own a runtime directory. Its lifetime lease is
 separate from the short CSV writer lock, so API reads/summary updates remain
 possible. Do not delete locks while a process runs. SIGINT/SIGTERM waits for the
 current bounded request sequence, stops before the next source and records stopped
-state. Restart reuses attempt timestamps and revision/deduplication semantics.
+state. SIGHUP is also handled by new workers. Restart reuses attempt timestamps and revision/deduplication semantics.
 
 `runtime/collection_worker.json` contains the last persisted heartbeat/state,
 not proof of a currently running process or fresh upstream data. Inspect its time,
 process/container status and `cli status`. The collector probe allows 30 minutes
 between completed cycles because all eight sources can exhaust retries. API
 readiness tests local catalog/storage access; freshness stays in route responses.
+
+For Terminal-independent collection using the existing Mac runtime directory, see
+the optional [macOS LaunchAgent instructions](LOCAL_COLLECTOR_MACOS.md). Configuration
+rendering is inert; installation and activation are explicit operator actions.
+The same document defines the additive worker/source diagnostics and their limits.
 
 Collection extends the three observation/history categories and refreshes route
 mapping views. It never trains a model or writes forecasts into observation

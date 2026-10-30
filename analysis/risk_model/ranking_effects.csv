@@ -1,0 +1,9 @@
+snapshot,comparison,routes_changed,top3_shared,top3_gained,top3_lost,baseline_mean_top3_risk,full_mean_top3_risk,change_mean_top3_internal_risk
+archived_2026-10-09_1200_SGT,full_vs_distance,8,2,west_coast,bishan_ang_mo_kio,29.47,25.993333333333336,-3.476666666666663
+archived_2026-10-09_1200_SGT,full_vs_no_environment,8,2,west_coast,bishan_ang_mo_kio,29.47,25.993333333333336,-3.476666666666663
+archived_2026-10-10_1200_SGT,full_vs_distance,6,3,,,28.843333333333334,28.843333333333334,0.0
+archived_2026-10-10_1200_SGT,full_vs_no_environment,6,3,,,28.843333333333334,28.843333333333334,0.0
+archived_2026-10-15_1200_SGT,full_vs_distance,0,3,,,,,
+archived_2026-10-15_1200_SGT,full_vs_no_environment,0,3,,,,,
+controlled_heterogeneous,full_vs_distance,11,0,east_coast;jurong_lake_gardens;marina_bay,bishan_ang_mo_kio;pasir_ris_park;singapore_botanic_gardens,52.166666666666664,0.0,-52.166666666666664
+controlled_heterogeneous,full_vs_no_environment,11,0,east_coast;jurong_lake_gardens;marina_bay,bishan_ang_mo_kio;pasir_ris_park;west_coast,52.166666666666664,0.0,-52.166666666666664

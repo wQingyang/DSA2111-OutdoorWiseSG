@@ -8,6 +8,7 @@ from uuid import uuid4
 from typing import get_args
 from outdoorwise.contracts.models import Route,Run
 from outdoorwise.contracts.environment import (Location,EnvironmentObservation,IngestionRun,RouteSourceMapping,RouteMetric)
+from outdoorwise.contracts.ports import collection_error_category
 OBSERVATION_GROUPS={
     'weather':{'rainfall','wind_speed','wind_direction','air_temperature','relative_humidity'},
     'air_quality':{'pm25','psi','pm10'},
@@ -219,8 +220,19 @@ class FileRepository:
             rows=[o for o in observations if o.source==source]
             attempts=[l for l in logs if l.source==source]
             last=max(attempts,key=lambda l:l.finished_at) if attempts else None
+            successful=[l for l in attempts if l.status=='success']
+            failures=0
+            for attempt in sorted(attempts,key=lambda l:l.finished_at,reverse=True):
+                if attempt.status=='skipped':continue
+                if attempt.status!='failed':break
+                failures+=1
             sources[source]={'observation_records':len(rows),'oldest_observed_at':min((o.observed_at for o in rows),default=None),
                 'latest_observed_at':max((o.observed_at for o in rows),default=None),
-                'last_attempt':last.model_dump(mode='json') if last else None}
+                'last_attempt':last.model_dump(mode='json') if last else None,
+                'last_attempt_started_at':last.started_at if last else None,
+                'last_successful_run_finished_at':max((l.finished_at for l in successful),default=None),
+                'last_retained_fetch_at':max((o.fetched_at for o in rows),default=None),
+                'consecutive_failures':failures,
+                'last_error_category':collection_error_category(last.error) if last and last.status=='failed' else None}
         return {'source_kind':source_kind,'observation_records':len(observations),'route_summary_records':len(summaries),
             'sources':sources,'worker':worker}

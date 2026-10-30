@@ -9,6 +9,7 @@ change production matching, risk policies, or prediction behavior.
 |---|---|---|
 | [Data Freshness](data_freshness/README.md) | Observation age, collection timestamps, and data freshness assessment | Data Governance / Data Quality |
 | [Station Matching](station_matching/README.md) | Comparison of V1 single-station and V2 route-level station matching | Methodology / Model Design |
+| [Risk and Catalog Evaluation](risk_model/README.md) | Controlled risk/eligibility checks and archived catalog ranking comparisons | Environmental Risk / Recommendation Evaluation |
 
 Future contributors may add independent subdirectories for risk model evaluation,
 prediction model performance, route coverage analysis, data quality checks, and

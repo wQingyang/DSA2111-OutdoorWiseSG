@@ -1,0 +1,2 @@
+snapshot,routes,complete,eligible,caution,blocked,unknown,very_low_confidence_routes,fresh_rainfall_routes,fresh_wind_routes,usable_wbgt_routes,usable_pm25_routes,usable_psi_routes,interpretation,risk_score,weighted_score,fallback,visible_disclosure,root_cause
+archived_2026-10-15_1200_SGT,12,0,0,0,0,12,0,0,0,0,12,12,unknown assessment; discovery only,null,null,legacy distance order; no location or forecast,Assessment unavailable; Unknown; fallback message,stale required observations at selected evaluation time; interruption cause unproven

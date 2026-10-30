@@ -1,0 +1,5 @@
+snapshot,routes,complete,eligible,caution,blocked,unknown,very_low_confidence_routes,fresh_rainfall_routes,fresh_wind_routes,usable_wbgt_routes,usable_pm25_routes,usable_psi_routes
+archived_2026-10-09_1200_SGT,12,12,5,7,0,0,2,12,12,12,12,12
+archived_2026-10-10_1200_SGT,12,12,5,7,0,0,1,12,12,12,12,12
+archived_2026-10-15_1200_SGT,12,0,0,0,0,12,0,0,0,0,12,12
+controlled_heterogeneous,12,12,8,4,0,0,0,12,12,12,12,12

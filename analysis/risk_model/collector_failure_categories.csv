@@ -1,0 +1,10 @@
+source,error_category,failed_runs,interpretation
+nea_air_temperature,transport,18,recorded failed request/parse; not proof of local process shutdown
+nea_pm25,transport,10,recorded failed request/parse; not proof of local process shutdown
+nea_psi,transport,10,recorded failed request/parse; not proof of local process shutdown
+nea_rainfall,transport,20,recorded failed request/parse; not proof of local process shutdown
+nea_relative_humidity,transport,16,recorded failed request/parse; not proof of local process shutdown
+nea_wbgt,parser_or_schema,15,recorded failed request/parse; not proof of local process shutdown
+nea_wbgt,transport,10,recorded failed request/parse; not proof of local process shutdown
+nea_wind_direction,transport,13,recorded failed request/parse; not proof of local process shutdown
+nea_wind_speed,transport,14,recorded failed request/parse; not proof of local process shutdown
