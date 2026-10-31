@@ -1,0 +1,32 @@
+{
+  "task": "all",
+  "input_sha256": {
+    "data/datasets/snapshot_20261015/weather_observations.csv": "b1f2154ca197f3585b5177063ca9b435bcfbcaa16ae9cfcbd44aef87b81af7ee",
+    "data/datasets/snapshot_20261015/heat_stress_observations.csv": "cdbbccb588ebdc405187dec31e3fba16fd2f53cdc94919518db0633009c464bf",
+    "data/datasets/snapshot_20261015/locations.csv": "26cd982b15db483533f91c5bfe274971773a1e2aab70ed50b0e6236b7261d2fd",
+    "data/datasets/snapshot_20261015/air_quality_observations.csv": "e97ea58bb80049018217cc6e4ebc1b557256e67d997e75f41885d9aac2e0672f",
+    "prediction/predict_route_environment.py": "13f3fe668b81a2de68f7861c04dc86949e953cf4108db6ba16c957ee78f06756",
+    "prediction/train_pm25_multihorizon.py": "06231cb1a4ffa842d753609ee6a7985e5e93e263707609ba60c92f439c4e9b45",
+    "prediction/train_rainfall_neighbors.py": "fb4c0a2c2d65f3a38102a0442b6bc77c6f7bcca6e3271f19389ab07d9dd47d34",
+    "prediction/train_rainfall_classification.py": "a8e709f2f4812aac2b857cd2b4ef9bd4c137582627a9dcfd4d8cc01eeec68897",
+    "prediction/predict_route_risk.py": "329e3de91da3f38e150ba0ac5abe284d4516f3c12a2b9171a764599d85630dbe",
+    "prediction/train_wbgt_multihorizon.py": "8cf66302bdaaf171fdd38b24a18f823d49723a2e1adbbe4cb1f0e69cc5d3ea73",
+    "prediction/check_rainfall_sample_rules.py": "eca85e77c27dc39806b9e06931b22cff44cca6c8fb2e37ddc03f925ac9a36f86",
+    "prediction/results/pm25_multihorizon/backtest_models.json": "cd874faccdd4f653bdf8e331e961cd00b3f8a14e1e45027cf1565fba09d7e01e",
+    "docs/forecast_evaluation.json": "2df758a575140ea52a310e7cab5742afc058084c5a39a06652e7d6c6f3699cd8"
+  },
+  "protected_inputs_unchanged": true,
+  "holdout_start_sgt": "2026-10-14T00:00:00+08:00",
+  "selected_horizons_min": [
+    15,
+    30,
+    60
+  ],
+  "limitations": [
+    "Exploratory reused holdout; no new independent evaluation period.",
+    "Rainfall uses recent-input, complete-target samples from the neighbour experiment, not the strict baseline sample set.",
+    "Models use identical test rows within each interval/horizon.",
+    "Single-class test targets cannot establish rain-detection skill.",
+    "No model is installed into the application by this script."
+  ]
+}
