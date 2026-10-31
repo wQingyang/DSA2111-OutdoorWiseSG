@@ -5,7 +5,7 @@ Inspected in the final integration sprint. Training implementations are not evid
 | Family | Implemented research and targets | Shipped artifact | Runtime classification |
 |---|---|---|---|
 | Rainfall local logistic | `train_rainfall_classification.py`: StandardScaler + logistic regression, strict recent rainfall features, 15-minute event targets with interval ends 15–180 min; comparison with dry/prior/persistence. Requires all three future 5-minute target blocks. | No frozen classifier, scaler or calibration report. | Trained method unavailable. Training scripts remain offline. Historical HTTP no longer refits a neighbor classifier. |
-| Rainfall neighbors | `train_rainfall_neighbors.py` and `check_rainfall_sample_rules.py`: local/neighbor features, chronological validation, revised missing-target rules. Former replay fitted 15/30-min methods per request. | No frozen feature/preprocessing/model bundle or neighbor manifest. | Experimental training only; rain probabilities unavailable in live/replay responses. |
+| Rainfall neighbors | `train_rainfall_neighbors.py` and `check_rainfall_sample_rules.py`: local/neighbor features, chronological validation, revised missing-target rules. Former replay fitted 15/30-min methods per request. | `prediction/results/rainfall_neighbors/frozen_model.json`: fitted median imputer, missing indicators, scaler, logistic coefficients and neighbor manifest for the original 15/30-minute intervals. | Historical-only experimental event probabilities; no request-time fitting. Live predictions, rainfall-amount risk and route ordering are unchanged. |
 | PM2.5 | `train_pm25_multihorizon.py`: regional nonnegative linear prediction versus latest-value persistence; direct 60/120/180-min targets. Exact features: latest PM2.5, lag 1 hour, lag 2 hours, same region, consecutive hourly observations available by origin. Input age <=90 min. | `prediction/results/pm25_multihorizon/backtest_models.json`: 15 region/horizon coefficient records, intercept + 3 coefficients; training cutoff **2026-10-14 00:00 SGT**. | Frozen historical-only experiment. Not a deployment model; no live activation. |
 | WBGT | `train_wbgt_multihorizon.py`: latest and 15/30/45/60-min lags, age and diurnal features; direct 15–180-min targets. | No frozen trained artifact or original evaluation reports. | Historical replay persistence; live baseline capped at 15 min. |
 | Wind | No verified trained forecast found. | None. | Explicit persistence only; live cap 10 min. Existing neutral wind risk still requires usable input. |
@@ -54,7 +54,7 @@ Historical files lack full revision history and historic station geography. Thei
 
 Live inference uses `FileRepository.environment_snapshot('live', issue_time)`, preserving revision, first fetch, source update and source-kind semantics. It uses the same catalog source matching as current environmental views and returns issue time, validity interval, model version, horizon/value/unit, input timestamps/revision, station or region, freshness/spatial quality, method, warnings, missing reasons and requested-window coverage. It never consumes historical labels or future observations. Dynamic-route risk remains observation-based; the supplementary live endpoint currently supports catalog routes only.
 
-Missing trained artifacts and preprocessing bundles block rainfall/WBGT deployment. The short, gapped holdout, incomplete snapshot revision history, absent calibration and mixed PM2.5 skill block promotion of trained forecast risk into production ranking. Future work needs frozen/versioned preprocessing and model artifacts, broader chronological evaluation against persistence, calibration where applicable, representative station/season coverage and consistent risk eligibility across the entire requested window. No retraining occurs during route requests.
+The frozen neighbor rainfall bundle enables historical inspection, not live deployment or risk scoring. A frozen trained WBGT artifact is still absent. The short, gapped holdout, incomplete snapshot revision history, absent calibration and mixed PM2.5 skill block promotion of trained forecast risk into production ranking. Future work needs broader chronological evaluation against persistence, calibration where applicable, representative station/season coverage and consistent risk eligibility across the entire requested window. No retraining occurs during route requests.
 
 ## Unified historical recommendation workflow
 
@@ -62,6 +62,25 @@ Application workflow is selected by `OUTDOORWISE_APP_MODE`, independently of run
 
 The unified historical adapter does not accept the research script's painted intervals as evidence of continuous exposure. Full-window risk and weighted suitability remain unknown; the shared non-environmental fallback and replay-time personal reordering remain available. Existing origin-time policy blocks are preserved. This cannot currently demonstrate validated forecast-based environmental ranking; prediction evidence is embedded within the same route results instead.
 
-Persistence repetitions beyond the existing baseline caps (rainfall 5, wind 10, WBGT 15, PM2.5 60 minutes from replay reference) are marked unavailable rather than extended through arbitrary runs. Frozen direct PM2.5 values may remain available at native targets when complete origin-time features exist. No frozen WBGT/rain classifier is fabricated. Missing PM2.5 artifact is explicitly identified and only the existing recent-observation persistence fallback can apply. Legacy research endpoints retain their interval assumptions for compatibility, outside unified Tab 1.
+Persistence repetitions beyond the existing baseline caps (rainfall 5, wind 10, WBGT 15, PM2.5 60 minutes from replay reference) are marked unavailable rather than extended through arbitrary runs. Frozen direct PM2.5 values may remain available at native targets when complete origin-time features exist. The offline-fitted rainfall bundle supplies event probabilities only for the first two 15-minute intervals, separately from rainfall amount and risk. No frozen WBGT classifier is fabricated. Missing PM2.5 artifact is explicitly identified and only the existing recent-observation persistence fallback can apply. Legacy research endpoints retain their interval assumptions for compatibility, outside unified Tab 1.
+
+### Frozen rainfall reproduction
+
+Run `python scripts/freeze_rainfall_model.py` offline to reproduce the new JSON
+bundle. This is an explicit training command, never called by the API. It reuses
+the original neighbor features and preprocessing (median imputation with missing
+indicators, standardization, logistic regression with C=1), and requires complete
+target blocks available strictly before **14 Oct 2026 00:00 SGT**. The 15-minute
+classifier uses 23,997 training samples (98 rainy); the 30-minute classifier uses
+23,373 (101 rainy). The export command checks portable inference against sklearn
+on every training input to 1e-12 tolerance. This checks serialization correctness,
+not held-out skill. No earlier saved evaluation or source dataset is overwritten.
+Snapshot hashes, feature schema, neighboring-station identities, class counts and
+training cutoffs accompany the coefficients. Missing inputs/artifacts and origins
+earlier than the training cutoff yield unavailable predictions; horizons beyond
+30 minutes remain unsupported. No interpolation or prediction at +30/+60 departure
+windows is invented. The frontend shows percentages and distinguishes very small
+positive probabilities from exact zero. These probabilities are uncalibrated,
+historical-only, and do not change departure or full-run risk scores.
 
 Prediction Details reports target timestamp, native horizon, method/version, origin/input observed and available times, coverage, and exact-target evaluation labels. Exact target absence remains unavailable; no nearest future observation is substituted. Snapshot CSV local times are parsed as SGT. Signed selected-target error is prediction minus observation, distinct from pooled offline MAE/RMSE. Saved evaluation JSON is read only, never recomputed or trained by the web app. Snapshot revision/geography limitations and the recorded weaker 60-minute PM2.5 performance remain explicit.

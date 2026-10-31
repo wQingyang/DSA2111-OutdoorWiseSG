@@ -1,6 +1,8 @@
 /* Replay response adapter and evidence only; shared cards/maps live in results/app. */
 (() => {
   const el = (tag, text) => Object.assign(document.createElement(tag), {textContent: text});
+  const forecastValue = (name, value, unit) => value == null ? 'Unavailable' :
+    name === 'rain_probability' ? (value > 0 && value < 0.0001 ? '<0.01%' : `${(value * 100).toFixed(2)}%`) : `${value.toFixed(1)} ${unit}`;
   function adapt(result) {
     const origin = new Map([...(result.origin_risks || []), ...(result.departure_risks || [])].map(row => [row.route_id, row]));
     const risks = result.recommendations.map(row => row.departure_assessment?.risk || ({
@@ -36,7 +38,10 @@
     const names = {wbgt: 'WBGT', pm25: 'PM2.5', rain_probability: 'Rain probability'};
     for (const [name, metric] of Object.entries(forecast.metrics || {})) {
       const available = metric.blocks?.filter(block => block.value != null) || [];
-      estimates.append(el('li', `${names[name] || name}: ${available.length ? available.map(block => `${block.value.toFixed(1)} ${metric.unit} at ${window.outdoorwiseResults.formatTime(block.target_timestamp)} (${block.method})`).join('; ') : 'Unavailable for this window'}. Continuous exposure coverage unverified.`));
+      const unsupported = metric.blocks?.length && metric.blocks.every(block => block.method === 'unsupported_rainfall_horizon');
+      const missing = unsupported ? 'Unsupported window: rainfall model covers only the first 30 minutes after the replay origin' : 'Unavailable for this window';
+      estimates.append(el('li', `${names[name] || name}: ${available.length ? available.map(block =>
+        `${forecastValue(name, block.value, metric.unit)} ${name === 'rain_probability' ? `during ${window.outdoorwiseResults.formatTime(block.valid_from)} –` : 'at'} ${window.outdoorwiseResults.formatTime(block.target_timestamp)} (${block.method})`).join('; ') : missing}. ${name === 'rain_probability' && available.length ? 'Experimental event probabilities; not calibrated and not used as rainfall risk. ' : ''}Continuous exposure coverage unverified.`));
     }
     card.insertBefore(estimates, card.querySelector('.card-actions'));
     const details = document.createElement('details'); details.className = 'prediction-details';
@@ -55,7 +60,8 @@
       details.append(el('h4', `${name} · ${metric.unit}`));
       details.append(el('p', `${metric.coverage_status || 'Coverage unverified'} Full run covered: ${metric.covers_entire_run ? 'yes' : 'no'}. Model origin: ${metric.model_origin}`));
       for (const block of metric.blocks || []) {
-        details.append(el('p', `${block.horizon_min} min · target ${block.target_timestamp} · predicted ${block.value ?? 'Unavailable'} ${metric.unit} · method: ${block.method}. ${block.target_semantics}`));
+        details.append(el('p', `${block.horizon_min} min · target ${block.target_timestamp} · predicted ${forecastValue(name, block.value, metric.unit)} · method: ${block.method}. ${block.target_semantics}`));
+        if (block.calibration_status) details.append(el('p', block.calibration_status));
         details.append(el('p', `Ground truth: ${block.ground_truth?.value ?? 'Unavailable'} ${metric.unit} · signed error (prediction minus observation): ${block.forecast_error ?? 'Unavailable'}. ${block.evaluation_status}`));
         const provenance = el('pre', JSON.stringify({source: block.input_source, input_provenance: block.input_provenance, ground_truth: block.ground_truth, model_version: block.model_version, training_cutoff: block.training_cutoff}, null, 2));
         provenance.style.whiteSpace = 'pre-wrap'; provenance.style.overflowWrap = 'anywhere';

@@ -108,7 +108,11 @@ def test_historical_origin_window_isolation_and_coverage(settings, monkeypatch, 
                         assert timestamp(block['ground_truth']['observed_at']) > timestamp(REPLAY_TIME)
                     else:
                         assert block['forecast_error'] is None
-            assert all(row['value'] is None for row in forecast['metrics']['rain_probability']['blocks'])
+            rain_blocks = forecast['metrics']['rain_probability']['blocks']
+            if delay == 0:
+                assert all(0 <= row['value'] <= 1 for row in rain_blocks)
+            else:
+                assert all(row['value'] is None for row in rain_blocks)
         assert hashes(settings.data_root) == before
 
 

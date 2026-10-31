@@ -37,16 +37,18 @@ baseline values are research assumptions, not observations or ground truth.
 
 | Indicator | Now, 19:15 | +30, 19:45 | +60, 20:15 | Existing method / blocker |
 |---|---|---|---|---|
-| Rainfall | 0 mm observations at 19:00 | Unsupported delayed input | Unsupported delayed input | Held 5-minute amount assumption; no frozen classifier or validated delayed-target amount contract |
+| Rainfall | 0 mm observations at 19:00 | Unsupported delayed input | Unsupported delayed input | Risk retains observed/held 5-minute amount; experimental event probabilities are separate, not a delayed-target amount contract |
 | WBGT | 25.7–26.7 °C observations at 18:45 | Native persistence point available | Native persistence point available | Existing research targets; no frozen trained WBGT artifact |
 | PM2.5 | 95–208 µg/m³ observations at 18:00 | No exact 19:45 target | No exact 20:15 target | Hourly persistence fallback; required 16:00 lag missing in all five regions |
 | Wind | 0.566–2.829 m/s observations at 19:04 | Unsupported delayed input | Unsupported delayed input | Held-value assumption lacks validated delayed-target contract; neutral scoring still requires usable wind |
 
 PM2.5 has frozen 60/120/180-minute coefficients, with model origin 19:00 and
 native targets 20:00/21:00/22:00. WBGT replay supplies persistence at 15-minute
-targets through 180 minutes. Rain probabilities remain unavailable without a frozen
-classifier. No new horizons, interpolation, extrapolation or model artifacts are
-introduced. Saved 60-minute frozen PM2.5 pooled MAE/RMSE (24.707/36.660 µg/m³) is
+targets through 180 minutes. A subsequent local rainfall restoration adds an
+offline-fitted neighbor classifier bundle for the original 15/30-minute event
+intervals, displayed separately from risk. It does not extend horizons or change
+ranking, PM2.5 coefficients, WBGT or previously recorded evaluation results.
+Saved 60-minute frozen PM2.5 pooled MAE/RMSE (24.707/36.660 µg/m³) is
 worse than persistence (24.000/35.339); those offline metrics are not selected-route
 errors. See the [read-only inventory](PREDICTION_MODELS.md) and
 [evaluation evidence](forecast_evaluation.json).

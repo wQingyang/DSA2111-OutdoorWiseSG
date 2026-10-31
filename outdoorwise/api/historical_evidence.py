@@ -42,7 +42,7 @@ def describe_forecast(forecast):
     for name, metric in data['metrics'].items():
         metric['covers_entire_run'] = False
         metric['coverage_status'] = 'Native targets do not establish continuous run-window coverage.'
-        source = sources.get(name)
+        source = sources.get('rainfall' if name == 'rain_probability' else name)
         station = source.get('station_id') if isinstance(source, dict) else source
         for block in metric['blocks']:
             target = timestamp(block['valid_to'])
@@ -50,12 +50,14 @@ def describe_forecast(forecast):
             # exact departure and continuous exposure are separate decisions.
             block['target_timestamp'] = block['valid_to']
             block['horizon_min'] = int((target - timestamp(metric['model_origin'])).total_seconds() / 60)
-            block['target_semantics'] = 'Direct point target; displayed interval is not a validated exposure interval.'
+            block['target_semantics'] = ('Probability of any rainfall in the stated 15-minute interval; not rainfall amount or full-run risk.'
+                if name == 'rain_probability' else 'Direct point target; displayed interval is not a validated exposure interval.')
             block['input_source'] = source
             block['ground_truth'] = None
             block['forecast_error'] = None
             # Only exact native measurement targets, after the origin, can be
-            # compared. Rain probability has no compatible deployed classifier.
+            # compared. Rain event probability needs complete interval labels,
+            # not a single rainfall amount at the endpoint.
             truth = records.get((name, station, target)) if name in {'wbgt', 'pm25'} and target > origin else None
             if truth:
                 value = float(truth['value'])

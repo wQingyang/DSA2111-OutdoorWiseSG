@@ -133,7 +133,9 @@ def test_historical_rainfall_does_not_fit_models():
     sys.path.insert(0, str(ROOT / 'prediction'))
     from predict_route_environment import rain_forecasts
     rows = rain_forecasts({}, None, utc_now())
-    assert all(row['value'] is None and 'no_frozen' in row['method'] for row in rows)
+    assert all(row['value'] is None for row in rows)
+    assert all(row['method'] == 'missing_rainfall_input' for row in rows[:2])
+    assert all(row['method'] == 'unsupported_rainfall_horizon' for row in rows[2:])
 
 
 def test_pm25_artifact_inventory():

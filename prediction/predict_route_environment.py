@@ -115,11 +115,9 @@ def coverage(series, start, end):
 
 
 def rain_forecasts(stations, station, origin):
-    """No frozen rainfall artifact is shipped; never train during a request."""
-    return [block(origin + timedelta(minutes=horizon - 15),
-                  origin + timedelta(minutes=horizon), None,
-                  "unavailable_no_frozen_rainfall_model")
-            for horizon in range(15, 181, 15)]
+    """Load the offline-fitted neighbor classifier; never fit during a request."""
+    from frozen_rainfall import forecast_blocks
+    return forecast_blocks(stations, station, origin, block)
 
 
 def predict(route_id, as_of, start_delay_min, duration_min):
@@ -398,7 +396,7 @@ def predict(route_id, as_of, start_delay_min, duration_min):
             "No new accuracy evaluation is performed by this script.",
             "Station matching uses the route start and prototype input-age limits.",
             "Snapshot metadata and revision history are not reconstructed.",
-            "Rain probabilities unavailable: no frozen classifier is shipped; HTTP inference never fits models.",
+            "Rain event probabilities use frozen experimental 15/30-minute neighbor classifiers; no request-time fitting or probability calibration.",
             "PM2.5 values are hourly means, not minute-level predictions.",
             "Risk conversion and time ranking are not implemented.",
         ],
